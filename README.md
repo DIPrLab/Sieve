@@ -7,9 +7,7 @@ SIEVE is a general purpose middleware to support access control in DBMS that ena
 
 ## Setup
 
-1. Create database in either MySQL or PostgreSQL
-2. Load schema and data inside the data directory (wifi_dataset.tar.xz for MySQL and mall_dataset.tar.xz for PostgreSQL)
-3. Update the sample.properties file inside resource/credentials directory with DBMS properties
+1. 
 
 ## Usage
 

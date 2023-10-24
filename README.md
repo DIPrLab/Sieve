@@ -7,7 +7,14 @@ SIEVE is a general purpose middleware to support access control in DBMS that ena
 
 ## Setup
 
-1. 
+1. Download [MySQL](https://dev.mysql.com/downloads/installer/) or [PostgreSQL](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
+2. Create a user "sieve" and grant privileges of DBA role.
+3. Create a Schema.
+4. Populate the schema found inside the data directory (data/wifi_dataset.tar.xz for MySQL and data/mall_dataset.tar.xz for PostgreSQL)
+   1. Extracted files are sql dump files.
+   2. Import the table definition (wifi_defn.sql/ mall_defn.sql)
+   3. Import the data (wifi_data.sql/ mall_data.sql)
+5. Update the sample.properties file with the DBMS properties inside the src/main/resources/credential.sample directory
 
 ## Usage
 

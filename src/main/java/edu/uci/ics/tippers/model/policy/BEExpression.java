@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * Created by cygnus on 11/1/17.
  */
-public class BEExpression{
+public class BEExpression {
 
     List<BEPolicy> policies;
 

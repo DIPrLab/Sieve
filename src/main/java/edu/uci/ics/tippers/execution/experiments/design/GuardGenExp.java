@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.execution.experiments.design;
 
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.dbms.mysql.MySQLConnectionManager;
+import edu.uci.ics.tippers.fileop.Writer;
 import edu.uci.ics.tippers.generation.policy.WiFiDataSet.PolicyUtil;
 import edu.uci.ics.tippers.persistor.GuardPersistor;
 import edu.uci.ics.tippers.persistor.PolicyPersistor;
@@ -34,20 +35,23 @@ public class GuardGenExp {
         this.connection = MySQLConnectionManager.getInstance().getConnection();
     }
 
-    private void writeExecTimes(int querier, int policyCount, int timeTaken){
-            String execTimesInsert = "INSERT INTO gg_results (querier, pCount, timeTaken) VALUES (?, ?, ?)";
-            try {
-                PreparedStatement eTStmt = connection.prepareStatement(execTimesInsert);
-                eTStmt.setInt(1, querier);
-                eTStmt.setInt(2, policyCount);
-                eTStmt.setInt(3, timeTaken);
-                eTStmt.execute();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-    }
+//    private void writeExecTimes(int querier, int policyCount, int timeTaken){
+//            String execTimesInsert = "INSERT INTO gg_results (querier, pCount, timeTaken) VALUES (?, ?, ?)";
+//            try {
+//                PreparedStatement eTStmt = connection.prepareStatement(execTimesInsert);
+//                eTStmt.setInt(1, querier);
+//                eTStmt.setInt(2, policyCount);
+//                eTStmt.setInt(3, timeTaken);
+//                eTStmt.execute();
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//    }
 
     public void generateGuards(List<Integer> queriers){
+        Writer writer = new Writer();
+        StringBuilder result = new StringBuilder();
+        String fileName = "experiment.csv";
         boolean first = true;
         for(int querier: queriers) {
             List<BEPolicy> allowPolicies = polper.retrievePolicies(String.valueOf(querier),
@@ -63,7 +67,14 @@ public class GuardGenExp {
             guardGen = guardGen.plus(Duration.between(fsStart, fsEnd));
             System.out.println("Guard Generation time: " + guardGen + " Number of Guards: " + gh.numberOfGuards());
             guardPersistor.insertGuard(gh.create(String.valueOf(querier), "user"));
-            if(!first) writeExecTimes(querier, allowPolicies.size(), (int) guardGen.toMillis());
+            long noOfPredicates = gh.getOriginalNumPreds(allowBeExpression);
+            result.append(querier).append(",")
+                    .append(allowPolicies.size()).append(",")
+                    .append(guardGen.toMillis()).append(",")
+                    .append(gh.numberOfGuards()).append(",")
+                    .append(noOfPredicates)//guard size
+                    .append("\n");
+            if(!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
             else first = false;
         }
     }

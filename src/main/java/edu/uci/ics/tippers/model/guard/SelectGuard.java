@@ -253,7 +253,7 @@ public class SelectGuard {
         return query.toString();
     }
 
-    private long getOriginalNumPreds(BEExpression beExpression){
+    public long getOriginalNumPreds(BEExpression beExpression){
         long numPreds = 0;
         for (BEPolicy bp: beExpression.getPolicies()) {
             numPreds += pMap.get(bp.getId()).countNumberOfPredicates();

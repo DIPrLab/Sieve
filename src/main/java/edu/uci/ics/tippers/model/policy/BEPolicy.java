@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * Created by cygnus on 9/25/17.
  */
-public class BEPolicy {
+public class BEPolicy{
 
     @JsonProperty("id")
     private String id;

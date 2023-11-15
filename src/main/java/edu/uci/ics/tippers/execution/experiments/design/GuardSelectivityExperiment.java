@@ -46,4 +46,34 @@ public class GuardSelectivityExperiment {
             writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
         }
     }
+
+//    public void runExperiment(){
+//        String fileName = "helloGuard.csv";
+//        PolicyUtil pg = new PolicyUtil();
+//        List <Integer> users = pg.getAllUsers(true);;
+//        Writer writer = new Writer();
+//        writer.writeString("Querier, Number of Policies, Number of Guards, Guard cardinality \n", PolicyConstants.EXP_RESULTS_DIR, fileName);
+//        for (int i = 1; i <= users.size(); i++) {
+//            StringBuilder result = new StringBuilder();
+//            String querier = String.valueOf(users.get(i));
+//            PolicyPersistor polper = PolicyPersistor.getInstance();
+//            List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
+//                    PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
+//            GuardPersistor guardPersistor = new GuardPersistor();
+//            GuardExp guardExp = guardPersistor.retrieveGuardExpression(querier, "user", allowPolicies);
+//            if(allowPolicies == null) continue;
+//            double totalGuardCard = 0.0;
+//            for (int j = 0; j < guardExp.getGuardParts().size(); j++) {
+//                GuardPart gp = guardExp.getGuardParts().get(j);
+//                totalGuardCard += gp.getCardinality();
+//            }
+//            result.append(querier).append(",")
+//                    .append(allowPolicies.size()).append(",")
+//                    .append(guardExp.getGuardParts().size()).append(",")
+//                    .append(totalGuardCard)
+//                    .append("\n");
+//            System.out.println(result.toString());
+//            writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
+//        }
+//    }
 }

@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.execution;
 
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.common.PolicyEngineException;
+import edu.uci.ics.tippers.execution.experiments.design.GuardGenExp;
 import edu.uci.ics.tippers.execution.experiments.performance.PolicyScaler;
 import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
 import org.apache.commons.configuration2.Configuration;
@@ -28,16 +29,19 @@ public class Sieve {
         } catch (ConfigurationException e) {
             e.printStackTrace();
         }
+        System.out.println("Test");
+        GuardGenExp ggexp = new GuardGenExp();
+        ggexp.runExperiment();
 
-        if(QUERY_PERFORMANCE_EXP) {
-            if(PolicyConstants.DBMS_CHOICE.equalsIgnoreCase(PolicyConstants.PGSQL_DBMS))
-                throw new PolicyEngineException("Query Performance experiments only supported on MySQL");
-            QueryPerformance queryPerformance = new QueryPerformance();
-            queryPerformance.runExperiment();
-        }
-        if(POLICY_SCALER_EXP) {
-            PolicyScaler policyScaler = new PolicyScaler();
-            policyScaler.runExperiment();
-        }
+//        if(QUERY_PERFORMANCE_EXP) {
+//            if(PolicyConstants.DBMS_CHOICE.equalsIgnoreCase(PolicyConstants.PGSQL_DBMS))
+//                throw new PolicyEngineException("Query Performance experiments only supported on MySQL");
+//            QueryPerformance queryPerformance = new QueryPerformance();
+//            queryPerformance.runExperiment();
+//        }
+//        if(POLICY_SCALER_EXP) {
+//            PolicyScaler policyScaler = new PolicyScaler();
+//            policyScaler.runExperiment();
+//        }
     }
 }

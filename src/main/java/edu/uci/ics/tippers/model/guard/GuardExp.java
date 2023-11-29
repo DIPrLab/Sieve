@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.model.guard;
 
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.common.PolicyEngineException;
+import edu.uci.ics.tippers.model.policy.BEPolicy;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -174,6 +175,17 @@ public class GuardExp {
         return  queryExp.toString();
     }
 
+    public int countNoOfPredicate(){
+        int predicateCount = 0;
+        for (GuardPart gp: this.guardParts) {
+            predicateCount+=1;
+            for(BEPolicy p: gp.guardPartition.getPolicies()) {
+                predicateCount += p.countNumberOfPredicates();
+            }
+        }
+        return predicateCount;
+    }
+
     //TODO: Should the cost be memory read cost (current value) or io read cost?
     //TODO: io read cost would mean guard scan cost is really high
     public double estimateCostofGuardScan(){
@@ -244,7 +256,7 @@ public class GuardExp {
         if (union)
             query += createQueryWithUnion(true); //Change it to false to have UNION ALL
         else
-            query += PolicyConstants.SELECT_ALL_WHERE + createQueryWithOR();
+            query += PolicyConstants.SELECT_ALL_WHERE +  createQueryWithOR();
         if(cte) query += ") SELECT * from polEval";
         return query;
     }

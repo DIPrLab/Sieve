@@ -15,10 +15,10 @@
 log/
 target/
 
-results/
-.csv
-.swp
-
-data/
+#results/
+#.csv
+#.swp
+#
+#data/
 
 *credentials/

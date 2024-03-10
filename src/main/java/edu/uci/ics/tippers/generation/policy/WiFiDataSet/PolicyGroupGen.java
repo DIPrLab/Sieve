@@ -223,7 +223,7 @@ public class PolicyGroupGen {
      * Default policies generated per querier based on their profile and group memberships
      * @param queriers
      */
-    private void generateDefaultPolicies(List<Integer> queriers){
+    public List<BEPolicy> generateDefaultPolicies(List<Integer> queriers){
         List<BEPolicy> defaultPolicies = new ArrayList<>();
         for (int querier: queriers) {
             List<String> querierGroups = getGroupsForUser(querier);
@@ -236,16 +236,16 @@ public class PolicyGroupGen {
                 defaultPolicies.add(pg.generatePolicies(querier, 0, querierGroups.get(0), querierProfile, null,
                         null, PolicyConstants.ACTION_ALLOW));
             }
-            //Create default policy for staff to monitor faculty and visitors
-//            if(querierProfile.equalsIgnoreCase(UserProfile.STAFF.getValue())){
-//                defaultPolicies.add(pg.generatePolicies(querier, 0, null, UserProfile.FACULTY.getValue(),
-//                        workingHours, null, PolicyConstants.ACTION_ALLOW));
-//                // in specific locations during working hours
-//                for (String forbiddenLoc: location_clusters.get(0)) {
-//                    defaultPolicies.add(pg.generatePolicies(querier, 0, null, UserProfile.VISITOR.getValue(),
-//                            workingHours, forbiddenLoc, PolicyConstants.ACTION_ALLOW));
-//                }
-//            }
+//            //Create default policy for staff to monitor faculty and visitors
+            if(querierProfile.equalsIgnoreCase(UserProfile.STAFF.getValue())){
+                defaultPolicies.add(pg.generatePolicies(querier, 0, null, UserProfile.FACULTY.getValue(),
+                        workingHours, null, PolicyConstants.ACTION_ALLOW));
+                // in specific locations during working hours
+                for (String forbiddenLoc: location_clusters.get(0)) {
+                    defaultPolicies.add(pg.generatePolicies(querier, 0, null, UserProfile.VISITOR.getValue(),
+                            workingHours, forbiddenLoc, PolicyConstants.ACTION_ALLOW));
+                }
+            }
 //            //Create default policy for faculty to see students during working hours
 //            if(querierProfile.equalsIgnoreCase(UserProfile.FACULTY.getValue())){
 //                defaultPolicies.add(pg.generatePolicies(querier, 0, null, UserProfile.GRADUATE.getValue(),
@@ -261,7 +261,8 @@ public class PolicyGroupGen {
 //                        nightDuskHours, null,  PolicyConstants.ACTION_ALLOW));
 //            }
         }
-        polper.insertPolicy(defaultPolicies);
+//        polper.insertPolicy(defaultPolicies);
+        return defaultPolicies;
     }
 
     /**

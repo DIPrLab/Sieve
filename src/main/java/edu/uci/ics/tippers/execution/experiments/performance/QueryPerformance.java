@@ -274,7 +274,7 @@ public class QueryPerformance {
         return resultString.append("\n").toString();
     }
 
-    private List<QueryStatement> getQueries(int template, int query_count){
+    public List<QueryStatement> getQueries(int template, int query_count){
         WiFiDataSetQueryGeneration qg = new WiFiDataSetQueryGeneration();
         List<QueryStatement> queries = new ArrayList<>();
         queries.addAll(qg.retrieveQueries(template,"all", query_count));

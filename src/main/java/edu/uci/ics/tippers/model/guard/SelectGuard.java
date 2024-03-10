@@ -35,18 +35,27 @@ public class SelectGuard {
         this.pMap = new HashMap<>();
         this.costMap = new HashMap<>();
         this.ptMap = new HashMap<>();
+        int initialNumberOfTerms = getNumberOfAllTermsBeforeSelection();
         houseKeep();
         if(extend){
             GenerateCandidate pm = new GenerateCandidate(this.input.getRemainder(), PolicyConstants.RANGED_ATTRIBUTES);
             pm.extend();
         }
         this.canFactors = collectAllFactors(this.input.getRemainder());
+        System.out.println("Initial number of terms: " + initialNumberOfTerms);
         selectGuards();
+        int finalNumberOfTerms = numberOfGuards();
+        System.out.println("Final number of terms: " + finalNumberOfTerms);
     }
 
     public int numberOfGuards(){
         return finalForm.size();
     }
+
+    public int getNumberOfAllTermsBeforeSelection() {
+        return allTerms.size();
+    }
+
 
     /**
      * Backing up original policies by id before they are extended

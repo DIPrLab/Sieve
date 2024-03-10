@@ -1,5 +1,7 @@
 package edu.uci.ics.tippers.execution;
 
+import edu.uci.ics.tippers.caching.workload.CPolicyGen;
+import edu.uci.ics.tippers.caching.workload.CUserGen;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.common.PolicyEngineException;
 import edu.uci.ics.tippers.execution.experiments.design.GuardGenExp;
@@ -8,6 +10,7 @@ import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+
 
 public class Sieve {
 
@@ -30,8 +33,13 @@ public class Sieve {
             e.printStackTrace();
         }
         System.out.println("Test");
-        GuardGenExp ggexp = new GuardGenExp();
-        ggexp.runExperiment();
+//        GuardGenExp ggexp = new GuardGenExp();
+//        ggexp.runExperiment();
+//        CUserGen cug =new CUserGen();
+//        cug.runExperiment();
+        CPolicyGen cpg = new CPolicyGen();
+        cpg.runExpreriment();
+
 
 //        if(QUERY_PERFORMANCE_EXP) {
 //            if(PolicyConstants.DBMS_CHOICE.equalsIgnoreCase(PolicyConstants.PGSQL_DBMS))

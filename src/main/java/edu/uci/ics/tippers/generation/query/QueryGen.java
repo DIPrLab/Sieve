@@ -2,7 +2,9 @@ package edu.uci.ics.tippers.generation.query;
 
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.dbms.QueryManager;
+import edu.uci.ics.tippers.generation.query.WiFiDataSet.WiFiDataSetQueryGeneration;
 import edu.uci.ics.tippers.model.query.QueryStatement;
+import edu.uci.ics.tippers.caching.workload.CQueryGen;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -84,11 +86,30 @@ public abstract class QueryGen {
         return null;
     }
 
+    public List<QueryStatement> getQueries(int templateNum, int numOfQueries) {
+        if (templateNum == 0) {
+            return createQuery1(numOfQueries);
+        } else if (templateNum == 1) {
+            return createQuery2(numOfQueries);
+        } else if (templateNum == 2) {
+            return createQuery3(numOfQueries);
+        } else if (templateNum == 3) {
+            return createQuery4();
+        }
+        return null;
+    }
+
     public abstract List<QueryStatement> createQuery1(List<String> selTypes, int numOfQueries);
 
     public abstract List<QueryStatement> createQuery2(List<String> selTypes, int numOfQueries);
 
     public abstract List<QueryStatement> createQuery3(List<String> selTypes, int numOfQueries);
+
+    public abstract List<QueryStatement> createQuery1(int numOfQueries);
+
+    public abstract List<QueryStatement> createQuery2(int numOfQueries);
+
+    public abstract List<QueryStatement> createQuery3(int numOfQueries);
 
     public abstract List<QueryStatement> createQuery4();
 
@@ -151,15 +172,20 @@ public abstract class QueryGen {
     }
 
 
-    public void constructWorkload(boolean[] templates, int numOfQueries) {
+    public List<QueryStatement> constructWorkload(boolean[] templates, int numOfQueries) {
         List<String> selTypes = new ArrayList<>();
-        selTypes.add("low");
-        selTypes.add("medium");
-        selTypes.add("high");
+//        selTypes.add("low");
+//        selTypes.add("medium");
+//        selTypes.add("high");
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {
-            if (templates[i]) queries.addAll(getQueries(i, selTypes, numOfQueries));
+            if (templates[i]) queries.addAll(getQueries(i, numOfQueries));
+//            for (QueryStatement query : queries) {
+//                System.out.println(query.toString());
+//            }
+//            System.out.println();
         }
-        insertQuery(queries);
+//        insertQuery(queries);
+        return queries;
     }
 }

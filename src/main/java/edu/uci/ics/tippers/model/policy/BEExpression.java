@@ -279,7 +279,7 @@ public class BEExpression {
      */
     public double estimateCPUCost(ObjectCondition oc, long numPreds){
         return PolicyConstants.getNumberOfTuples() * oc.computeL() * (
-                    PolicyConstants.ROW_EVALUATE_COST * numPreds * PolicyConstants.NUMBER_OF_PREDICATES_EVALUATED);
+                    PolicyConstants.ROW_EVALUATE_COST * numPreds * PolicyConstants.NUMBER_OF_PREDICATES_EVALUATED); //c*|P|*alpha
     }
 
 

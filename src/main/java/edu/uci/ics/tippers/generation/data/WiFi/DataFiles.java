@@ -8,7 +8,7 @@ public enum DataFiles {
     USER ("user.json"),
     SO ("semanticObservation.json"),
     SO_FULL ("semanticObservationFull.json"),
-    PRESENCE_REAL ("fma_2018.csv"),
+    PRESENCE_REAL ("policy.csv"),
     COVERAGE("coverageSensor.txt");
 
 

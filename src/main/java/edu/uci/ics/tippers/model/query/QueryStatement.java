@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.model.query;
 
 import java.sql.Timestamp;
+import java.util.*;
 
 public class QueryStatement {
 
@@ -21,6 +22,12 @@ public class QueryStatement {
         this.template = template;
         this.selectivity = selectivity;
         this.selectivity_type = selectivity_type;
+        this.inserted_at = inserted_at;
+    }
+
+    public QueryStatement(String query, int template, Timestamp inserted_at) {
+        this.query = query;
+        this.template = template;
         this.inserted_at = inserted_at;
     }
 
@@ -74,5 +81,26 @@ public class QueryStatement {
 
     public void setSelectivity_type(String selectivity_type) {
         this.selectivity_type = selectivity_type;
+    }
+
+    @Override
+//    public String toString() {
+//        return "QueryStatement{" +
+//                "id='" + id + '\'' +
+//                ", query='" + query + '\'' +
+//                ", template='" + template + '\'' +
+//                ", selectivity=" + selectivity + '\'' +
+//                ", selectivity_type=" + selectivity_type + '\'' +
+//                ", inserted_at=" + inserted_at +
+//                '}';
+//    }
+
+    public String toString() {
+        return "QueryStatement{" +
+                "id='" + id + '\'' +
+                ", query='" + query + '\'' +
+                ", template='" + template + '\'' +
+                ", inserted_at=" + inserted_at +
+                '}';
     }
 }

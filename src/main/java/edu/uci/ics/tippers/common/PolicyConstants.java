@@ -38,12 +38,12 @@ public class PolicyConstants {
     public static long INFINTIY ;
     public static int BATCH_SIZE_INSERTION ;
     public static Duration MAX_DURATION;
-    public static double IO_BLOCK_READ_COST;
+    public static double IO_BLOCK_READ_COST; //c_r
     public static double MEMORY_BLOCK_READ_COST ;
-    public static double ROW_EVALUATE_COST ;
+    public static double ROW_EVALUATE_COST ; //c_e
     public static double UDF_INVOCATION_COST;
     public static double POLICY_EVAL_COST ;
-    public static double NUMBER_OF_PREDICATES_EVALUATED;
+    public static double NUMBER_OF_PREDICATES_EVALUATED; //alpha
 
     //Dataset related
     public static List<String> ATTRIBUTES;

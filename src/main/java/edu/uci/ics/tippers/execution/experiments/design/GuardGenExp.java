@@ -85,7 +85,7 @@ public class GuardGenExp {
     public void generateGuards(List<Integer> queriers) {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "outliers.csv";
+        String fileName = "attendance_generation1.csv";
         boolean first = true;
 
         for (int querier : queriers) {

@@ -17,7 +17,7 @@ public class PresenceDataGeneration {
 
     private static final String dataDir = "/metadata/";
     private Connection connection;
-    private HashMap<String, Integer> user_id_map;
+    private HashMap<Integer, String> user_id_map;
 
     public PresenceDataGeneration(){
         this.connection = MySQLConnectionManager.getInstance().getConnection();
@@ -33,9 +33,9 @@ public class PresenceDataGeneration {
         PreparedStatement queryStm = null;
         try {
             queryStm = connection.prepareStatement("SELECT ID, USER_ID as id, user_id " +
-                    "FROM USER");
+                    "FROM APP_USER");
             ResultSet rs = queryStm.executeQuery();
-            while (rs.next()) user_id_map.put(rs.getString("user_id"), rs.getInt("id"));
+            while (rs.next()) user_id_map.put(rs.getInt("id"), rs.getString("user_id"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -77,10 +77,20 @@ public class PresenceDataGeneration {
         return new Timestamp(parsedDate.getTime());
     }
 
+    private Date parseDate(String dateStr) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return dateFormat.parse(dateStr);
+    }
+
+    private Date parseTime(String timeStr) throws ParseException {
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        return timeFormat.parse(timeStr);
+    }
+
     private void parseAndWrite(String fileName) {
         String pInsert = "INSERT INTO PRESENCE " +
-                "(USER_ID, LOCATION_ID, START_DATE, START_TIME) " +
-                "VALUES (?, ?, ?, ?)";
+                "(USER_ID, LOCATION_ID, USER_PROFILE, USER_GROUP, START_DATE, START_TIME) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
         int presenceCount = 0;
         try {
             InputStream in = getClass().getResourceAsStream(fileName);
@@ -94,24 +104,56 @@ public class PresenceDataGeneration {
                 java.sql.Date startDate;
                 java.sql.Time startTime;
                 String location;
+                String user_profile;
+                String user_group;
                 if(nextRecord.length == 6){
-                    userId = user_id_map.get(new JSONObject(nextRecord[2]).getString("client_id"));
-                    Timestamp ts = parseTimeStamp(nextRecord[3]);
+                    userId = Integer.parseInt(nextRecord[5]);
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
+                    user_group = nextRecord[5];
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
+                    user_profile = nextRecord[5];
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
+                    String concatenateEntry = nextRecord[5];
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
+                    concatenateEntry = concatenateEntry + " " + nextRecord[5];
+                    Timestamp ts = parseTimeStamp(concatenateEntry);
                     startDate = new java.sql.Date(ts.getTime());
                     startTime = new java.sql.Time(ts.getTime());
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
                     location = nextRecord[5];
+                    csvReader.readNext();
                 }
                 else{
-                    userId = user_id_map.get(new JSONObject(nextRecord[0]).getString("client_id"));
-                    Timestamp ts = parseTimeStamp(nextRecord[1]);
+                    userId = Integer.parseInt(nextRecord[5]);
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
+                    user_group = nextRecord[5];
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
+                    user_profile = nextRecord[5];
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
+                    Timestamp ts = parseTimeStamp(nextRecord[5]);
                     startDate = new java.sql.Date(ts.getTime());
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
                     startTime = new java.sql.Time(ts.getTime());
-                    location = nextRecord[3];
+                    csvReader.readNext();
+                    nextRecord = csvReader.readNext();
+                    location = nextRecord[5];
+                    csvReader.readNext();
                 }
                 presenceStmt.setInt(1, userId);
                 presenceStmt.setString(2, location);
-                presenceStmt.setDate(3, startDate);
-                presenceStmt.setTime(4, startTime);
+                presenceStmt.setString(3, user_profile);
+                presenceStmt.setString(4, user_group);
+                presenceStmt.setDate(5, startDate);
+                presenceStmt.setTime(6, startTime);
                 presenceStmt.addBatch();
                 presenceCount++;
                 if (presenceCount % PolicyConstants.BATCH_SIZE_INSERTION == 0) {
@@ -127,9 +169,11 @@ public class PresenceDataGeneration {
         }
     }
 
-    public static void main(String[] args) {
+    public void runExperiment() {
+//        String csvFilePath = "/results/policy.csv";
         PresenceDataGeneration pdg = new PresenceDataGeneration();
         pdg.getAllUsers();
+//        pdg.parseAndWrite(csvFilePath);
         pdg.parseAndWrite(dataDir + DataFiles.PRESENCE_REAL.getPath());
     }
 }

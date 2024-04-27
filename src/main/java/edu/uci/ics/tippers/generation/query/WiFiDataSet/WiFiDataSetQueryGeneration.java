@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.generation.query.WiFiDataSet;
 
 import edu.uci.ics.tippers.generation.policy.WiFiDataSet.PolicyUtil;
 import edu.uci.ics.tippers.generation.query.QueryGen;
+import edu.uci.ics.tippers.model.policy.BEPolicy;
 import edu.uci.ics.tippers.model.policy.TimeStampPredicate;
 import edu.uci.ics.tippers.model.query.QueryStatement;
 
@@ -64,7 +65,7 @@ public class WiFiDataSetQueryGeneration extends QueryGen {
         for (int k = 0; k < selTypes.size(); k++) {
             int numQ = 0;
             int locs = numLocs.get(i);
-            int duration = 30; // in minutes
+            int duration = 60; // in minutes
             int days = 0;
             boolean locFlag = true;
             String selType = selTypes.get(k);
@@ -72,7 +73,7 @@ public class WiFiDataSetQueryGeneration extends QueryGen {
             System.out.println("Chosen Selectivity " + chosenSel);
             do {
                 duration = Math.min(duration, 1439); //maximum of a day
-                TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), days, "00:00", duration);
+                TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), days, "08:00", duration);
                 String query = String.format("start_date >= \"%s\" AND start_date <= \"%s\" ", tsPred.getStartDate().toString(),
                         tsPred.getEndDate().toString());
                 query += String.format("and start_time >= \"%s\" AND start_time <= \"%s\" ", tsPred.getStartTime().toString(),
@@ -292,7 +293,7 @@ public class WiFiDataSetQueryGeneration extends QueryGen {
     public List<QueryStatement> createQuery3(List<String> selTypes, int queryNum) {
         List<QueryStatement> queries = new ArrayList<>();
         Random r = new Random();
-        String user_group = "visitor";
+        String user_group = "staff";
         String full_query = String.format("Select PRESENCE.user_id, PRESENCE.location_id, PRESENCE.start_date, " +
                 "PRESENCE.start_time, PRESENCE.user_group, PRESENCE.user_profile  " +
                 "from PRESENCE, USER_GROUP_MEMBERSHIP " +
@@ -317,7 +318,7 @@ public class WiFiDataSetQueryGeneration extends QueryGen {
     public List<QueryStatement> createQuery4() {
         List<QueryStatement> queries = new ArrayList<>();
         for (int j =0; j < 200; j++) {
-            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 0, "00:00", 7*j);
+            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 0, "08:00", 7*j);
             String query = String.format("Select location_id, count(*) from PRESENCE where start_time >= \"%s\" " +
                             "AND start_time <= \"%s\" group by location_id", tsPred.getStartTime().toString(),
                     tsPred.getEndTime().toString());
@@ -346,12 +347,21 @@ public class WiFiDataSetQueryGeneration extends QueryGen {
         return queries;
     }
 
+    public List<QueryStatement> createQuery1(int numOfQueries){return null;};
+
+    public List<QueryStatement> createQuery2(int numOfQueries){return null;};
+
+    public List<QueryStatement> createQuery3(int numOfQueries){return null;};
 
     public static void main(String[] args) {
         WiFiDataSetQueryGeneration qg = new WiFiDataSetQueryGeneration();
         boolean[] templates = {false, false, true, false};
-        int numOfQueries = 3;
-        qg.constructWorkload(templates, numOfQueries);
+        int numOfQueries = 1;
+        List<QueryStatement> queries = qg.constructWorkload(templates, numOfQueries);
+        for (QueryStatement query : queries) {
+            System.out.println(query.toString());
+        }
+        System.out.println();
     }
 
 }

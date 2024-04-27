@@ -37,6 +37,12 @@ public class TPCHQueryGeneration extends QueryGen {
         numClerks = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 5, 10, 15, 20, 30, 50, 100, 200));
     }
 
+    public List<QueryStatement> createQuery1(int numOfQueries){return null;};
+
+    public List<QueryStatement> createQuery2(int numOfQueries){return null;};
+
+    public List<QueryStatement> createQuery3(int numOfQueries){return null;};
+
     /**
      * Select * from ORDERS where O_CLERK in [......]
      * and O_ORDERDATE >= d1 and O_ORDERDATE <= d2

@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.caching.workload;
 
+import com.google.gson.Gson;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.fileop.Writer;
 import edu.uci.ics.tippers.generation.query.WiFiDataSet.WiFiDataSetQueryGeneration;
@@ -8,6 +9,8 @@ import edu.uci.ics.tippers.model.policy.*;
 import edu.uci.ics.tippers.caching.workload.*;
 import edu.uci.ics.tippers.model.query.QueryStatement;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -25,62 +28,66 @@ public class WorkloadGenerator {
         int currentTime = 0;
         int nextRegularPolicyInsertionTime = regularInterval;
         int nextDynamicPolicyInsertionTime = dynamicInterval;
-        Writer writer = new Writer();
-        StringBuilder result = new StringBuilder();
-        String fileName = "workload.txt";
-        int countp = 0;
-        int countq = 0;
+
+// Creating a Gson object for JSON serialization
+        Gson gson = new Gson();
+
+// Name of the output JSON file
+        String fileName = "workload.json";
+
+// Initializing counters for policies and queries
+        int countp = 0; // Counter for policies (not used in this code)
+        int countq = 0; // Counter for queries (not used in this code)
+
+// Boolean flag to track if it's the first entry being written to the file
         boolean first = true;
-        result.append("No. of policies= "). append(policies.size()).append("\n")
-                .append("No. of queries= ").append(queries.size()).append("\n")
-                .append("Interleaving Techniques= ").append("[Constant Interval= ").append(regularInterval).append("]")
-                .append("[Variable Interval= 0,2*").append(dynamicInterval).append("]").append("\n");
-        writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
-        while (!policies.isEmpty() && !queries.isEmpty()) {
+// Try-with-resources block to ensure proper resource management
+        try (FileWriter writer = new FileWriter(PolicyConstants.EXP_RESULTS_DIR + fileName)) {
+            // Starting the JSON structure with an array of policies
+            writer.write("{\"policies\": [");
 
+            // Loop until either policies or queries list becomes empty
+            while (!policies.isEmpty() && !queries.isEmpty()) {
 
-            if (currentTime >= nextRegularPolicyInsertionTime) {
-                // Generate regular policies and write them to file
-                List<BEPolicy> regularPolicies = extractPolicies(policies, n);
-
-                for(BEPolicy policy: regularPolicies){
-                    result.append(currentTime).append(",")
-                            .append(policy.toString()).append("\n");
-                }
-                nextRegularPolicyInsertionTime += regularInterval;
-            }
-
-            if (currentTime >= nextDynamicPolicyInsertionTime) {
-                // Generate dynamic policies and write them to file
-                Random random = new Random();
-                int noOfPolices = random.nextInt(2*n)+1;
-                List<BEPolicy> dynamicPolicies = extractPolicies(policies, noOfPolices);
-                for(BEPolicy policy: dynamicPolicies){
-                    result.append(currentTime).append(",")
-                            .append(policy.toString()).append("\n");
+                // Writing regular policies if it's time
+                if (currentTime >= nextRegularPolicyInsertionTime) {
+                    // Generate regular policies and write them to file
+                    List<BEPolicy> regularPolicies = extractPolicies(policies, n);
+                    for (BEPolicy policy : regularPolicies) {
+                        writer.write(gson.toJson(policy) + ","); // Serializing policy object to JSON and writing to file
+                    }
+                    nextRegularPolicyInsertionTime += regularInterval; // Updating the next insertion time
                 }
 
-                nextDynamicPolicyInsertionTime += dynamicInterval;
+                // Writing dynamic policies if it's time
+                if (currentTime >= nextDynamicPolicyInsertionTime) {
+                    // Generate dynamic policies and write them to file
+                    Random random = new Random();
+                    int noOfPolices = random.nextInt(2 * n) + 1; // Randomly determining the number of dynamic policies
+                    List<BEPolicy> dynamicPolicies = extractPolicies(policies, noOfPolices);
+                    for (BEPolicy policy : dynamicPolicies) {
+                        writer.write(gson.toJson(policy) + ","); // Serializing policy object to JSON and writing to file
+                    }
+                    nextDynamicPolicyInsertionTime += dynamicInterval; // Updating the next insertion time
+                }
+
+                // Generating queries and writing them to file
+                List<QueryStatement> generatedQueries = generateQueries(queries, n);
+                for (QueryStatement query : generatedQueries) {
+                    writer.write(gson.toJson(query) + ","); // Serializing query object to JSON and writing to file
+                }
+
+                // Incrementing the current time for the next iteration
+                currentTime++;
             }
 
-            // Generate queries and write them to file
-            List<QueryStatement> generatedQueries = generateQueries(queries, n);
-            for(QueryStatement query: generatedQueries){
-                result.append(currentTime).append(",")
-                        .append(query.toString()).append("\n");
-            }
-
-            // Writing results to file
-            if (!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
-            else first = false;
-
-            // Clearing StringBuilder for the next iteration
-            result.setLength(0);
-
-            currentTime++;
-
+            // Closing the JSON array of policies and completing the JSON structure
+            writer.write("]}");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
     }
 
     private List<BEPolicy> extractPolicies(List<BEPolicy> policies, int n) {

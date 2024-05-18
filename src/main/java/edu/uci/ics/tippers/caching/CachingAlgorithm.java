@@ -28,77 +28,85 @@ public class CachingAlgorithm <C,Q> {
     GuardPersistor guardPersistor;
     PolicyUtil pg;
 
+    QueryPerformance e;
+
     public CachingAlgorithm(){
         connection = MySQLConnectionManager.getInstance().getConnection();
         r = new Random();
         polper = PolicyPersistor.getInstance();
         pg = new PolicyUtil();
+        this.guardPersistor = new GuardPersistor();
+        QueryPerformance e = new QueryPerformance();
 
     }
 
-    public void runAlgorithm(ClockHashMap<Integer, List<GuardExp>> clockHashMap, QueryStatement query, Timestamp timestampGlobal) {
+    public void runAlgorithm(ClockHashMap<String, GuardExp> clockHashMap, String querier, QueryStatement query, Timestamp timestampGlobal) {
 
         // Implementation of the Guard Caching Algorithm
-        Integer querier = query.getId();
-        int index = clockHashMap.getIndex(querier);
+        int index;
+        if(clockHashMap.size == 0){
+            index = 0;
+        }else{
+            index = clockHashMap.getIndex(querier);
+        }
+
         List<BEPolicy> newPolicies = null;
 
         if (index != 0) {
-            List<GuardExp> listGE = (List<GuardExp>) clockHashMap.get(querier);
-            Timestamp timestamp;
-            for(int i=0; i< listGE.size(); i++){
-                if(timestamp.after(listGE.get(i).getLast_updated())) {
-                    to do;//// verify
-                }
-            }
-            Timestamp timestamp = ge.getLast_updated();
+            GuardExp guardExp = clockHashMap.get(querier);
+            Timestamp timestamp = guardExp.getLast_updated();
 
             boolean t = timestampGlobal.equals(timestamp);
             if (t) {
                 clockHashMap.update(querier);
+                String result = e.runGE(querier, query, guardExp);
                 return;
-            } else {
-                // Fetch policies that have timestamp greater than the GE stored
-                newPolicies = fetchNewPolicies(querier, timestampGlobal);
-
-                // Implement CASE 1 and CASE 2
-                // costMethod1 and costMethod2 calculation
-                int cost1 = costMethod1();
-                int cost2 = costMethod2();
-
-                if (cost1 > cost2) {
-                    concatenatePNew(PoliciesInGE_i, P_new); // create a new ge which includes all the policies???
-                    clockHashMap.findAndUpdate(querier, listGE);
-                    return;
-                } else {
-                    // Implement GE_i union with GE_new
-                    GuardExp newGE = SieveGG(querier, newPolicies);
-
-                    clockHashMap.findAndUpdate(querier, listGE);    // make a list of ge to store more than one ge (GE1+GE2)???
-                    return;
-                }
+//            } else {
+//                // Fetch policies that have timestamp greater than the GE stored
+//                newPolicies = fetchNewPolicies(querier, timestampGlobal);
+//
+//                // Implement CASE 1 and CASE 2
+//                // costMethod1 and costMethod2 calculation
+//                int cost1 = costMethod1();
+//                int cost2 = costMethod2();
+//
+//                if (cost1 > cost2) {
+//                    concatenatePNew(PoliciesInGE_i, P_new); // create a new ge which includes all the policies???
+//                    clockHashMap.findAndUpdate(querier, listGE);
+//                    return;
+//                } else {
+//                    // Implement GE_i union with GE_new
+//                    GuardExp newGE = SieveGG(querier, newPolicies);
+//
+//                    clockHashMap.findAndUpdate(querier, listGE);    // make a list of ge to store more than one ge (GE1+GE2)???
+//                    return;
+//                }
+//            }
             }
-        } else {
-            // If querier not found or no matching GE, create a new one
-            GuardExp newGE = SieveGG(querier, newPolicies);
-            clockHashMap.put(querier, newGE);
-            return;
+        }else{
+        // If querier not found or no matching GE, create a new one
+            GuardExp newGE = SieveGG(querier);
+            if (newGE == null){
+                return;
+            }else {
+                clockHashMap.put(querier, newGE);
+                return;
+            }
         }
     }
-    private int costMethod1(){
-        int a;
-    }
+//    private int costMethod1(){
+//        int a;
+//    }
+//
+//    private int costMethod2(){
+//        int b;
+//    }
 
-    private int costMethod2(){
-        int b;
-    }
-
-    private GuardExp SieveGG (int querier, List<BEPolicy> allowPolicies){
-        if(allowPolicies == null){
-            allowPolicies = polper.retrievePolicies(String.valueOf(querier),
+    public GuardExp SieveGG (String querier){
+        List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
                     PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
-        }
 
+        if(allowPolicies == null) return null;
         System.out.println("Querier #: " + querier + " with " + allowPolicies.size() + " allow policies");
         BEExpression allowBeExpression = new BEExpression(allowPolicies);
         Duration guardGen = Duration.ofMillis(0);
@@ -116,9 +124,9 @@ public class CachingAlgorithm <C,Q> {
 
         return gh.create(String.valueOf(querier), "user");
     }
-    public List<BEPolicy> fetchNewPolicies(Integer querier, Timestamp timestampGlobal) {
+    public List<BEPolicy> fetchNewPolicies(String querier, Timestamp timestampGlobal) {
         // Implementation for fetchNewPolicies function
-        List<BEPolicy> allowPolicies = polper.retrievePolicies(String.valueOf(querier),
+        List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
                 PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
         List<BEPolicy> newPolicies = null;
         for (int i=0; i< allowPolicies.size(); i++) {
@@ -133,11 +141,12 @@ public class CachingAlgorithm <C,Q> {
         // Example usage of CachingAlgorithm
         long millis = Instant.now().toEpochMilli();
         Timestamp timestampGlobal = new Timestamp(millis);
-        ClockHashMap<Integer, List<GuardExp>> clockHashMap = new ClockHashMap<>(3);
+        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(3);
         QueryPerformance e = new QueryPerformance();
         List<QueryStatement> queries = e.getQueries(3, 9);
         QueryStatement query = new QueryStatement();
         CachingAlgorithm ca = new CachingAlgorithm();
-        ca.runAlgorithm(clockHashMap, query, timestampGlobal);
+        String querier = null;
+        ca.runAlgorithm(clockHashMap, querier, query, timestampGlobal);
     }
 }

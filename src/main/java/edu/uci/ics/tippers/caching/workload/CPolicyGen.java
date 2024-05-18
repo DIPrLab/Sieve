@@ -135,7 +135,7 @@ public class CPolicyGen {
         for (CUserGen.User user: users){
 
             System.out.println("User ID: " + user.getUserId() + ", User Profile: " + user.getUserProfile());
-            int numPolicies = 100;
+            int numPolicies = 10;
             for (int i = 0; i < numPolicies; i++) {
                 if (i<numPolicies){
                     if(user.getUserProfile().equals("faculty")){
@@ -147,7 +147,7 @@ public class CPolicyGen {
                         }
                         Random r = new Random();
                         int index = r.nextInt(possibleQueriers.size());
-                        BEPolicy policy = generateRandomPolicies(index,user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
+                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
                         policies.add(policy);
                     }
                     if(user.getUserProfile().equals("staff")){
@@ -165,7 +165,7 @@ public class CPolicyGen {
                         }
                         Random rand = new Random();
                         index = rand.nextInt(loc.size());
-                        BEPolicy policy = generateRandomPolicies(index,user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, loc.get(index), PolicyConstants.ACTION_ALLOW);
+                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, loc.get(index), PolicyConstants.ACTION_ALLOW);
                         policies.add(policy);
                     }
                     if(user.getUserProfile().equals("graduate")){
@@ -177,7 +177,7 @@ public class CPolicyGen {
                         }
                         Random r = new Random();
                         int index = r.nextInt(possibleQueriers.size());
-                        BEPolicy policy = generateRandomPolicies(index,user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
+                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
                         policies.add(policy);
 
                     }
@@ -190,7 +190,7 @@ public class CPolicyGen {
                         }
                         Random r = new Random();
                         int index = r.nextInt(possibleQueriers.size());
-                        BEPolicy policy = generateRandomPolicies(index,user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
+                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
                         policies.add(policy);
 
                     }
@@ -203,7 +203,7 @@ public class CPolicyGen {
                     }
                     Random r = new Random();
                     int index = r.nextInt(possibleQueriers.size());
-                    BEPolicy policy = generateRandomPolicies(index, user.getId(), user.getUserGroup(), user.getUserProfile(), workingHours, null, PolicyConstants.ACTION_ALLOW);
+                    BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index), user.getId(), user.getUserGroup(), user.getUserProfile(), workingHours, null, PolicyConstants.ACTION_ALLOW);
                     policies.add(policy);
                 }
             }
@@ -212,7 +212,7 @@ public class CPolicyGen {
             }
             System.out.println();
         }
-        polper.insertPolicy(policies);
+//        polper.insertPolicy(policies);
         return policies;
     }
 

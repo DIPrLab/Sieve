@@ -223,7 +223,7 @@ public class GuardExp {
                 queryExp.append(PolicyConstants.SELECT_ALL)
                         .append(" force index (")
                         .append(PolicyConstants.ATTRIBUTE_INDEXES.get(gp.getGuard().getAttribute()))
-                        .append(" ) Where")
+                        .append(" ) Where ")
                         .append(gp.getGuard().print())
                         .append(PolicyConstants.CONJUNCTION);
                 queryExp.append(gp.getGuardPartition().createQueryFromPolices());

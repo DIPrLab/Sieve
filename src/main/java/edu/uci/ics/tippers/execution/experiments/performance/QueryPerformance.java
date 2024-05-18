@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.execution.experiments.performance;
 
+import edu.uci.ics.tippers.caching.CachingAlgorithm;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.dbms.QueryManager;
 import edu.uci.ics.tippers.dbms.QueryResult;
@@ -19,10 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Experiment 3 in the paper
@@ -45,6 +43,7 @@ public class QueryPerformance {
     private static boolean QUERY_INDEX;
     private static boolean SIEVE_EXEC;
     private static boolean RESULT_CHECK;
+    GuardPersistor guardPersistor;
 
     private static int NUM_OF_REPS;
 
@@ -55,6 +54,7 @@ public class QueryPerformance {
         polper = PolicyPersistor.getInstance();
         queryExplainer = new QueryExplainer();
         queryManager = new QueryManager();
+        this.guardPersistor = new GuardPersistor();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         try {
@@ -101,12 +101,14 @@ public class QueryPerformance {
                     queryResult = queryManager.runTimedSubQuery(queryStatement.getQuery(), RESULT_CHECK);
                 else
                     queryResult = queryManager.runTimedQueryWithOutSorting(queryStatement.getQuery(), true);
-                Duration runTime = Duration.ofMillis(0);
-                runTime = runTime.plus(queryResult.getTimeTaken());
-                System.out.println("Time taken by query alone " + runTime.toMillis());
-                long QUERY_EXECUTION_TIME = runTime.toMillis();
-                resultString.append(QUERY_EXECUTION_TIME).append(",");
+                if(queryResult.getResultCount() != 0){
+                    Duration runTime = Duration.ofMillis(0);
+                    runTime = runTime.plus(queryResult.getTimeTaken());
+                    System.out.println("Time taken by query alone " + runTime.toMillis());
+                    long QUERY_EXECUTION_TIME = runTime.toMillis();
+                    resultString.append(QUERY_EXECUTION_TIME).append(",");
 //                mySQLQueryManager.increaseTimeout(runTime.toMillis()); //Updating timeout to query exec time + constant
+                }
             }
             else resultString.append("NA").append(",");
 
@@ -155,7 +157,8 @@ public class QueryPerformance {
             }
             else resultString.append("NA").append(",");
 
-
+//            CachingAlgorithm ca =new CachingAlgorithm<>();
+//            GuardExp GE = ca.SieveGG(querier);
             GuardPersistor guardPersistor = new GuardPersistor();
             GuardExp guardExp = guardPersistor.retrieveGuardExpression(querier, "user", bePolicies);
             if(guardExp.getGuardParts().isEmpty()) return "empty";
@@ -270,6 +273,67 @@ public class QueryPerformance {
         } catch (Exception e) {
             e.printStackTrace();
         }
+//        System.out.println(resultString);
+        return resultString.append("\n").toString();
+    }
+
+    public String runGE(String querier, QueryStatement queryStatement, GuardExp guardExp) {
+
+        QueryExplainer qe = new QueryExplainer();
+        double querySel = qe.estimateSelectivity(queryStatement);
+        StringBuilder resultString = new StringBuilder();
+        resultString.append(querier).append(",")
+                .append(userProfile(Integer.parseInt(querier))).append(",")
+                .append(queryStatement.getTemplate()).append(",");
+
+//        double querySel = qe.estimateSelectivity(queryStatement);
+//        resultString.append(querySel).append(",");
+
+        try {
+            GuardPersistor guardPersistor = new GuardPersistor();
+            if(guardExp.getGuardParts().isEmpty()) return "empty";
+
+            double guardTotalCard = guardExp.getGuardParts().stream().mapToDouble(GuardPart::getCardinality).sum();
+
+            Duration execTime = Duration.ofMillis(0);
+            String guardQuery = guardExp.inlineOrNot(true);
+            String query_hint = qe.keyUsed(queryStatement);
+            String sieve_query;
+            /** Calibration of choosing between IndexGuards and IndexQuery
+             *  based on the ratio of querySel/guardTotalCard. In template 3
+             *  because of the join, this ratio is a much smaller number.
+             */
+//            boolean indexGuards = querySel > 0.5 * guardTotalCard;
+//            if(queryStatement.getTemplate() == 3) {
+//                indexGuards = querySel > 0.01 *guardTotalCard;
+//            }
+//            if (indexGuards || query_hint == null) { //Use Guards
+//                if(queryStatement.getTemplate() == 3){
+//                    sieve_query = guardQuery + queryStatement.getQuery().replace("PRESENCE", "polEval");
+//                }
+//                else
+//                    sieve_query = guardQuery + "Select * from polEval where " + queryStatement.getQuery();
+//                resultString.append("Guard Index").append(",");
+//            }
+//            else { //Use queries
+                if(queryStatement.getTemplate() == 3) {
+                    String query_index = queryStatement.getQuery().replace("from PRESENCE", "from PRESENCE force index("
+                            + query_hint +")" );
+                    sieve_query = "SELECT * from ( " + query_index + " ) as P where " + guardExp.createQueryWithOR();
+                }
+                else
+                    sieve_query = "SELECT * from ( SELECT * from PRESENCE force index(" + query_hint
+                            + ") where " + queryStatement.getQuery() + " ) as P where " + guardExp.createQueryWithOR();
+                resultString.append("Query Index").append(",");
+//            }
+            QueryResult execResult = queryManager.runTimedQueryExp(sieve_query, NUM_OF_REPS);
+            execTime = execTime.plus(execResult.getTimeTaken());
+            resultString.append(execTime.toMillis());
+            System.out.println("Sieve Query: "  + " Time: " + execTime.toMillis());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.out.println(resultString);
         return resultString.append("\n").toString();
     }
@@ -292,47 +356,74 @@ public class QueryPerformance {
         else return "staff" ;
     }
 
-    public void runExperiment() {
+//    public void runExperiment() {
+//        QueryPerformance e = new QueryPerformance();
+//        PolicyUtil pg = new PolicyUtil();
+////        List<Integer> users = pg.getAllUsers(true);
+//        //users with increasing number of guards
+////        List <Integer> users = new ArrayList<>(Arrays.asList(26389, 15230, 30769, 12445, 36430, 21951,
+////                13411, 7079, 364, 26000, 5949, 34372, 6371, 26083, 34290, 2917, 33425, 35503, 26927, 15007));
+//        //users with guards of increasing cardinality
+////        List <Integer> users = new ArrayList<>(Arrays.asList(14215, 56, 2050, 2819, 37, 625, 23519, 8817, 6215, 387,
+////                945, 8962, 23416, 34035));
+//        //users with increasing number of policies
+////        List <Integer> faculty = new ArrayList<>(Arrays.asList(1023, 5352, 11043, 13353, 18575));
+////        List <Integer> undergrad = new ArrayList<>(Arrays.asList(4686, 7632, 12555, 15936, 15007));
+////        List<Integer> grad = new ArrayList<>(Arrays.asList(100, 532, 5990, 11815, 32467));
+////        List<Integer> staff = new ArrayList<>(Arrays.asList(38,43,53));
+//        List<Integer> faculty = new ArrayList<>(Arrays.asList(80,87));
+//        List<Integer> users = new ArrayList<>();
+//        users.addAll(faculty);
+////        users.addAll(undergrad);
+////        users.addAll(grad);
+////        users.addAll(staff);
+//        PolicyPersistor polper = PolicyPersistor.getInstance();
+//        String fileName = "query.csv";
+////        String file_header = "Querier,Querier_Profile,Query_Type,Query_Cardinality,Number_Of_Policies,Estimated_QPS,Query_Alone," +
+////                "Baseline_Policies, Baseline_UDF,Number_of_Guards,Total_Guard_Cardinality,With_Guard_Index,With_Query_Index,Sieve_Parameters, Sieve\n";
+//        String file_header = "Querier,Querier_Profile,Query_Type,Query_Cardinality,Number_Of_Policies,Estimated_QPS,Query_Alone," +
+//                "Baseline_Policies, Baseline_UDF,Baseline_Index,Number_of_Guards,Total_Guard_Cardinality,Sieve_Parameters, Sieve\n";
+//        Writer writer = new Writer();
+//        writer.writeString(file_header, PolicyConstants.EXP_RESULTS_DIR, fileName);
+//        List<QueryStatement> queries = e.getQueries(3, 12);
+//        for (int j = 0; j < queries.size(); j++) {
+//            System.out.println("Total Query Selectivity " + queries.get(j).getSelectivity());
+//            for (int i = 0; i < users.size(); i++) {
+//                String querier = String.valueOf(users.get(i));
+//                List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
+//                        PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
+//                if (allowPolicies == null) continue;
+//                System.out.println("Querier " + querier);
+//                writer.writeString(e.runBEPolicies(querier, queries.get(j),
+//                        allowPolicies), PolicyConstants.EXP_RESULTS_DIR, fileName);
+//                QUERY_EXEC = false;
+//            }
+//            QUERY_EXEC = true;
+//        }
+//    }
+
+    public String runExperiment(QueryStatement query) {
         QueryPerformance e = new QueryPerformance();
-        PolicyUtil pg = new PolicyUtil();
-//        List<Integer> users = pg.getAllUsers(true);
-        //users with increasing number of guards
-//        List <Integer> users = new ArrayList<>(Arrays.asList(26389, 15230, 30769, 12445, 36430, 21951,
-//                13411, 7079, 364, 26000, 5949, 34372, 6371, 26083, 34290, 2917, 33425, 35503, 26927, 15007));
-        //users with guards of increasing cardinality
-//        List <Integer> users = new ArrayList<>(Arrays.asList(14215, 56, 2050, 2819, 37, 625, 23519, 8817, 6215, 387,
-//                945, 8962, 23416, 34035));
-        //users with increasing number of policies
-        List <Integer> faculty = new ArrayList<>(Arrays.asList(1023, 5352, 11043, 13353, 18575));
-        List <Integer> undergrad = new ArrayList<>(Arrays.asList(4686, 7632, 12555, 15936, 15007));
-        List<Integer> grad = new ArrayList<>(Arrays.asList(100, 532, 5990, 11815, 32467));
-        List<Integer> staff = new ArrayList<>(Arrays.asList(888, 2550, 5293, 9733, 20021));
+
+        List<Integer> faculty = new ArrayList<>(Arrays.asList(177,4167,4702,5654,5674,5706,7016,9189,12148,13708,14996,15486
+                ,16607,16662,18131,19421,19782,20845,23203,24802,26171,29514,30088,30743,31086,32818,33049,34380));
         List<Integer> users = new ArrayList<>();
         users.addAll(faculty);
-        users.addAll(undergrad);
-        users.addAll(grad);
-        users.addAll(staff);
-        PolicyPersistor polper = PolicyPersistor.getInstance();
-//        String file_header = "Querier,Querier_Profile,Query_Type,Query_Cardinality,Number_Of_Policies,Estimated_QPS,Query_Alone," +
-//                "Baseline_Policies, Baseline_UDF,Number_of_Guards,Total_Guard_Cardinality,With_Guard_Index,With_Query_Index,Sieve_Parameters, Sieve\n";
-        String file_header = "Querier,Querier_Profile,Query_Type,Query_Cardinality,Number_Of_Policies,Estimated_QPS,Query_Alone," +
-                "Baseline_Policies, Baseline_UDF,Baseline_Index,Number_of_Guards,Total_Guard_Cardinality,Sieve_Parameters, Sieve\n";
-        Writer writer = new Writer();
-        writer.writeString(file_header, PolicyConstants.EXP_RESULTS_DIR, RESULTS_FILE);
-        List<QueryStatement> queries = e.getQueries(3, 9);
-        for (int j = 0; j < queries.size(); j++) {
-            System.out.println("Total Query Selectivity " + queries.get(j).getSelectivity());
-            for (int i = 0; i < users.size(); i++) {
-                String querier = String.valueOf(users.get(i));
-                List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
-                        PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
-                if (allowPolicies == null) continue;
+
+        Random random = new Random();
+
+        for (int i = 0; i < users.size(); i++) {
+            int randomIndex = random.nextInt(users.size());
+            String querier = String.valueOf(users.get(randomIndex));
+            List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
+                    PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
+            if (allowPolicies == null) continue;
+            else {
                 System.out.println("Querier " + querier);
-                writer.writeString(e.runBEPolicies(querier, queries.get(j),
-                        allowPolicies), PolicyConstants.EXP_RESULTS_DIR, RESULTS_FILE);
-                QUERY_EXEC = false;
+                System.out.println(e.runBEPolicies(querier,query,allowPolicies));
+                return querier;
             }
-            QUERY_EXEC = true;
         }
+        return "177";
     }
 }

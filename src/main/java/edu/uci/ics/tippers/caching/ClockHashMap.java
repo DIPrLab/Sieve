@@ -8,7 +8,7 @@ public class ClockHashMap<K, V> {
     private static final int DEFAULT_CAPACITY = 10;
 
     private Entry<K, V>[] entries;
-    private int size;
+    public int size;
     private int capacity;
     private int hand; // Clock hand position
 

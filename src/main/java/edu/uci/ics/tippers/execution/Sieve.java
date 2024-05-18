@@ -42,12 +42,12 @@ public class Sieve {
 //        CPolicyGen cpg = new CPolicyGen();
 //        cpg.runExpreriment();
 
-        WorkloadGenerator wg = new WorkloadGenerator(4,2);
-        wg.runExperiment();
-//        PresenceDataGeneration pdg = new PresenceDataGeneration();
-//        pdg.runExperiment();
-//        QueryPerformance queryPerformance = new QueryPerformance();
-//        queryPerformance.runExperiment();
+        int regularInterval = 1; // Example regular interval
+        int dynamicInterval = 1; // Example dynamic interval
+        int duration = 5;
+
+        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
+        generator.runExperiment();
 
 
 //        if(QUERY_PERFORMANCE_EXP) {

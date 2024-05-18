@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.caching.workload;
 
 import edu.uci.ics.tippers.dbms.mysql.MySQLConnectionManager;
+import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
 import edu.uci.ics.tippers.generation.policy.WiFiDataSet.PolicyUtil;
 import edu.uci.ics.tippers.generation.query.QueryGen;
 import edu.uci.ics.tippers.generation.query.WiFiDataSet.WiFiDataSetQueryGeneration;
@@ -22,6 +23,7 @@ public class CQueryGen extends QueryGen {
     Random r;
     PolicyPersistor polper;
     PolicyUtil pg;
+    CUserGen cug;
 
     private List<Integer> user_ids;
     private List<String> locations;
@@ -35,51 +37,79 @@ public class CQueryGen extends QueryGen {
         r = new Random();
         polper = PolicyPersistor.getInstance();
         pg = new PolicyUtil();
+        cug = new CUserGen();
 
-        this.user_ids = pg.getAllUsers(false);
-        this.locations = pg.getAllLocations();
+        this.user_ids = new ArrayList<>();
+        this.locations = new ArrayList<>(Arrays.asList("3142-clwa-2209", "3144-clwa-4051", "3146-clwa-6131"));
         this.start_beg = pg.getDate("MIN");
         this.start_fin = pg.getDate("MAX");
         this.user_groups = new ArrayList<>(Arrays.asList("3142-clwa-2209", "3144-clwa-4051", "3146-clwa-6131"));
         user_groups.addAll(locations);
         user_groups.addAll(new ArrayList<>(Arrays.asList("faculty", "staff", "undergrad", "graduate", "visitor")));
         hours = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 7, 10, 12, 15, 17, 20, 23));
-        numUsers = new ArrayList<Integer>(Arrays.asList(1000, 2000, 3000, 5000, 10000, 11000, 12000, 13000, 14000, 15000));
+        numUsers = new ArrayList<Integer>(Arrays.asList(10,50,100,150,200,250,300,350,400,420));
 
     }
 
+    //This query retrieves data based on a specified time range and location(s).
+    // Example: SELECT * FROM table
+    // WHERE start_date >= 'MIN_DATE' AND start_date <= 'MAX_DATE'
+    // AND start_time >= 'START_TIME' AND start_time <= 'END_TIME'
+    // AND location_id IN ('loc1', 'loc2', ...)
+    // Data of all the people at a given location
     @Override
     public List<QueryStatement> createQuery1(int queryCount) {
         List<QueryStatement> queries = new ArrayList<>();
+        int duration = 60;
 
         for (int numQ = 0; numQ < queryCount; numQ++) {
             // Generate query without considering selectivity
             int locs = r.nextInt(locations.size());
-            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 0, "00:00", 60);
+            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 60, "00:00", duration);
             String query = String.format("start_date >= \"%s\" AND start_date <= \"%s\" ",
                     tsPred.getStartDate().toString(), tsPred.getEndDate().toString());
             query += String.format("and start_time >= \"%s\" AND start_time <= \"%s\" ",
                     tsPred.getStartTime().toString(), tsPred.getEndTime().toString());
             List<String> locPreds = new ArrayList<>();
-            for (int predCount = 0; predCount < locs; predCount++) {
-                locPreds.add(String.valueOf(locations.get(new Random().nextInt(locations.size()))));
+            if (locs > 0) {
+                for (int predCount = 0; predCount < locs; predCount++) {
+                    locPreds.add(String.valueOf(locations.get(new Random().nextInt(locations.size()))));
+                }
+            } else {
+                // Handle the case where locs is empty
+                // For example, you could add a default location:
+                locPreds.add("3142-clwa-2209");
             }
             query += "AND location_id IN (";
             query += locPreds.stream().map(item -> "\"" + item + "\"").collect(Collectors.joining(", "));
             query += ")";
             queries.add(new QueryStatement(query, 1, new Timestamp(System.currentTimeMillis())));
+            duration += 60;
         }
         return queries;
     }
 
+    //Example: SELECT * FROM table WHERE start_date >= 'MIN_DATE' AND start_date <= 'MAX_DATE'
+    // AND start_time >= 'START_TIME' AND start_time <= 'END_TIME'
+    // AND user_id IN (id1, id2, ...)
+    //This query retrieves data based on a specified time range and user ID(s).
+    //Data of all the location a used id was present
     @Override
     public List<QueryStatement> createQuery2(int queryCount) {
         List<QueryStatement> queries = new ArrayList<>();
+        List<CUserGen.User> users = cug.retrieveUserData();
+        for (CUserGen.User user: users) {
+            user_ids.add(user.getId());
+        }
 
         for (int numQ = 0; numQ < queryCount; numQ++) {
             // Generate query without considering selectivity
             int userCount = numUsers.get(new Random().nextInt(numUsers.size()));
-            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 0, "00:00", 300);
+            if (userCount == 0) {
+                // Ensure there is at least one user
+                userCount = 1;
+            }
+            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 60, "00:00", 300);
             String query = String.format("start_date >= \"%s\" AND start_date <= \"%s\" ",
                     tsPred.getStartDate().toString(), tsPred.getEndDate().toString());
             query += String.format("and start_time >= \"%s\" AND start_time <= \"%s\" ",
@@ -96,11 +126,14 @@ public class CQueryGen extends QueryGen {
         return queries;
     }
 
+    //Example: SELECT * FROM table WHERE USER_GROUP_MEMBERSHIP.user_group_id = 'group_id'
+    // AND PRESENCE.user_id = USER_GROUP_MEMBERSHIP.user_id AND ...
+    // This query retrieves data based on a specified user group and utilizes the results from Type 1 queries.
     @Override
     public List<QueryStatement> createQuery3(int queryNum) {
         List<QueryStatement> queries = new ArrayList<>();
         Random r = new Random();
-        String user_group = "staff";
+        String user_group = "undergrad";
         String full_query = String.format("Select PRESENCE.user_id, PRESENCE.location_id, PRESENCE.start_date, " +
                 "PRESENCE.start_time, PRESENCE.user_group, PRESENCE.user_profile  " +
                 "from PRESENCE, USER_GROUP_MEMBERSHIP " +
@@ -135,12 +168,17 @@ public class CQueryGen extends QueryGen {
 
     public static void main(String[] args) {
         CQueryGen cqg = new CQueryGen();
-        boolean[] templates = {true, true, true, true};
-        int numOfQueries = 4;
+        QueryPerformance e = new QueryPerformance();
+        boolean[] templates = {true, true, false, false};
+        int numOfQueries = 552;
+        String querier;
         List<QueryStatement> queries = cqg.constructWorkload(templates, numOfQueries);
         for (QueryStatement query : queries) {
             System.out.println(query.toString());
+            querier = e.runExperiment(query);
+            System.out.println(querier);
         }
+        cqg.insertQuery(queries);
         System.out.println();
     }
 

@@ -1,6 +1,8 @@
 package edu.uci.ics.tippers.caching.workload;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.fileop.Writer;
 import edu.uci.ics.tippers.generation.query.WiFiDataSet.WiFiDataSetQueryGeneration;
@@ -25,71 +27,56 @@ public class WorkloadGenerator {
     }
 
     public void generateWorkload(int n, List<BEPolicy> policies, List<QueryStatement> queries) {
-        int currentTime = 0;
-        int nextRegularPolicyInsertionTime = regularInterval;
-        int nextDynamicPolicyInsertionTime = dynamicInterval;
 
-// Creating a Gson object for JSON serialization
+        // Creating a Gson object for JSON serialization
         Gson gson = new Gson();
 
-// Name of the output JSON file
+      //Name of the output JSON file
         String fileName = "workload.json";
 
-// Initializing counters for policies and queries
-        int countp = 0; // Counter for policies (not used in this code)
-        int countq = 0; // Counter for queries (not used in this code)
+        // Create a JSON object to hold the data
+        JsonObject workloadJson = new JsonObject();
 
-// Boolean flag to track if it's the first entry being written to the file
-        boolean first = true;
+        // Add the number of policies and queries
+        workloadJson.addProperty("No_of_policies", policies.size());
+        workloadJson.addProperty("No_of_queries", queries.size());
 
-// Try-with-resources block to ensure proper resource management
+        // Add interleaving techniques
+        JsonObject interleavingTechniques = new JsonObject();
+        interleavingTechniques.addProperty("Constant_Interval", regularInterval);
+        JsonArray variableIntervalArray = new JsonArray();
+        variableIntervalArray.add(0);
+        variableIntervalArray.add(dynamicInterval);
+        interleavingTechniques.add("Variable_Interval", variableIntervalArray);
+        workloadJson.add("Interleaving_Techniques", interleavingTechniques);
+
+        // Create an array to hold policies and queries
+        JsonArray policiesAndQueriesArray = new JsonArray();
+
+        // Add policies to the array
+        for (BEPolicy policy : policies) {
+            JsonObject policyJson = gson.toJsonTree(policy).getAsJsonObject();
+            policyJson.addProperty("type", "BEPolicy");
+            policiesAndQueriesArray.add(policyJson);
+        }
+
+        // Add queries to the array
+        for (QueryStatement query : queries) {
+            JsonObject queryJson = gson.toJsonTree(query).getAsJsonObject();
+            queryJson.addProperty("type", "QueryStatement");
+            policiesAndQueriesArray.add(queryJson);
+        }
+
+        // Add the policies and queries array to the workload JSON object
+        workloadJson.add("Policies_and_Queries", policiesAndQueriesArray);
+
+        // Write the JSON object to a file
         try (FileWriter writer = new FileWriter(PolicyConstants.EXP_RESULTS_DIR + fileName)) {
-            // Starting the JSON structure with an array of policies
-            writer.write("{\"policies\": [");
-
-            // Loop until either policies or queries list becomes empty
-            while (!policies.isEmpty() && !queries.isEmpty()) {
-
-                // Writing regular policies if it's time
-                if (currentTime >= nextRegularPolicyInsertionTime) {
-                    // Generate regular policies and write them to file
-                    List<BEPolicy> regularPolicies = extractPolicies(policies, n);
-                    for (BEPolicy policy : regularPolicies) {
-                        writer.write(gson.toJson(policy) + ","); // Serializing policy object to JSON and writing to file
-                    }
-                    nextRegularPolicyInsertionTime += regularInterval; // Updating the next insertion time
-                }
-
-                // Writing dynamic policies if it's time
-                if (currentTime >= nextDynamicPolicyInsertionTime) {
-                    // Generate dynamic policies and write them to file
-                    Random random = new Random();
-                    int noOfPolices = random.nextInt(2 * n) + 1; // Randomly determining the number of dynamic policies
-                    List<BEPolicy> dynamicPolicies = extractPolicies(policies, noOfPolices);
-                    for (BEPolicy policy : dynamicPolicies) {
-                        writer.write(gson.toJson(policy) + ","); // Serializing policy object to JSON and writing to file
-                    }
-                    nextDynamicPolicyInsertionTime += dynamicInterval; // Updating the next insertion time
-                }
-
-                // Generating queries and writing them to file
-                List<QueryStatement> generatedQueries = generateQueries(queries, n);
-                for (QueryStatement query : generatedQueries) {
-                    writer.write(gson.toJson(query) + ","); // Serializing query object to JSON and writing to file
-                }
-
-                // Incrementing the current time for the next iteration
-                currentTime++;
-            }
-
-            // Closing the JSON array of policies and completing the JSON structure
-            writer.write("]}");
+            gson.toJson(workloadJson, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
-
     private List<BEPolicy> extractPolicies(List<BEPolicy> policies, int n) {
         List<BEPolicy> extractedPolicies = new ArrayList<>();
         for (int i = 0; i < n && !policies.isEmpty(); i++) {

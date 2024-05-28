@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.caching.workload;
 
 import edu.uci.ics.tippers.caching.CachingAlgorithm;
+import edu.uci.ics.tippers.caching.CircularHashMap;
 import edu.uci.ics.tippers.caching.ClockHashMap;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
@@ -59,9 +60,8 @@ public class WorkloadGenerator {
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 //        System.out.println(dynamicPolicySize);
 
-        long millis = Instant.now().toEpochMilli();
-        Timestamp timestampGlobal = new Timestamp(millis);
-        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>((int)Math.floor(queries.size() * 0.1));
+        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(400);
+        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(400);
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
@@ -103,11 +103,14 @@ public class WorkloadGenerator {
                     for(BEPolicy policy: regularPolicies){
                         result.append(currentTime).append(",")
                                 .append(policy.toString()).append("\n");
+                        Instant pinsert = Instant.now();
+                        Timestamp policyinsertionTime = Timestamp.from(pinsert);
+                        timestampDirectory.put(policy.fetchQuerier(),policyinsertionTime);
                     }
-
                     nextRegularPolicyInsertionTime += regularInterval;
 
                     polper.insertPolicy(regularPolicies);
+
 //                }
             }
 
@@ -131,7 +134,7 @@ public class WorkloadGenerator {
             result.append(currentTime).append(",")
                     .append(query.toString()).append("\n");
             String querier = e.runExperiment(query);
-            ca.runAlgorithm(clockHashMap, querier, query, timestampGlobal);
+           ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 
 
             // Writing results to file
@@ -179,7 +182,7 @@ public class WorkloadGenerator {
         System.out.println("Total number of entries: " + users.size());
         System.out.println("Total number of entries: " + policies.size());
 
-        int queryCount = 552;
+        int queryCount = 3940;
         boolean[] templates = {true, true, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {

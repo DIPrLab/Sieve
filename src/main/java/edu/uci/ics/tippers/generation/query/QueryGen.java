@@ -105,13 +105,13 @@ public abstract class QueryGen {
 
     public abstract List<QueryStatement> createQuery3(List<String> selTypes, int numOfQueries);
 
+    public abstract List<QueryStatement> createQuery4();
+
     public abstract List<QueryStatement> createQuery1(int numOfQueries);
 
     public abstract List<QueryStatement> createQuery2(int numOfQueries);
 
     public abstract List<QueryStatement> createQuery3(int numOfQueries);
-
-    public abstract List<QueryStatement> createQuery4();
 
     public void insertQuery(List<QueryStatement> queryStatements) {
         String soInsert = "INSERT INTO QUERIES " +

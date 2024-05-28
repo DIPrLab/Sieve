@@ -134,22 +134,22 @@ public class CPolicyGen {
         List<BEPolicy> policies = new ArrayList<>();
         for (CUserGen.User user: users){
 
-            System.out.println("User ID: " + user.getUserId() + ", User Profile: " + user.getUserProfile());
+            System.out.println("User ID: " + user.getId() + ", User Profile: " + user.getUserProfile());
             int numPolicies = 10;
             for (int i = 0; i < numPolicies; i++) {
                 if (i<numPolicies){
-                    if(user.getUserProfile().equals("faculty")){
-                        List<Integer> possibleQueriers = new ArrayList<>();
-                        for (CUserGen.User u : users) {
-                            if (u.getUserProfile().equals("staff")) {
-                                possibleQueriers.add(u.getId());
-                            }
-                        }
-                        Random r = new Random();
-                        int index = r.nextInt(possibleQueriers.size());
-                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
-                        policies.add(policy);
-                    }
+//                    if(user.getUserProfile().equals("faculty")){
+//                        List<Integer> possibleQueriers = new ArrayList<>();
+//                        for (CUserGen.User u : users) {
+//                            if (u.getUserProfile().equals("staff")) {
+//                                possibleQueriers.add(u.getId());
+//                            }
+//                        }
+//                        Random r = new Random();
+//                        int index = r.nextInt(possibleQueriers.size());
+//                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
+//                        policies.add(policy);
+//                    }
                     if(user.getUserProfile().equals("staff")){
                         List<Integer> possibleQueriers = new ArrayList<>();
                         for (CUserGen.User u : users) {
@@ -181,7 +181,7 @@ public class CPolicyGen {
                         policies.add(policy);
 
                     }
-                    if(user.getUserProfile().equals("undergrad")){
+                    if(user.getUserProfile().equals("undergrad") && !user.getUserGroup().equals("3146-clwa-6122")){
                         List<Integer> possibleQueriers = new ArrayList<>();
                         for (CUserGen.User u : users) {
                             if (u.getUserProfile().equals("faculty") && user.getUserGroup().equals(u.getUserGroup())) {
@@ -207,11 +207,11 @@ public class CPolicyGen {
                     policies.add(policy);
                 }
             }
-            for (BEPolicy policy : policies) {
-                System.out.println(policy.toString());
-            }
-            System.out.println();
         }
+        for (BEPolicy policy : policies) {
+            System.out.println(policy.toString());
+        }
+        System.out.println();
 //        polper.insertPolicy(policies);
         return policies;
     }

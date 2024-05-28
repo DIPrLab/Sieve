@@ -43,9 +43,9 @@ public class Sieve {
 //        cpg.runExpreriment();
 
         int regularInterval = 1; // Example regular interval
-        int dynamicInterval = 1; // Example dynamic interval
-        int duration = 5;
-
+//        int dynamicInterval = 1; // Example dynamic interval
+//        int duration = 5;
+//
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
         generator.runExperiment();
 

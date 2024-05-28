@@ -40,12 +40,24 @@ public class CQueryGen extends QueryGen {
         cug = new CUserGen();
 
         this.user_ids = new ArrayList<>();
-        this.locations = new ArrayList<>(Arrays.asList("3142-clwa-2209", "3144-clwa-4051", "3146-clwa-6131"));
+        this.locations = new ArrayList<>(Arrays.asList("3142-clwa-2019","3142-clwa-2039","3142-clwa-2051","3142-clwa-2059",
+                "3142-clwa-2065","3142-clwa-2099","3142-clwa-2209","3142-clwa-2219","3142-clwa-2231","3143-clwa-3039",
+                "3143-clwa-3051","3143-clwa-3059","3143-clwa-3099","3143-clwa-3209","3143-clwa-3219","3143-clwa-3231",
+                "3144-clwa-4019","3144-clwa-4039","3144-clwa-4051","3144-clwa-4059","3144-clwa-4065","3144-clwa-4099",
+                "3144-clwa-4209","3144-clwa-4219","3144-clwa-4231","3145-clwa-5019","3145-clwa-5039","3145-clwa-5051",
+                "3145-clwa-5059","3145-clwa-5065","3145-clwa-5099","3145-clwa-5209","3145-clwa-5219","3145-clwa-5231",
+                "3146-clwa-6011","3146-clwa-6029","3146-clwa-6049","3146-clwa-6131","3146-clwa-6217"));
         this.start_beg = pg.getDate("MIN");
         this.start_fin = pg.getDate("MAX");
-        this.user_groups = new ArrayList<>(Arrays.asList("3142-clwa-2209", "3144-clwa-4051", "3146-clwa-6131"));
+        this.user_groups = new ArrayList<>(Arrays.asList("3142-clwa-2019","3142-clwa-2039","3142-clwa-2051","3142-clwa-2059",
+                "3142-clwa-2065","3142-clwa-2099","3142-clwa-2209","3142-clwa-2219","3142-clwa-2231","3143-clwa-3039",
+                "3143-clwa-3051","3143-clwa-3059","3143-clwa-3099","3143-clwa-3209","3143-clwa-3219","3143-clwa-3231",
+                "3144-clwa-4019","3144-clwa-4039","3144-clwa-4051","3144-clwa-4059","3144-clwa-4065","3144-clwa-4099",
+                "3144-clwa-4209","3144-clwa-4219","3144-clwa-4231","3145-clwa-5019","3145-clwa-5039","3145-clwa-5051",
+                "3145-clwa-5059","3145-clwa-5065","3145-clwa-5099","3145-clwa-5209","3145-clwa-5219","3145-clwa-5231",
+                "3146-clwa-6011","3146-clwa-6029","3146-clwa-6049","3146-clwa-6131","3146-clwa-6217"));
         user_groups.addAll(locations);
-        user_groups.addAll(new ArrayList<>(Arrays.asList("faculty", "staff", "undergrad", "graduate", "visitor")));
+        user_groups.addAll(new ArrayList<>(Arrays.asList("faculty", "undergrad", "graduate")));
         hours = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 7, 10, 12, 15, 17, 20, 23));
         numUsers = new ArrayList<Integer>(Arrays.asList(10,50,100,150,200,250,300,350,400,420));
 
@@ -151,7 +163,7 @@ public class CQueryGen extends QueryGen {
         List<QueryStatement> queries = new ArrayList<>();
         for (int j = 0; j < 200; j++) {
             // Generate query without considering selectivity
-            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 0, "00:00", 7 * j);
+            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 60, "00:00", 7 * j);
             String query = String.format("SELECT location_id, COUNT(*) FROM PRESENCE WHERE start_time >= \"%s\" " +
                             "AND start_time <= \"%s\" GROUP BY location_id",
                     tsPred.getStartTime().toString(), tsPred.getEndTime().toString());
@@ -170,7 +182,7 @@ public class CQueryGen extends QueryGen {
         CQueryGen cqg = new CQueryGen();
         QueryPerformance e = new QueryPerformance();
         boolean[] templates = {true, true, false, false};
-        int numOfQueries = 552;
+        int numOfQueries = 3940;
         String querier;
         List<QueryStatement> queries = cqg.constructWorkload(templates, numOfQueries);
         for (QueryStatement query : queries) {

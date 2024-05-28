@@ -1,9 +1,11 @@
 package edu.uci.ics.tippers.execution.experiments.performance;
 
 import edu.uci.ics.tippers.caching.CachingAlgorithm;
+import edu.uci.ics.tippers.caching.workload.CUserGen;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.dbms.QueryManager;
 import edu.uci.ics.tippers.dbms.QueryResult;
+import edu.uci.ics.tippers.dbms.mysql.MySQLConnectionManager;
 import edu.uci.ics.tippers.fileop.Writer;
 import edu.uci.ics.tippers.generation.policy.WiFiDataSet.PolicyUtil;
 import edu.uci.ics.tippers.generation.query.QueryExplainer;
@@ -18,6 +20,10 @@ import edu.uci.ics.tippers.model.query.QueryStatement;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
@@ -47,9 +53,12 @@ public class QueryPerformance {
 
     private static int NUM_OF_REPS;
 
+    private Connection connection;
+
     private static String RESULTS_FILE;
 
     public QueryPerformance() {
+        connection = MySQLConnectionManager.getInstance().getConnection();
         PolicyConstants.initialize();
         polper = PolicyPersistor.getInstance();
         queryExplainer = new QueryExplainer();
@@ -80,12 +89,12 @@ public class QueryPerformance {
         }
     }
 
-    private String runBEPolicies(String querier, QueryStatement queryStatement, List<BEPolicy> bePolicies) {
+    public String runBEPolicies(String querier, QueryStatement queryStatement, List<BEPolicy> bePolicies) {
 
         BEExpression beExpression = new BEExpression(bePolicies);
         StringBuilder resultString = new StringBuilder();
         resultString.append(querier).append(",")
-                .append(userProfile(Integer.parseInt(querier))).append(",")
+//                .append(userProfile(Integer.parseInt(querier))).append(",")
                 .append(queryStatement.getTemplate()).append(",")
                 .append(queryStatement.getSelectivity()).append(",")
                 .append(bePolicies.size()).append(",");
@@ -283,7 +292,7 @@ public class QueryPerformance {
         double querySel = qe.estimateSelectivity(queryStatement);
         StringBuilder resultString = new StringBuilder();
         resultString.append(querier).append(",")
-                .append(userProfile(Integer.parseInt(querier))).append(",")
+//                .append(userProfile(Integer.parseInt(querier))).append(",")
                 .append(queryStatement.getTemplate()).append(",");
 
 //        double querySel = qe.estimateSelectivity(queryStatement);
@@ -303,19 +312,19 @@ public class QueryPerformance {
              *  based on the ratio of querySel/guardTotalCard. In template 3
              *  because of the join, this ratio is a much smaller number.
              */
-//            boolean indexGuards = querySel > 0.5 * guardTotalCard;
-//            if(queryStatement.getTemplate() == 3) {
-//                indexGuards = querySel > 0.01 *guardTotalCard;
-//            }
-//            if (indexGuards || query_hint == null) { //Use Guards
-//                if(queryStatement.getTemplate() == 3){
-//                    sieve_query = guardQuery + queryStatement.getQuery().replace("PRESENCE", "polEval");
-//                }
-//                else
-//                    sieve_query = guardQuery + "Select * from polEval where " + queryStatement.getQuery();
-//                resultString.append("Guard Index").append(",");
-//            }
-//            else { //Use queries
+            boolean indexGuards = querySel > 0.5 * guardTotalCard;
+            if(queryStatement.getTemplate() == 3) {
+                indexGuards = querySel > 0.01 *guardTotalCard;
+            }
+            if (indexGuards || query_hint == null) { //Use Guards
+                if(queryStatement.getTemplate() == 3){
+                    sieve_query = guardQuery + queryStatement.getQuery().replace("PRESENCE", "polEval");
+                }
+                else
+                    sieve_query = guardQuery + "Select * from polEval where " + queryStatement.getQuery();
+                resultString.append("Guard Index").append(",");
+            }
+            else { //Use queries
                 if(queryStatement.getTemplate() == 3) {
                     String query_index = queryStatement.getQuery().replace("from PRESENCE", "from PRESENCE force index("
                             + query_hint +")" );
@@ -325,7 +334,7 @@ public class QueryPerformance {
                     sieve_query = "SELECT * from ( SELECT * from PRESENCE force index(" + query_hint
                             + ") where " + queryStatement.getQuery() + " ) as P where " + guardExp.createQueryWithOR();
                 resultString.append("Query Index").append(",");
-//            }
+            }
             QueryResult execResult = queryManager.runTimedQueryExp(sieve_query, NUM_OF_REPS);
             execTime = execTime.plus(execResult.getTimeTaken());
             resultString.append(execTime.toMillis());
@@ -402,13 +411,41 @@ public class QueryPerformance {
 //        }
 //    }
 
+    public List<CUserGen.User> retrieveQuerier() {
+        List<CUserGen.User> users = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group FROM app_user " +
+                    "WHERE user_profile IN ('faculty') and " +
+                    "user_group NOT IN ('3143-clwa-3019', '3146-clwa-6122', '3143-clwa-3065', '3146-clwa-6219')");
+            int count = 0;
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String userId = resultSet.getString("user_id");
+                String userProfile = resultSet.getString("user_profile");
+                String userGroup = resultSet.getString("user_group");
+                CUserGen.User user = new CUserGen.User(id, userId, userProfile, userGroup);
+                users.add(user);
+                count++;
+                System.out.println("Entry #" + count + ": " + user);
+            }
+            System.out.println("Total number of entries: " + count);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
     public String runExperiment(QueryStatement query) {
         QueryPerformance e = new QueryPerformance();
 
-        List<Integer> faculty = new ArrayList<>(Arrays.asList(177,4167,4702,5654,5674,5706,7016,9189,12148,13708,14996,15486
-                ,16607,16662,18131,19421,19782,20845,23203,24802,26171,29514,30088,30743,31086,32818,33049,34380));
+        List<CUserGen.User> faculties = e.retrieveQuerier();
+
         List<Integer> users = new ArrayList<>();
-        users.addAll(faculty);
+
+        for(CUserGen.User faculty : faculties){
+            users.add(faculty.getId());
+        }
 
         Random random = new Random();
 
@@ -420,7 +457,6 @@ public class QueryPerformance {
             if (allowPolicies == null) continue;
             else {
                 System.out.println("Querier " + querier);
-                System.out.println(e.runBEPolicies(querier,query,allowPolicies));
                 return querier;
             }
         }

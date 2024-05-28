@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.caching;
 
 import java.sql.Connection;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -9,6 +10,7 @@ import java.util.*;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.dbms.mysql.MySQLConnectionManager;
 import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
+import edu.uci.ics.tippers.fileop.Writer;
 import edu.uci.ics.tippers.generation.policy.WiFiDataSet.PolicyUtil;
 import edu.uci.ics.tippers.model.guard.SelectGuard;
 import edu.uci.ics.tippers.model.policy.BEExpression;
@@ -27,8 +29,10 @@ public class CachingAlgorithm <C,Q> {
     PolicyPersistor polper;
     GuardPersistor guardPersistor;
     PolicyUtil pg;
-
     QueryPerformance e;
+    Writer writer;
+    StringBuilder result;
+    String fileName;
 
     public CachingAlgorithm(){
         connection = MySQLConnectionManager.getInstance().getConnection();
@@ -36,38 +40,54 @@ public class CachingAlgorithm <C,Q> {
         polper = PolicyPersistor.getInstance();
         pg = new PolicyUtil();
         this.guardPersistor = new GuardPersistor();
-        QueryPerformance e = new QueryPerformance();
+        e = new QueryPerformance();
+        writer = new Writer();
+        result = new StringBuilder();
+        fileName = "caching.csv";
+        result.append("Querier"). append(",")
+                .append("Cache log").append(",")
+                .append("Flag").append(",");
+        writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
     }
 
-    public void runAlgorithm(ClockHashMap<String, GuardExp> clockHashMap, String querier, QueryStatement query, Timestamp timestampGlobal) {
+    public void runAlgorithm(ClockHashMap<String, GuardExp> clockHashMap, String querier, QueryStatement query, CircularHashMap<String,Timestamp> timestampDirectory) {
 
         // Implementation of the Guard Caching Algorithm
         int index;
+
+        GuardExp newGE = new GuardExp();
+
+        boolean first = true;
+
         if(clockHashMap.size == 0){
             index = 0;
         }else{
             index = clockHashMap.getIndex(querier);
         }
 
-        List<BEPolicy> newPolicies = null;
-
         if (index != 0) {
             GuardExp guardExp = clockHashMap.get(querier);
-            Timestamp timestamp = guardExp.getLast_updated();
+            Timestamp timestampGE = guardExp.getLast_updated();
 
-            boolean t = timestampGlobal.equals(timestamp);
-            if (t) {
+            Timestamp lastestTimestamp = timestampDirectory.get(querier);
+            if (lastestTimestamp.before(timestampGE)) {
                 clockHashMap.update(querier);
-                String result = e.runGE(querier, query, guardExp);
-                return;
+                String answer = e.runGE(querier, query, guardExp);
+                System.out.println(answer);
+                result.append(querier).append(",")
+                        .append("hit").append(",")
+                        .append(1).append("\n");
+                writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
+                newGE = guardExp;
+//                timestampDirectory.put(querier,newGE.getLast_updated());
 //            } else {
 //                // Fetch policies that have timestamp greater than the GE stored
 //                newPolicies = fetchNewPolicies(querier, timestampGlobal);
 //
-//                // Implement CASE 1 and CASE 2
 //                // costMethod1 and costMethod2 calculation
 //                int cost1 = costMethod1();
+//                // Implement CASE 1 and CASE 2
 //                int cost2 = costMethod2();
 //
 //                if (cost1 > cost2) {
@@ -82,17 +102,38 @@ public class CachingAlgorithm <C,Q> {
 //                    return;
 //                }
 //            }
+            }else{
+                newGE = SieveGG(querier, query);
+                clockHashMap.put(querier, newGE);
+                result.append(querier).append(",")
+                        .append("soft-hit").append(",")
+                        .append(2).append("\n");
+                writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
+
             }
         }else{
         // If querier not found or no matching GE, create a new one
-            GuardExp newGE = SieveGG(querier);
+            newGE = SieveGG(querier, query);
             if (newGE == null){
                 return;
             }else {
                 clockHashMap.put(querier, newGE);
-                return;
+                result.append(querier).append(",")
+                        .append("miss").append(",")
+                        .append(0).append("\n");
+                writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
             }
         }
+
+        // Writing results to file
+        if (!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
+        else first = false;
+
+        // Clearing StringBuilder for the next iteration
+        result.setLength(0);
+
+        return;
+
     }
 //    private int costMethod1(){
 //        int a;
@@ -102,7 +143,8 @@ public class CachingAlgorithm <C,Q> {
 //        int b;
 //    }
 
-    public GuardExp SieveGG (String querier){
+    public GuardExp SieveGG (String querier, QueryStatement query){
+        QueryPerformance e = new QueryPerformance();
         List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
                     PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
 
@@ -121,6 +163,8 @@ public class CachingAlgorithm <C,Q> {
         System.out.println("Guard Generation time: " + guardGen + " Number of Guards: " + gh.numberOfGuards());
 
         guardPersistor.insertGuard(gh.create(String.valueOf(querier), "user"));
+
+        System.out.println(e.runBEPolicies(querier,query,allowPolicies));
 
         return gh.create(String.valueOf(querier), "user");
     }
@@ -147,6 +191,6 @@ public class CachingAlgorithm <C,Q> {
         QueryStatement query = new QueryStatement();
         CachingAlgorithm ca = new CachingAlgorithm();
         String querier = null;
-        ca.runAlgorithm(clockHashMap, querier, query, timestampGlobal);
+//        ca.runAlgorithm(clockHashMap, querier, query, timestampGlobal);
     }
 }

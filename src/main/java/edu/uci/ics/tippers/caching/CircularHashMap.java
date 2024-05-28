@@ -1,5 +1,7 @@
 package edu.uci.ics.tippers.caching;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Arrays;
 
 public class CircularHashMap<K, V> {
@@ -69,18 +71,17 @@ public class CircularHashMap<K, V> {
     }
 
     public static void main(String[] args) {
-        CircularHashMap<String, Integer> circularHashMap = new CircularHashMap<>(3);
+        CircularHashMap<String, Timestamp> circularHashMap = new CircularHashMap<>(3);
 
-        circularHashMap.put("One", 1);
-        circularHashMap.put("Two", 2);
-        circularHashMap.put("Three", 3);
+        long millis = Instant.now().toEpochMilli();
+        circularHashMap.put("One", new Timestamp(millis));
+        circularHashMap.put("Two", new Timestamp(millis+2));
+        circularHashMap.put("Three", new Timestamp(millis+3));
 
         System.out.println(circularHashMap); // Output: CircularHashMap{keys=[Three, Two, One], values=[3, 2, 1]}
 
-        circularHashMap.put("Four", 4);
+        circularHashMap.put("Four", new Timestamp(millis+4));
 
         System.out.println(circularHashMap); // Output: CircularHashMap{keys=[Four, Two, One], values=[4, 2, 1]}
-
-        System.out.println("Value for key 'Two': " + circularHashMap.get("Two")); // Output: Value for key 'Two': 2
     }
 }

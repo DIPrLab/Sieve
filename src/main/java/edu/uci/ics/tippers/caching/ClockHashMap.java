@@ -24,7 +24,13 @@ public class ClockHashMap<K, V> {
     }
 
     public int getIndex(K key) {
-        return Math.abs(key.hashCode()) % capacity;
+        for (int i = 0; i < size; i++) {
+            Entry<K, V> entry = entries[i];
+            if (entry.key.equals(key)) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     public void put(K key, V value) {

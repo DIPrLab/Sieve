@@ -43,6 +43,8 @@ public class TPCHQueryGeneration extends QueryGen {
 
     public List<QueryStatement> createQuery3(int numOfQueries){return null;};
 
+    public List<QueryStatement> createQuery4(int numOfQueries){return null;};
+
     /**
      * Select * from ORDERS where O_CLERK in [......]
      * and O_ORDERDATE >= d1 and O_ORDERDATE <= d2
@@ -153,8 +155,8 @@ public class TPCHQueryGeneration extends QueryGen {
         return null;
     }
 
-    @Override
     public List<QueryStatement> createQuery4() {
         return null;
     }
+
 }

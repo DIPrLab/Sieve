@@ -427,9 +427,9 @@ public class QueryPerformance {
                 CUserGen.User user = new CUserGen.User(id, userId, userProfile, userGroup);
                 users.add(user);
                 count++;
-                System.out.println("Entry #" + count + ": " + user);
+//                System.out.println("Entry #" + count + ": " + user);
             }
-            System.out.println("Total number of entries: " + count);
+//            System.out.println("Total number of entries: " + count);
         } catch (SQLException e) {
             e.printStackTrace();
         }

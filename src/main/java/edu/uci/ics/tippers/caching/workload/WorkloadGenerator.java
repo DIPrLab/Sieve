@@ -15,6 +15,7 @@ import edu.uci.ics.tippers.model.query.QueryStatement;
 import edu.uci.ics.tippers.persistor.PolicyPersistor;
 
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -50,7 +51,7 @@ public class WorkloadGenerator {
         clockMap = new ClockHashMap<>(3);
     }
 
-    public void generateWorkload(int n, List<BEPolicy> policies, List<QueryStatement> queries) {
+    public Duration generateWorkload(int n, List<BEPolicy> policies, List<QueryStatement> queries) {
         int currentTime = 0;
         int nextRegularPolicyInsertionTime = 0;
         int sizeOfPolicies = policies.size();
@@ -75,6 +76,7 @@ public class WorkloadGenerator {
                 .append("[Variable Interval= ").append(dynamicIntervalStart).append(",").append(dynamicIntervalStart+duration).append("]").append("\n");
         writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
+        Instant fsStart = Instant.now();
 
         while (!policies.isEmpty() && !queries.isEmpty()) {
 
@@ -147,6 +149,9 @@ public class WorkloadGenerator {
             currentTime++;
 
         }
+        Instant fsEnd = Instant.now();
+        Duration totalRunTime = Duration.between(fsStart, fsEnd);
+        return totalRunTime;
     }
 
     private List<BEPolicy> extractPolicies(List<BEPolicy> policies, int n) {
@@ -204,7 +209,8 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 2; // Example number of policies/queries to generate each interval
-        generator.generateWorkload(numPoliciesQueries, policies, queries);
+        int numPoliciesQueries = 10; // Example number of policies/queries to generate each interval
+        Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
+        System.out.println("Total Run Time: " + totalRunTime);
     }
 }

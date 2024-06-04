@@ -135,7 +135,8 @@ public class CPolicyGen {
         for (CUserGen.User user: users){
 
             System.out.println("User ID: " + user.getUserId() + ", User Profile: " + user.getUserProfile());
-            int numPolicies = 100;
+            //For each user policies are defined
+            int numPolicies = 1;
             for (int i = 0; i < numPolicies; i++) {
                 if (i<numPolicies){
                     if(user.getUserProfile().equals("faculty")){

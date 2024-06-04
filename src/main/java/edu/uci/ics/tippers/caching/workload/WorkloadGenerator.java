@@ -1,5 +1,7 @@
 package edu.uci.ics.tippers.caching.workload;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -10,7 +12,9 @@ import edu.uci.ics.tippers.model.policy.BEPolicy;
 import edu.uci.ics.tippers.model.policy.*;
 import edu.uci.ics.tippers.caching.workload.*;
 import edu.uci.ics.tippers.model.query.QueryStatement;
+import edu.uci.ics.tippers.persistor.PolicyPersistor;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,8 +31,18 @@ public class WorkloadGenerator {
     }
 
     public void generateWorkload(int n, List<BEPolicy> policies, List<QueryStatement> queries) {
+        //only Persisting BEPolicy to json file
+        // Create an ObjectMapper instance for JSON serialization
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            objectMapper.writeValue(new File(PolicyConstants.EXP_RESULTS_DIR + "policies.json"), policies);
+            System.out.println("***** JSON File Successfully Written ***** ");
+        } catch (IOException e) {
+            System.out.println("***** ERROR ********** JSON File Not Written ***** ");
+            e.printStackTrace();
+        }
 
-        // Creating a Gson object for JSON serialization
+       /* // Creating a Gson object for JSON serialization
         Gson gson = new Gson();
 
       //Name of the output JSON file
@@ -75,6 +89,31 @@ public class WorkloadGenerator {
             gson.toJson(workloadJson, writer);
         } catch (IOException e) {
             e.printStackTrace();
+        }*/
+    }
+
+    private static List<BEPolicy> readBEPolicyFromJson(ObjectMapper objectMapper) {
+        List<BEPolicy> localPolicies = new ArrayList<>();
+        try {
+            localPolicies = objectMapper.readValue(new File(PolicyConstants.EXP_RESULTS_DIR + "policies.json"), new TypeReference<List<BEPolicy>>() {});
+        } catch (IOException e) {
+            System.out.println("***** Error Parsing json BEPolicies ***** ");
+            e.printStackTrace();
+        }
+        return localPolicies;
+    }
+
+    private void persistBEPoliciesFromJsonToDatabase() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<BEPolicy> localPolicies = readBEPolicyFromJson(objectMapper);
+        System.out.println("JsonPolicies count: " + localPolicies.size());
+        PolicyPersistor polper = PolicyPersistor.getInstance();
+        try {
+            polper.insertPolicy(localPolicies);
+            System.out.println("***** Successfully inserted JSON policies into the database. ***** ");
+        } catch (Exception e) {
+            System.out.println("***** Failed to insert JSON policies into the database. ***** ");
+            e.printStackTrace();
         }
     }
     private List<BEPolicy> extractPolicies(List<BEPolicy> policies, int n) {
@@ -102,10 +141,10 @@ public class WorkloadGenerator {
 
         List<BEPolicy> policies = cpg.generatePolicies(users);
 
-        for (BEPolicy policy : policies) {
-            System.out.println(policy.toString());
-        }
-        System.out.println();
+//        for (BEPolicy policy : policies) {
+//            System.out.println(policy.toString());
+//        }
+//        System.out.println();
 
         CQueryGen cqg = new CQueryGen();
         boolean[] templates = {true, true, true, true};
@@ -121,5 +160,11 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval);
         int numPoliciesQueries = 1; // Example number of policies/queries to generate each interval
         generator.generateWorkload(numPoliciesQueries, policies, queries);
+
+        //testing json BEpoilices to database
+        generator.persistBEPoliciesFromJsonToDatabase();
+
     }
+
+
 }

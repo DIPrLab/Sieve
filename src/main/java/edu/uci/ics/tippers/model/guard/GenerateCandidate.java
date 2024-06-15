@@ -26,6 +26,12 @@ public class GenerateCandidate {
         constructMaps(inputExp);
     }
 
+    public GenerateCandidate(){
+        oMap = new HashMap<>();
+        aMap = new HashMap<>();
+        RangeDataSetAttributes = null;
+    }
+
     private void constructMaps(BEExpression inputExp) {
         for (int i = 0; i < inputExp.getPolicies().size(); i++) {
             BEPolicy pol = inputExp.getPolicies().get(i);
@@ -48,7 +54,7 @@ public class GenerateCandidate {
      * @param pBar
      * @return
      */
-    private boolean shouldIMerge(ObjectCondition oc1, ObjectCondition oc2, BEPolicy pBar) {
+    public boolean mergeability(ObjectCondition oc1, ObjectCondition oc2, BEPolicy pBar) {
         ObjectCondition intersect = oc1.intersect(oc2);
         ObjectCondition union = oc1.union(oc2);
         double lhs = intersect.computeL() / union.computeL();
@@ -62,7 +68,7 @@ public class GenerateCandidate {
         ObjectCondition subMerged = null;
         BEPolicy beM =  oMap.get(oc1).getObject_conditions().size() > oMap.get(oc2).getObject_conditions().size()?
                 new BEPolicy(oMap.get(oc1)): new BEPolicy(oMap.get(oc2));
-        if(shouldIMerge(oc1, oc2, beM)) subMerged = oc1.union(oc2);
+        if(mergeability(oc1, oc2, beM)) subMerged = oc1.union(oc2);
         return subMerged;
     }
 

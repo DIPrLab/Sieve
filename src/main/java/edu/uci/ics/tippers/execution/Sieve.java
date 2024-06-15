@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.execution;
 
+import edu.uci.ics.tippers.caching.costmodel.CMWorkoad;
 import edu.uci.ics.tippers.caching.workload.CPolicyGen;
 import edu.uci.ics.tippers.caching.workload.CUserGen;
 import edu.uci.ics.tippers.caching.workload.WorkloadGenerator;
@@ -48,7 +49,6 @@ public class Sieve {
 //
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
         generator.runExperiment();
-
 
 //        if(QUERY_PERFORMANCE_EXP) {
 //            if(PolicyConstants.DBMS_CHOICE.equalsIgnoreCase(PolicyConstants.PGSQL_DBMS))

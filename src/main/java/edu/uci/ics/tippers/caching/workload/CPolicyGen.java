@@ -181,7 +181,7 @@ public class CPolicyGen {
                         policies.add(policy);
 
                     }
-                    if(user.getUserProfile().equals("undergrad") && !user.getUserGroup().equals("3146-clwa-6122")){
+                    if(user.getUserProfile().equals("undergrad")){
                         List<Integer> possibleQueriers = new ArrayList<>();
                         for (CUserGen.User u : users) {
                             if (u.getUserProfile().equals("faculty") && user.getUserGroup().equals(u.getUserGroup())) {

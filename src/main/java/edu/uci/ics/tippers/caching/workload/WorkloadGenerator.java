@@ -3,6 +3,8 @@ package edu.uci.ics.tippers.caching.workload;
 import edu.uci.ics.tippers.caching.CachingAlgorithm;
 import edu.uci.ics.tippers.caching.CircularHashMap;
 import edu.uci.ics.tippers.caching.ClockHashMap;
+import edu.uci.ics.tippers.caching.costmodel.CMWorkoad;
+import edu.uci.ics.tippers.caching.costmodel.CostModelsExp;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
 import edu.uci.ics.tippers.fileop.Writer;
@@ -29,6 +31,7 @@ public class WorkloadGenerator {
     PolicyPersistor polper;
     QueryPerformance e;
     CachingAlgorithm ca;
+    CostModelsExp cme;
     ClockHashMap<String, GuardExp> clockMap;
 
     public WorkloadGenerator(int regularInterval, int dynamicIntervalStart, int duration) {
@@ -38,6 +41,7 @@ public class WorkloadGenerator {
         polper = PolicyPersistor.getInstance();
         e = new QueryPerformance();
         ca = new CachingAlgorithm();
+        cme = new CostModelsExp();
         clockMap = new ClockHashMap<>();
     }
 
@@ -48,6 +52,7 @@ public class WorkloadGenerator {
         polper = PolicyPersistor.getInstance();
         e = new QueryPerformance();
         ca = new CachingAlgorithm();
+        cme = new CostModelsExp();
         clockMap = new ClockHashMap<>(3);
     }
 
@@ -58,15 +63,21 @@ public class WorkloadGenerator {
         int dynamicPolicySize = (int) Math.floor(sizeOfPolicies/3);
         int windowSize = 10;
         int generatedQueries = 0;
+        boolean cachingFlag = true;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 //        System.out.println(dynamicPolicySize);
+
+        QueryStatement query = new QueryStatement();
+        Random random = new Random();
+        int batchSize = 2;
+        List<QueryStatement> batchQueries = new ArrayList<>();
 
         CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(400);
         ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(400);
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "workload_sample.txt";
+        String fileName = "redo_S5P1Q_M.txt";
 
         boolean first = true;
 
@@ -78,27 +89,12 @@ public class WorkloadGenerator {
 
         Instant fsStart = Instant.now();
 
-        while (!policies.isEmpty() && !queries.isEmpty()) {
+//        while (!policies.isEmpty() && !queries.isEmpty()) {
 
-
-            /*if (currentTime >= dynamicIntervalStart && currentTime <= (dynamicIntervalStart+duration)) {
-                // Generate dynamic policies and write them to file
-
-                while (dynamicPolicySize > 0){
-                    Random random = new Random();
-                    int noOfPolices = random.nextInt(dynamicPolicySize)+1;
-                    List<BEPolicy> dynamicPolicies = extractPolicies(policies, noOfPolices);
-                    for(BEPolicy policy: dynamicPolicies){
-                        result.append(currentTime).append(",")
-                                .append(policy.toString()).append("\n");
-                    }
-
-                    polper.insertPolicy(dynamicPolicies);
-                    dynamicPolicySize -= noOfPolices;
-                }
-            } else*/ if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
-                // Generate regular policies and write them to file
-//                if (currentTime != dynamicIntervalStart && currentTime >= (dynamicIntervalStart+duration)){
+        if(cachingFlag){
+            System.out.println("!!!Regen Vs Update!!!");
+            while (generatedQueries < 788 && !policies.isEmpty()) {
+                if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
 
                     //Insert policy into database
@@ -108,47 +104,199 @@ public class WorkloadGenerator {
                         Instant pinsert = Instant.now();
                         Timestamp policyinsertionTime = Timestamp.from(pinsert);
                         timestampDirectory.put(policy.fetchQuerier(),policyinsertionTime);
+                        policy.setInserted_at(policyinsertionTime);
                     }
                     nextRegularPolicyInsertionTime += regularInterval;
 
                     polper.insertPolicy(regularPolicies);
-
-//                }
-            }
-
-            // Generate queries and write them to file
-            // Sliding window to store last 10 queries
-            QueryStatement query = new QueryStatement();
-            Random random = new Random();
-            if (generatedQueries % 2 == 0){
-                if(queryWindow.size() < windowSize){
-                    queryWindow.add(queries.remove(0));
-                }else{
-                    queryWindow.removeFirst();
-                    queryWindow.add(queries.remove(0));
                 }
-                query = queryWindow.getLast();
-            }else{
-                int index = random.nextInt(queryWindow.size());
-                query = queryWindow.get(index);
+
+
+                // Bursty State
+/*                if(generatedQueries <=4000){
+                    if (generatedQueries % 2 == 0){
+                        if(queryWindow.size() < windowSize){
+                            queryWindow.add(queries.remove(0));
+                        }else{
+                            queryWindow.removeFirst();
+                            queryWindow.add(queries.remove(0));
+                        }
+                        query = queryWindow.getLast();
+                    }else{
+                        int index = random.nextInt(queryWindow.size());
+                        query = queryWindow.get(index);
+                    }
+                    generatedQueries++;
+                    result.append(currentTime).append(",")
+                            .append(query.toString()).append("\n");
+                    String querier = e.runExperiment(query);
+//                    ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                }else{*/
+//                    int queriesToGenerate = Math.min(batchSize, queries.size());
+//                    for(int i = 0; i < queriesToGenerate; i++){
+//                        if (generatedQueries % 2 == 0){
+//                            if(queryWindow.size() < windowSize){
+//                                queryWindow.add(queries.remove(0));
+//                            }else{
+//                                queryWindow.removeFirst();
+//                                queryWindow.add(queries.remove(0));
+//                            }
+//                            query = queryWindow.getLast();
+//                        }else{
+//                            int index = random.nextInt(queryWindow.size());
+//                            query = queryWindow.get(index);
+//                        }
+//                        generatedQueries++;
+//                        batchQueries.add(query);
+//                    }
+//
+//                    if (!batchQueries.isEmpty()) {
+//                        for (QueryStatement q : batchQueries) {
+//                            result.append(currentTime).append(",")
+//                                    .append(q.toString()).append("\n");
+//                            String querier = e.runExperiment(q);
+//                            ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//                        }
+//                        batchQueries.clear(); // Clear the batch list for the next set of queries
+//                    }
+//                }
+
+//                Steady State
+                if (generatedQueries % 2 == 0){
+                    if(queryWindow.size() < windowSize){
+                        queryWindow.add(queries.remove(0));
+                    }else{
+                        queryWindow.removeFirst();
+                        queryWindow.add(queries.remove(0));
+                    }
+                    query = queryWindow.getLast();
+                }else{
+                    int index = random.nextInt(queryWindow.size());
+                    query = queryWindow.get(index);
+                }
+                generatedQueries++;
+                result.append(currentTime).append(",")
+                        .append(query.toString()).append("\n");
+                String querier = e.runExperiment(query);
+//               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+
+
+                // Writing results to file
+                if (!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
+                else first = false;
+
+                // Clearing StringBuilder for the next iteration
+                result.setLength(0);
+
+                currentTime++;
+
             }
-            generatedQueries++;
-            result.append(currentTime).append(",")
-                    .append(query.toString()).append("\n");
-            String querier = e.runExperiment(query);
-           ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+        }else{
+            System.out.println("!!! Without Caching!!!");
+            while (!policies.isEmpty() && !queries.isEmpty()) {
+//                if (generatedQueries <= 2000) n = 10;
+//                else if (generatedQueries <= 4000) n = 5;
+//                else n = 1;
+
+                if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
+                    // Generate regular policies and write them to file
+                    List<BEPolicy> regularPolicies = extractPolicies(policies, n);
+
+                    //Insert policy into database
+                    for(BEPolicy policy: regularPolicies){
+                        result.append(currentTime).append(",")
+                                .append(policy.toString()).append("\n");
+                        Instant pinsert = Instant.now();
+                        Timestamp policyinsertionTime = Timestamp.from(pinsert);
+                    }
+                    nextRegularPolicyInsertionTime += regularInterval;
+
+                    polper.insertPolicy(regularPolicies);
+                }
 
 
-            // Writing results to file
-            if (!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
-            else first = false;
+//                // Bursty State
+//                if(generatedQueries <=4000){
+//                    if (generatedQueries % 2 == 0){
+//                        if(queryWindow.size() < windowSize){
+//                            queryWindow.add(queries.remove(0));
+//                        }else{
+//                            queryWindow.removeFirst();
+//                            queryWindow.add(queries.remove(0));
+//                        }
+//                        query = queryWindow.getLast();
+//                    }else{
+//                        int index = random.nextInt(queryWindow.size());
+//                        query = queryWindow.get(index);
+//                    }
+//                    generatedQueries++;
+//                    result.append(currentTime).append(",")
+//                            .append(query.toString()).append("\n");
+//                    String querier = e.runExperiment(query);
+//                    ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//                }else{
+//                    int queriesToGenerate = Math.min(batchSize, queries.size());
+//                    for(int i = 0; i < queriesToGenerate; i++){
+//                        if (generatedQueries % 2 == 0){
+//                            if(queryWindow.size() < windowSize){
+//                                queryWindow.add(queries.remove(0));
+//                            }else{
+//                                queryWindow.removeFirst();
+//                                queryWindow.add(queries.remove(0));
+//                            }
+//                            query = queryWindow.getLast();
+//                        }else{
+//                            int index = random.nextInt(queryWindow.size());
+//                            query = queryWindow.get(index);
+//                        }
+//                        generatedQueries++;
+//                        batchQueries.add(query);
+//                    }
+//
+//                    if (!batchQueries.isEmpty()) {
+//                        for (QueryStatement q : batchQueries) {
+//                            result.append(currentTime).append(",")
+//                                    .append(q.toString()).append("\n");
+//                            String querier = e.runExperiment(q);
+//                            ca.runAlgorithm(clockHashMap, querier, q, timestampDirectory);
+//                        }
+//                        batchQueries.clear(); // Clear the batch list for the next set of queries
+//                    }
+//                }
 
-            // Clearing StringBuilder for the next iteration
-            result.setLength(0);
+//                Steady State
+                if (generatedQueries % 2 == 0){
+                    if(queryWindow.size() < windowSize){
+                        queryWindow.add(queries.remove(0));
+                    }else{
+                        queryWindow.removeFirst();
+                        queryWindow.add(queries.remove(0));
+                    }
+                    query = queryWindow.getLast();
+                }else{
+                    int index = random.nextInt(queryWindow.size());
+                    query = queryWindow.get(index);
+                }
+                generatedQueries++;
+                result.append(currentTime).append(",")
+                        .append(query.toString()).append("\n");
+                String querier = e.runExperiment(query);
+                GuardExp GE = ca.SieveGG(querier, query);
+                System.out.println(GE);
 
-            currentTime++;
+                // Writing results to file
+                if (!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
+                else first = false;
 
+                // Clearing StringBuilder for the next iteration
+                result.setLength(0);
+
+                currentTime++;
+
+            }
         }
+
         Instant fsEnd = Instant.now();
         Duration totalRunTime = Duration.between(fsStart, fsEnd);
         return totalRunTime;
@@ -160,19 +308,6 @@ public class WorkloadGenerator {
             extractedPolicies.add(policies.remove(0)); // Remove and add the first policy from the list
         }
         return extractedPolicies;
-    }
-//
-    private List<QueryStatement> generateQueries(List<QueryStatement> queries, int queriesGenerated) {
-        // Query generation logic here
-        List<QueryStatement> extractedQueries = new ArrayList<>();
-        LinkedList<QueryStatement> queryWindow = new LinkedList<>(); // Sliding window to store last 10 queries
-
-        Random random = new Random();
-        int totalQueries = queries.size();
-
-
-
-        return extractedQueries;
     }
 
     public void runExperiment() {
@@ -209,7 +344,7 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 10; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 5; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
     }

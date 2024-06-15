@@ -43,7 +43,7 @@ public class CachingAlgorithm <C,Q> {
         e = new QueryPerformance();
         writer = new Writer();
         result = new StringBuilder();
-        fileName = "caching S10P1R.csv";
+        fileName = "demo.csv";
         result.append("Querier"). append(",")
                 .append("Cache log").append(",")
                 .append("Flag").append(",");
@@ -61,12 +61,12 @@ public class CachingAlgorithm <C,Q> {
         boolean first = true;
 
         if(clockHashMap.size == 0){
-            index = 0;
+            index = -1;
         }else{
             index = clockHashMap.getIndex(querier);
         }
 
-        if (index != 0) {
+        if (index >= 0) {
             GuardExp guardExp = clockHashMap.get(querier);
             Timestamp timestampGE = guardExp.getLast_updated();
 

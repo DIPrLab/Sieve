@@ -342,6 +342,4 @@ public class GuardExp {
         queryExp.append(")");
         return queryExp.toString();
     }
-
-
 }

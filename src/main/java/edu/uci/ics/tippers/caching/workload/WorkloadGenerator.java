@@ -77,7 +77,7 @@ public class WorkloadGenerator {
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "redo_S5P1Q_M.txt";
+        String fileName = "gcp_replacement_S20P1Q.txt";
 
         boolean first = true;
 
@@ -93,7 +93,7 @@ public class WorkloadGenerator {
 
         if(cachingFlag){
             System.out.println("!!!Regen Vs Update!!!");
-            while (generatedQueries < 788 && !policies.isEmpty()) {
+            while (!queries.isEmpty() && !policies.isEmpty()) {
                 if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
 
@@ -344,7 +344,7 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 5; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 20; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
     }

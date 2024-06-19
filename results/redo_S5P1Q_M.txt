@@ -1,0 +1,9 @@
+No. of policies= 0
+No. of queries= 18
+Interleaving Techniques= [Constant Interval= 1][Variable Interval= 0,0]
+No. of policies= 0
+No. of queries= 18
+Interleaving Techniques= [Constant Interval= 1][Variable Interval= 0,0]
+No. of policies= 0
+No. of queries= 0
+Interleaving Techniques= [Constant Interval= 1][Variable Interval= 0,0]

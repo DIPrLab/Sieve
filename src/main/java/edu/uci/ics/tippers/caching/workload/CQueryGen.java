@@ -178,7 +178,7 @@ public class CQueryGen extends QueryGen {
 
     public List<QueryStatement> createQuery3(List<String> selTypes, int numOfQueries){return null;};
 
-    public static void main(String[] args) {
+    public void runExperiment() {
         CQueryGen cqg = new CQueryGen();
         QueryPerformance e = new QueryPerformance();
         boolean[] templates = {true, true, false, false};

@@ -17,7 +17,7 @@ public class CUserGen {
         try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group FROM sieve.APP_USER WHERE user_profile IN ('graduate', 'undergrad', 'faculty') and user_group NOT IN ('3143-clwa-3019', '3146-clwa-6122', '3143-clwa-3065', '3146-clwa-6219')");
-            int count = 0;
+//            int count = 0;
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String userId = resultSet.getString("user_id");
@@ -25,10 +25,10 @@ public class CUserGen {
                 String userGroup = resultSet.getString("user_group");
                 User user = new User(id, userId, userProfile, userGroup);
                 users.add(user);
-                count++;
-                System.out.println("Entry #" + count + ": " + user);
+//                count++;
+//                System.out.println("Entry #" + count + ": " + user);
             }
-            System.out.println("Total number of entries: " + count);
+//            System.out.println("Total number of entries: " + count);
         } catch (SQLException e) {
             e.printStackTrace();
         }

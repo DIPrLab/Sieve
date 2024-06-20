@@ -42,10 +42,10 @@ public class SelectGuard {
             pm.extend();
         }
         this.canFactors = collectAllFactors(this.input.getRemainder());
-        System.out.println("Initial number of terms: " + initialNumberOfTerms);
+//        System.out.println("Initial number of terms: " + initialNumberOfTerms);
         selectGuards();
         int finalNumberOfTerms = numberOfGuards();
-        System.out.println("Final number of terms: " + finalNumberOfTerms);
+//        System.out.println("Final number of terms: " + finalNumberOfTerms);
     }
 
     public int numberOfGuards(){

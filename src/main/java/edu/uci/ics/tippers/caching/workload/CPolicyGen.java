@@ -134,7 +134,7 @@ public class CPolicyGen {
         List<BEPolicy> policies = new ArrayList<>();
         for (CUserGen.User user: users){
 
-            System.out.println("User ID: " + user.getId() + ", User Profile: " + user.getUserProfile());
+//            System.out.println("User ID: " + user.getId() + ", User Profile: " + user.getUserProfile());
             int numPolicies = 10;
             for (int i = 0; i < numPolicies; i++) {
                 if (i<numPolicies){
@@ -208,10 +208,10 @@ public class CPolicyGen {
                 }
             }
         }
-        for (BEPolicy policy : policies) {
-            System.out.println(policy.toString());
-        }
-        System.out.println();
+//        for (BEPolicy policy : policies) {
+//            System.out.println(policy.toString());
+//        }
+//        System.out.println();
 //        polper.insertPolicy(policies);
         return policies;
     }

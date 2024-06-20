@@ -49,10 +49,7 @@ public class CostModelsExp <C,Q> {
         result = new StringBuilder();
         fileName = "gcp_M_S40P1Q.csv";
         result.append("Querier"). append(",")
-                .append("Cache log").append(",")
-                .append("Generation Time").append(",")
-                .append("Mergeability Time").append(",")
-                .append("Execution Time").append("\n");
+                .append("Cache log").append("\n");
         writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
     }
@@ -80,27 +77,24 @@ public class CostModelsExp <C,Q> {
             if (lastestTimestamp.before(timestampGE)) {
                 clockHashMap.update(querier);
 
-                Instant fsStart = Instant.now();
-                Duration totalExeTime = Duration.ofMillis(0);
+//                Instant fsStart = Instant.now();
+//                Duration totalExeTime = Duration.ofMillis(0);
                 String answer = e.runGE(querier, query, guardExp);
-                Instant fsEnd = Instant.now();
-                totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
-                double seconds = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
+//                Instant fsEnd = Instant.now();
+//                totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
+//                double seconds = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
 
 //                System.out.println(answer);
                 result.append(querier).append(",")
-                        .append("hit").append(",")
-                        .append(0).append(",")
-                        .append(0).append(",")
-                        .append(seconds).append("\n");
+                        .append("hit").append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
                 newGE = guardExp;
             }else{
                 List<BEPolicy> newPolicies = fetchNewPolicies(querier, timestampGE);
                 int count = 0;
 
-                Instant fsStart = Instant.now();
-                Duration totalMergeTime = Duration.ofMillis(0);
+//                Instant fsStart = Instant.now();
+//                Duration totalMergeTime = Duration.ofMillis(0);
 
                 for(BEPolicy policy: newPolicies){
                     List<ObjectCondition> policyConditions = policy.getObject_conditions();
@@ -155,34 +149,31 @@ public class CostModelsExp <C,Q> {
                     }
                 }
 
-                Instant fsEnd = Instant.now();
-                totalMergeTime = totalMergeTime.plus(Duration.between(fsStart, fsEnd));
-                double secondsM = totalMergeTime.getSeconds() + totalMergeTime.getNano() / 1_000_000.0;
+//                Instant fsEnd = Instant.now();
+//                totalMergeTime = totalMergeTime.plus(Duration.between(fsStart, fsEnd));
+//                double secondsM = totalMergeTime.getSeconds() + totalMergeTime.getNano() / 1_000_000.0;
 
                 if(count == newPolicies.size()){
 
-                    fsStart = Instant.now();
-                    Duration totalGenTime = Duration.ofMillis(0);
+//                    fsStart = Instant.now();
+//                    Duration totalGenTime = Duration.ofMillis(0);
                     newGE = SieveGG(querier, query);
-                    fsEnd = Instant.now();
-                    totalGenTime = totalGenTime.plus(Duration.between(fsStart, fsEnd));
-                    double secondsG = totalGenTime.getSeconds() + totalGenTime.getNano() / 1_000_000.0;
+//                    fsEnd = Instant.now();
+//                    totalGenTime = totalGenTime.plus(Duration.between(fsStart, fsEnd));
+//                    double secondsG = totalGenTime.getSeconds() + totalGenTime.getNano() / 1_000_000.0;
 
                     clockHashMap.put(querier, newGE);
 
-                    fsStart = Instant.now();
-                    Duration totalExeTime = Duration.ofMillis(0);
-                    String answer = e.runGE(querier, query, newGE);
-                    fsEnd = Instant.now();
-                    totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
-                    double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
+//                    fsStart = Instant.now();
+//                    Duration totalExeTime = Duration.ofMillis(0);
+//                    String answer = e.runGE(querier, query, newGE);
+//                    fsEnd = Instant.now();
+//                    totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
+//                    double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
 
 //                    System.out.println(answer);
                     result.append(querier).append(",")
-                            .append("regenerate").append(",")
-                            .append(secondsG).append(",")
-                            .append(secondsM).append(",")
-                            .append(secondsE).append("\n");
+                            .append("regenerate").append("\n");
                     writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
                 }else{
 
@@ -190,17 +181,17 @@ public class CostModelsExp <C,Q> {
                     Duration guardGen = Duration.ofMillis(0);
                     Duration totalTime = Duration.ofMillis(0);
 
-                    fsStart = Instant.now();
+                    Instant fsStart = Instant.now();
                     SelectGuard gh = new SelectGuard(allowBeExpression, true);
-                    fsEnd = Instant.now();
+                    Instant fsEnd = Instant.now();
 
                     System.out.println(gh.createGuardedQuery(true));
                     guardGen = guardGen.plus(Duration.between(fsStart, fsEnd));
-                    double secondsG = guardGen.getSeconds() + guardGen.getNano() / 1_000_000.0;
+//                    double secondsG = guardGen.getSeconds() + guardGen.getNano() / 1_000_000.0;
 
                     System.out.println("Guard Generation time: " + guardGen + " Number of Guards: " + gh.numberOfGuards());
 
-//                    guardPersistor.insertGuard(gh.create(String.valueOf(querier), "user"));
+                    guardPersistor.insertGuard(gh.create(String.valueOf(querier), "user"));
 
                     newGE = gh.create(String.valueOf(querier), "user");
                     for (GuardPart gp: newGE.getGuardParts()){
@@ -208,45 +199,39 @@ public class CostModelsExp <C,Q> {
                     }
                     clockHashMap.put(querier, guardExp);
 
-                    fsStart = Instant.now();
+//                    fsStart = Instant.now();
                     String answer = e.runGE(querier, query, guardExp);
 //                    System.out.println(answer);
-                    Instant totalEnd = Instant.now();
-                    totalTime = totalTime.plus(Duration.between(fsStart, totalEnd));
-                    double secondsE = totalTime.getSeconds() + totalTime.getNano() / 1_000_000.0;
+//                    Instant totalEnd = Instant.now();
+//                    totalTime = totalTime.plus(Duration.between(fsStart, totalEnd));
+//                    double secondsE = totalTime.getSeconds() + totalTime.getNano() / 1_000_000.0;
                     result.append(querier).append(",")
-                            .append("updation").append(",")
-                            .append(secondsG).append(",")
-                            .append(secondsM).append(",")
-                            .append(secondsE).append("\n");
+                            .append("updation").append("\n");
                     writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
                 }
             }
         }else{
             // If querier not found or no matching GE, create a new one
-            Instant fsStart = Instant.now();
-            Duration guardGen = Duration.ofMillis(0);
+//            Instant fsStart = Instant.now();
+//            Duration guardGen = Duration.ofMillis(0);
             newGE = SieveGG(querier, query);
-            Instant fsEnd = Instant.now();
-            guardGen = guardGen.plus(Duration.between(fsStart, fsEnd));
-            double secondsG = guardGen.getSeconds() + guardGen.getNano() / 1_000_000.0;
+//            Instant fsEnd = Instant.now();
+//            guardGen = guardGen.plus(Duration.between(fsStart, fsEnd));
+//            double secondsG = guardGen.getSeconds() + guardGen.getNano() / 1_000_000.0;
 
             if (newGE == null){
                 return;
             }else {
                 clockHashMap.put(querier, newGE);
-                fsStart = Instant.now();
-                Duration totalExeTime = Duration.ofMillis(0);
-                String answer = e.runGE(querier, query, newGE);
-//                System.out.println(answer);
-                fsEnd = Instant.now();
-                totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
-                double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
+//                fsStart = Instant.now();
+//                Duration totalExeTime = Duration.ofMillis(0);
+//                String answer = e.runGE(querier, query, newGE);
+////                System.out.println(answer);
+//                fsEnd = Instant.now();
+//                totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
+//                double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
                 result.append(querier).append(",")
-                        .append("miss").append(",")
-                        .append(secondsG).append(",")
-                        .append(0).append(",")
-                        .append(secondsE).append("\n");
+                        .append("miss").append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
             }
         }
@@ -261,13 +246,6 @@ public class CostModelsExp <C,Q> {
         return;
 
     }
-//    private int costMethod1(){
-//        int a;
-//    }
-//
-//    private int costMethod2(){
-//        int b;
-//    }
 
     public GuardExp SieveGG (String querier, QueryStatement query){
         List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
@@ -287,9 +265,9 @@ public class CostModelsExp <C,Q> {
 
         System.out.println("Guard Generation time: " + guardGen + " Number of Guards: " + gh.numberOfGuards());
 
-//        guardPersistor.insertGuard(gh.create(String.valueOf(querier), "user"));
+        guardPersistor.insertGuard(gh.create(String.valueOf(querier), "user"));
 
-//        System.out.println(e.runBEPolicies(querier,query,allowPolicies));
+        System.out.println(e.runBEPolicies(querier,query,allowPolicies));
 
         return gh.create(String.valueOf(querier), "user");
     }

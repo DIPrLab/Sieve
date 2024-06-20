@@ -63,7 +63,7 @@ public class WorkloadGenerator {
         int dynamicPolicySize = (int) Math.floor(sizeOfPolicies/3);
         int windowSize = 10;
         int generatedQueries = 0;
-        boolean cachingFlag = false;
+        boolean cachingFlag = true;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 //        System.out.println(dynamicPolicySize);
 
@@ -77,7 +77,7 @@ public class WorkloadGenerator {
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "gcp_W_S10P1Q.txt";
+        String fileName = "gcp_M_S40P1Q.txt";
 
         boolean first = true;
 
@@ -92,7 +92,7 @@ public class WorkloadGenerator {
 //        while (!policies.isEmpty() && !queries.isEmpty()) {
 
         if(cachingFlag){
-            System.out.println("!!!Caching!!!");
+            System.out.println("!!!Caching+Merge!!!");
             while (!queries.isEmpty() && !policies.isEmpty()) {
                 if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
@@ -178,8 +178,8 @@ public class WorkloadGenerator {
                 result.append(currentTime).append(",")
                         .append(query.toString()).append("\n");
                 String querier = e.runExperiment(query);
-               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-//                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 
 
                 // Writing results to file
@@ -346,7 +346,7 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 10; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 40; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
     }

@@ -63,7 +63,7 @@ public class WorkloadGenerator {
         int dynamicPolicySize = (int) Math.floor(sizeOfPolicies/3);
         int windowSize = 10;
         int generatedQueries = 0;
-        boolean cachingFlag = true;
+        boolean cachingFlag = false;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 //        System.out.println(dynamicPolicySize);
 
@@ -209,6 +209,7 @@ public class WorkloadGenerator {
                                 .append(policy.toString()).append("\n");
                         Instant pinsert = Instant.now();
                         Timestamp policyinsertionTime = Timestamp.from(pinsert);
+                        policy.setInserted_at(policyinsertionTime);
                     }
                     nextRegularPolicyInsertionTime += regularInterval;
 
@@ -283,7 +284,8 @@ public class WorkloadGenerator {
                         .append(query.toString()).append("\n");
                 String querier = e.runExperiment(query);
                 GuardExp GE = ca.SieveGG(querier, query);
-                System.out.println(GE);
+                String answer = e.runGE(querier, query, GE);
+//                System.out.println(GE);
 
                 // Writing results to file
                 if (!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);

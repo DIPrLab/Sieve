@@ -77,7 +77,7 @@ public class WorkloadGenerator {
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "gcp_M_S40P1Q.txt";
+        String fileName = "gcp_C_S40P1Q.txt";
 
         boolean first = true;
 
@@ -92,7 +92,7 @@ public class WorkloadGenerator {
 //        while (!policies.isEmpty() && !queries.isEmpty()) {
 
         if(cachingFlag){
-            System.out.println("!!!Regen Vs Update!!!");
+            System.out.println("!!!Caching!!!");
             while (!queries.isEmpty() && !policies.isEmpty()) {
                 if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
@@ -178,8 +178,8 @@ public class WorkloadGenerator {
                 result.append(currentTime).append(",")
                         .append(query.toString()).append("\n");
                 String querier = e.runExperiment(query);
-//               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 
 
                 // Writing results to file

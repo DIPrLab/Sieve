@@ -77,7 +77,7 @@ public class WorkloadGenerator {
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "changes_S30P1Q.txt";
+        String fileName = "gcp_M_S40P1Q.txt";
 
         boolean first = true;
 
@@ -344,7 +344,7 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 30; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 40; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
     }

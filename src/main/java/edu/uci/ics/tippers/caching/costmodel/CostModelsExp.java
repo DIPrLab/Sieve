@@ -47,7 +47,7 @@ public class CostModelsExp <C,Q> {
         e = new QueryPerformance();
         writer = new Writer();
         result = new StringBuilder();
-        fileName = "changes_S30P1Q.csv";
+        fileName = "gcp_M_S40P1Q.csv";
         result.append("Querier"). append(",")
                 .append("Cache log").append(",")
                 .append("Generation Time").append(",")

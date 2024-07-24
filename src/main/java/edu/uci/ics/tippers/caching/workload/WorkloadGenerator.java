@@ -178,8 +178,8 @@ public class WorkloadGenerator {
                 result.append(currentTime).append(",")
                         .append(query.toString()).append("\n");
                 String querier = e.runExperiment(query);
-//               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 
 
                 // Writing results to file
@@ -346,7 +346,7 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 40; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 5; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
     }

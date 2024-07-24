@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.model.policy;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 /**
  * Created by cygnus on 9/25/17.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BEPolicy{
 
     @JsonProperty("id")

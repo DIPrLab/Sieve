@@ -289,8 +289,8 @@ public class CostModelsExp <C,Q> {
         ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(3);
         QueryPerformance e = new QueryPerformance();
 
-        CUserGen cUserGen = new CUserGen();
-        List<CUserGen.User> users = cUserGen.retrieveUserData();
+        CUserGen cUserGen = new CUserGen(1);
+        List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
         Iterator<CUserGen.User> iterator = users.iterator();
         while (iterator.hasNext()) {
             CUserGen.User user = iterator.next();
@@ -300,7 +300,7 @@ public class CostModelsExp <C,Q> {
         }
 
         CPolicyGen cpg = new CPolicyGen();
-        List<BEPolicy> policies = cpg.generatePolicies(users);
+        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
 
         System.out.println("Total number of entries: " + users.size());
         System.out.println("Total number of entries: " + policies.size());

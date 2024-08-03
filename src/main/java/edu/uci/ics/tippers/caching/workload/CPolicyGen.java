@@ -88,7 +88,7 @@ public class CPolicyGen {
     }
 
     public BEPolicy generateRandomPolicies(int querier, int owner_id, String owner_group, String owner_profile,
-                                     TimeStampPredicate tsPred, String location, String action) {
+                                     TimeStampPredicate tsPred, String location, String action, int flag) {
         String policyID = UUID.randomUUID().toString();
         List<QuerierCondition> querierConditions = new ArrayList<>(Arrays.asList(
                 new QuerierCondition(policyID, "policy_type", AttributeType.STRING, Operation.EQ, "user"),
@@ -125,49 +125,35 @@ public class CPolicyGen {
         if (objectConditions.isEmpty()) {
             System.out.println("Empty Object Conditions");
         }
-        return new BEPolicy(policyID, objectConditions, querierConditions, "attendance-control",
-                action, new Timestamp(System.currentTimeMillis()));
+        if(flag == 1){
+            return new BEPolicy(policyID, objectConditions, querierConditions, "attendance-control",
+                    action, new Timestamp(System.currentTimeMillis()));
+        }else {
+            return new BEPolicy(policyID, objectConditions, querierConditions, "space-usage",
+                    action, new Timestamp(System.currentTimeMillis()));
+        }
+
     }
 
-    public List<BEPolicy> generatePolicies(List<CUserGen.User> users){
-//        Random random = new Random();
+
+    /*
+    This function generates policies for all the users sampled by CUserGen class.
+    Variable numPolicies indicates the # of policies defined by each user
+    Calling the function generateRandomPolicies with flag == 1, means we are generating policies for AC scenario
+    Policy Holders can only be students(undergrad, graduate)
+    Querier is faculty
+    Location can only be classrooms
+     */
+    public List<BEPolicy> generatePoliciesforAC(List<CUserGen.User> users){
+
         List<BEPolicy> policies = new ArrayList<>();
         for (CUserGen.User user: users){
 
-//            System.out.println("User ID: " + user.getId() + ", User Profile: " + user.getUserProfile());
+
             int numPolicies = 10;
             for (int i = 0; i < numPolicies; i++) {
                 if (i<numPolicies){
-//                    if(user.getUserProfile().equals("faculty")){
-//                        List<Integer> possibleQueriers = new ArrayList<>();
-//                        for (CUserGen.User u : users) {
-//                            if (u.getUserProfile().equals("staff")) {
-//                                possibleQueriers.add(u.getId());
-//                            }
-//                        }
-//                        Random r = new Random();
-//                        int index = r.nextInt(possibleQueriers.size());
-//                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
-//                        policies.add(policy);
-//                    }
-                    if(user.getUserProfile().equals("staff")){
-                        List<Integer> possibleQueriers = new ArrayList<>();
-                        for (CUserGen.User u : users) {
-                            if (u.getUserProfile().equals("staff") && !user.getUserId().equals(u.getUserId())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                        }
-                        Random r = new Random();
-                        int index = r.nextInt(possibleQueriers.size());
-                        List<String> loc = new ArrayList<>();
-                        for (String forbiddenLoc: location_clusters.get(0)) {
-                            loc.add(forbiddenLoc);
-                        }
-                        Random rand = new Random();
-                        index = rand.nextInt(loc.size());
-                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, loc.get(index), PolicyConstants.ACTION_ALLOW);
-                        policies.add(policy);
-                    }
+
                     if(user.getUserProfile().equals("graduate")){
                         List<Integer> possibleQueriers = new ArrayList<>();
                         for (CUserGen.User u : users) {
@@ -177,7 +163,9 @@ public class CPolicyGen {
                         }
                         Random r = new Random();
                         int index = r.nextInt(possibleQueriers.size());
-                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
+                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
+                                user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
+                                PolicyConstants.ACTION_ALLOW, 1);
                         policies.add(policy);
 
                     }
@@ -190,7 +178,9 @@ public class CPolicyGen {
                         }
                         Random r = new Random();
                         int index = r.nextInt(possibleQueriers.size());
-                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(), PolicyConstants.ACTION_ALLOW);
+                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
+                                user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
+                                PolicyConstants.ACTION_ALLOW, 1);
                         policies.add(policy);
 
                     }
@@ -203,11 +193,17 @@ public class CPolicyGen {
                     }
                     Random r = new Random();
                     int index = r.nextInt(possibleQueriers.size());
-                    BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index), user.getId(), user.getUserGroup(), user.getUserProfile(), workingHours, null, PolicyConstants.ACTION_ALLOW);
+                    BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index), user.getId(),
+                            user.getUserGroup(), user.getUserProfile(), workingHours, null,
+                            PolicyConstants.ACTION_ALLOW, 1);
                     policies.add(policy);
                 }
             }
         }
+
+        /*
+        To print policies generated and store it in the DB
+         */
 //        for (BEPolicy policy : policies) {
 //            System.out.println(policy.toString());
 //        }
@@ -216,11 +212,28 @@ public class CPolicyGen {
         return policies;
     }
 
+    /*
+    This function generates policies for all the users sampled by CUserGen class.
+    Variable numPolicies indicates the # of policies defined by each user
+    Calling the function generateRandomPolicies with flag == 2, means we are generating policies for SU scenario
+    Policy Holders can only be anyone
+    Querier is faculty or staff
+    Location can only be anything except for the forbidden locations
+     */
+    public List<BEPolicy> generatePoliciesforSU(List<CUserGen.User> users){
+
+        List<BEPolicy> policies = new ArrayList<>();
+        // TODO
+        return policies;
+    }
+
+
+
     public void runExpreriment () {
         CPolicyGen cpg = new CPolicyGen();
-        CUserGen cUserGen = new CUserGen();
-        List<CUserGen.User> users = cUserGen.retrieveUserData();
-        List<BEPolicy> policies = cpg.generatePolicies(users);
+        CUserGen cUserGen = new CUserGen(1);
+        List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
+        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
         System.out.println("Total number of entries: " + users.size());
         System.out.println("Total number of entries: " + policies.size());
     }

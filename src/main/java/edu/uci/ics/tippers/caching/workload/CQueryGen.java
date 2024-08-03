@@ -4,7 +4,6 @@ import edu.uci.ics.tippers.dbms.mysql.MySQLConnectionManager;
 import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
 import edu.uci.ics.tippers.generation.policy.WiFiDataSet.PolicyUtil;
 import edu.uci.ics.tippers.generation.query.QueryGen;
-import edu.uci.ics.tippers.generation.query.WiFiDataSet.WiFiDataSetQueryGeneration;
 import edu.uci.ics.tippers.model.policy.TimeStampPredicate;
 import edu.uci.ics.tippers.model.query.QueryStatement;
 import edu.uci.ics.tippers.persistor.PolicyPersistor;
@@ -24,6 +23,7 @@ public class CQueryGen extends QueryGen {
     PolicyPersistor polper;
     PolicyUtil pg;
     CUserGen cug;
+    int flag;
 
     private List<Integer> user_ids;
     private List<String> locations;
@@ -32,14 +32,24 @@ public class CQueryGen extends QueryGen {
     private List<Integer> hours;
     private List<Integer> numUsers;
 
+    /*
+    This constructor set the default values for query variables.
+    For AC: location and user_group can only be classroom
+            user_group can only have faculty, students
+    For SU: all locations and user_group possible
+            user_group can have everybody
+     */
     public CQueryGen(){
         connection = MySQLConnectionManager.getInstance().getConnection();
         r = new Random();
         polper = PolicyPersistor.getInstance();
         pg = new PolicyUtil();
-        cug = new CUserGen();
+        cug = new CUserGen(1);
 
         this.user_ids = new ArrayList<>();
+        this.start_beg = pg.getDate("MIN");
+        this.start_fin = pg.getDate("MAX");
+
         this.locations = new ArrayList<>(Arrays.asList("3142-clwa-2019","3142-clwa-2039","3142-clwa-2051","3142-clwa-2059",
                 "3142-clwa-2065","3142-clwa-2099","3142-clwa-2209","3142-clwa-2219","3142-clwa-2231","3143-clwa-3039",
                 "3143-clwa-3051","3143-clwa-3059","3143-clwa-3099","3143-clwa-3209","3143-clwa-3219","3143-clwa-3231",
@@ -47,8 +57,7 @@ public class CQueryGen extends QueryGen {
                 "3144-clwa-4209","3144-clwa-4219","3144-clwa-4231","3145-clwa-5019","3145-clwa-5039","3145-clwa-5051",
                 "3145-clwa-5059","3145-clwa-5065","3145-clwa-5099","3145-clwa-5209","3145-clwa-5219","3145-clwa-5231",
                 "3146-clwa-6011","3146-clwa-6029","3146-clwa-6049","3146-clwa-6131","3146-clwa-6217"));
-        this.start_beg = pg.getDate("MIN");
-        this.start_fin = pg.getDate("MAX");
+
         this.user_groups = new ArrayList<>(Arrays.asList("3142-clwa-2019","3142-clwa-2039","3142-clwa-2051","3142-clwa-2059",
                 "3142-clwa-2065","3142-clwa-2099","3142-clwa-2209","3142-clwa-2219","3142-clwa-2231","3143-clwa-3039",
                 "3143-clwa-3051","3143-clwa-3059","3143-clwa-3099","3143-clwa-3209","3143-clwa-3219","3143-clwa-3231",
@@ -60,6 +69,7 @@ public class CQueryGen extends QueryGen {
         user_groups.addAll(new ArrayList<>(Arrays.asList("faculty", "undergrad", "graduate")));
         hours = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 7, 10, 12, 15, 17, 20, 23));
         numUsers = new ArrayList<Integer>(Arrays.asList(10,50,100,150,200,250,300,350,400,420));
+
 
     }
 
@@ -109,7 +119,7 @@ public class CQueryGen extends QueryGen {
     @Override
     public List<QueryStatement> createQuery2(int queryCount) {
         List<QueryStatement> queries = new ArrayList<>();
-        List<CUserGen.User> users = cug.retrieveUserData();
+        List<CUserGen.User> users = cug.retrieveUserDataForAC();
         for (CUserGen.User user: users) {
             user_ids.add(user.getId());
         }
@@ -158,6 +168,8 @@ public class CQueryGen extends QueryGen {
         return queries;
     }
 
+    //The previous SIEVE uses 4 query templates, but we'll work with only 3.
+    // However, we will still need to override it.
     @Override
     public List<QueryStatement> createQuery4() {
         List<QueryStatement> queries = new ArrayList<>();

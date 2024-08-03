@@ -7,16 +7,27 @@ import java.util.*;
 public class CUserGen {
 
     private Connection connection;
+    int flag; //indicates which scenario to run. 1=AC, 2=SU
 
-    public CUserGen() {
+    public CUserGen(int i) {
         connection = MySQLConnectionManager.getInstance().getConnection();
+        flag = i;
     }
 
-    public List<User> retrieveUserData() {
+    /*
+    Sampling users for the attendance control scenario.
+    Policy Holders can only be students(undergrad, graduate)
+    Querier is faculty
+    Location can only be classrooms
+    Variable Flag needs to be set as 1
+     */
+    public List<User> retrieveUserDataForAC() {
         List<User> users = new ArrayList<>();
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group FROM sieve.APP_USER WHERE user_profile IN ('graduate', 'undergrad', 'faculty') and user_group NOT IN ('3143-clwa-3019', '3146-clwa-6122', '3143-clwa-3065', '3146-clwa-6219')");
+            ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group " +
+                    "FROM sieve.APP_USER WHERE user_profile IN ('graduate', 'undergrad', 'faculty') and " +
+                    "user_group NOT IN ('3143-clwa-3019', '3146-clwa-6122', '3143-clwa-3065', '3146-clwa-6219')");
 //            int count = 0;
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
@@ -35,6 +46,19 @@ public class CUserGen {
         return users;
     }
 
+    /*
+    Sampling users for the space usage scenario.
+    Policy Holders can only be anyone
+    Querier is faculty or staff
+    Location can only be anything except for the forbidden locations
+    Variable Flag needs to be set as 2
+     */
+    public List<User> retrieveUserDataForSU() {
+        List<User> users = new ArrayList<>();
+        // TODO
+        return users;
+    }
+
 
     public void printUserData(List<User> users) {
         System.out.println("User Data:");
@@ -45,9 +69,14 @@ public class CUserGen {
     }
 
     public void runExperiment() {
-        CUserGen cUserGen = new CUserGen();
-        List<User> users = cUserGen.retrieveUserData();
-        cUserGen.printUserData(users);
+        CUserGen cug = new CUserGen(1);
+        List<User> users;
+        if( cug.flag == 1) {
+            users = cug.retrieveUserDataForAC();
+        } else {
+            users = cug.retrieveUserDataForSU();
+        }
+        cug.printUserData(users);
     }
 
     public static class User {

@@ -335,6 +335,7 @@ public class QueryPerformance {
                             + ") where " + queryStatement.getQuery() + " ) as P where " + guardExp.createQueryWithOR();
                 resultString.append("Query Index").append(",");
             }
+            System.out.println();
             QueryResult execResult = queryManager.runTimedQueryExp(sieve_query, NUM_OF_REPS);
             execTime = execTime.plus(execResult.getTimeTaken());
             resultString.append(execTime.toMillis());

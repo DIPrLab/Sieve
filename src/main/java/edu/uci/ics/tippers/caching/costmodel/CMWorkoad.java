@@ -101,8 +101,8 @@ public class CMWorkoad {
 
     public void runExperiment() {
 
-        CUserGen cUserGen = new CUserGen();
-        List<CUserGen.User> users = cUserGen.retrieveUserData();
+        CUserGen cUserGen = new CUserGen(1);
+        List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
         Iterator<CUserGen.User> iterator = users.iterator();
         while (iterator.hasNext()) {
             CUserGen.User user = iterator.next();
@@ -112,7 +112,7 @@ public class CMWorkoad {
         }
 
         CPolicyGen cpg = new CPolicyGen();
-        List<BEPolicy> policies = cpg.generatePolicies(users);
+        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
 
         System.out.println("Total number of entries: " + users.size());
         System.out.println("Total number of entries: " + policies.size());

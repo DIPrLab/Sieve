@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class CQueryGen extends QueryGen {
+public class CQueryGenAC extends QueryGen {
     private Connection connection;
 
     Random r;
@@ -39,7 +39,7 @@ public class CQueryGen extends QueryGen {
     For SU: all locations and user_group possible
             user_group can have everybody
      */
-    public CQueryGen(){
+    public CQueryGenAC(){
         connection = MySQLConnectionManager.getInstance().getConnection();
         r = new Random();
         polper = PolicyPersistor.getInstance();
@@ -191,7 +191,7 @@ public class CQueryGen extends QueryGen {
     public List<QueryStatement> createQuery3(List<String> selTypes, int numOfQueries){return null;};
 
     public void runExperiment() {
-        CQueryGen cqg = new CQueryGen();
+        CQueryGenAC cqg = new CQueryGenAC();
         QueryPerformance e = new QueryPerformance();
         boolean[] templates = {true, true, false, false};
         int numOfQueries = 3940;

@@ -2,9 +2,7 @@ package edu.uci.ics.tippers.generation.query;
 
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.dbms.QueryManager;
-import edu.uci.ics.tippers.generation.query.WiFiDataSet.WiFiDataSetQueryGeneration;
 import edu.uci.ics.tippers.model.query.QueryStatement;
-import edu.uci.ics.tippers.caching.workload.CQueryGen;
 
 import java.sql.*;
 import java.util.ArrayList;

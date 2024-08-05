@@ -12,9 +12,11 @@ import edu.uci.ics.tippers.persistor.PolicyPersistor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.time.temporal.ChronoUnit;
 
 public class CPolicyGen {
 
@@ -64,7 +66,7 @@ public class CPolicyGen {
             if (inputStream != null) {
                 props.load(inputStream);
                 START_WORKING_HOURS = props.getProperty("w_start");
-                DURATION_WORKING_HOURS = Integer.parseInt(props.getProperty("w_plus"));
+                DURATION_WORKING_HOURS = 120;
                 workingHours = new TimeStampPredicate(pg.getDate("MIN"), pg.getDate("MAX"), START_WORKING_HOURS, DURATION_WORKING_HOURS);
                 START_NIGHT_DUSK_HOURS = props.getProperty("n_dusk_start");
                 DURATION_NIGHT_DUSK_HOURS = Integer.parseInt(props.getProperty("n_dusk_plus"));
@@ -85,6 +87,16 @@ public class CPolicyGen {
             return location_clusters.get(r.nextInt(10));
         }
         else return null;
+    }
+
+    private LocalTime generateRandomStartTime(){
+        final LocalTime START_RANGE = LocalTime.of(8, 0); // 8 AM
+        final LocalTime END_RANGE = LocalTime.of(15, 0); // 3 PM
+        final int INCREMENT_MINUTES = 30;
+        Random random = new Random();
+        int totalIncrements = (int) ChronoUnit.MINUTES.between(START_RANGE, END_RANGE) / INCREMENT_MINUTES;
+        int randomIncrement = random.nextInt(totalIncrements + 1);
+        return START_RANGE.plusMinutes(randomIncrement * INCREMENT_MINUTES);
     }
 
     public BEPolicy generateRandomPolicies(int querier, int owner_id, String owner_group, String owner_profile,
@@ -149,9 +161,11 @@ public class CPolicyGen {
         List<BEPolicy> policies = new ArrayList<>();
         for (CUserGen.User user: users){
 
-
             int numPolicies = 10;
+
             for (int i = 0; i < numPolicies; i++) {
+                workingHours.setStartTime(generateRandomStartTime());
+                workingHours.setEndTime(workingHours.getStartTime().plus(120, ChronoUnit.MINUTES));
                 if (i<numPolicies){
 
                     if(user.getUserProfile().equals("graduate")){

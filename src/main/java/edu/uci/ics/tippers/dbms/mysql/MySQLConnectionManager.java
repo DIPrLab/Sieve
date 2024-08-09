@@ -54,8 +54,8 @@ public class MySQLConnectionManager {
             return connection;
         try {
             connection = DriverManager.getConnection(
-                    String.format("jdbc:mysql://%s:%s/%s?useLegacyDatetimeCode=false&serverTimezone=America/Los_Angeles&rewriteBatchedStatements=true",
-                            SERVER, PORT, DATABASE), USER, PASSWORD);
+                    String.format("jdbc:mysql://ashakya:3PPnIVmoJh8hk3t@mysql.rc.pdx.edu:3306/ashakya?useLegacyDatetimeCode=false&serverTimezone=America/Los_Angeles&rewriteBatchedStatements=true&enabledTLSProtocols=TLSv1.2"));
+//                            SERVER, PORT, DATABASE), USER, PASSWORD);
             System.out.println("--- Connected to " + DATABASE + " on server " + SERVER + "---");
             return connection;
         } catch (SQLException e) {

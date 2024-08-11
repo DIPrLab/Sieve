@@ -96,7 +96,7 @@ public class WorkloadGenerator {
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "gcp_M_S40P1Q.txt";
+        String fileName = "removeUserID.txt";
 
         boolean first = true;
 
@@ -203,8 +203,8 @@ public class WorkloadGenerator {
                 result.append(currentTime).append(",")
                         .append(query.toString()).append("\n");
                 String querier = e.runExperiment(query);
-               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-//                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 
 
         // Add the number of policies and queries
@@ -433,7 +433,7 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 5; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 10; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
 

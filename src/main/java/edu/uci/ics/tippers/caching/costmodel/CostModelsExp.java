@@ -47,7 +47,7 @@ public class CostModelsExp <C,Q> {
         e = new QueryPerformance();
         writer = new Writer();
         result = new StringBuilder();
-        fileName = "gcp_M_S40P1Q.csv";
+        fileName = "removeUserID.csv";
         result.append("Querier"). append(",")
                 .append("Cache log").append("\n");
         writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
@@ -85,6 +85,11 @@ public class CostModelsExp <C,Q> {
 //                double seconds = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
 
 //                System.out.println(answer);
+                for(GuardPart gp: guardExp.getGuardParts()){
+                    System.out.println("Guard in GE: " + gp.getGuard().getAttribute());
+                    for(BEPolicy bp: gp.getGuardPartition().getPolicies())
+                        System.out.println("Policy Expression: " + bp.toString());
+                }
                 result.append(querier).append(",")
                         .append("hit").append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
@@ -172,6 +177,11 @@ public class CostModelsExp <C,Q> {
 //                    double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
 
 //                    System.out.println(answer);
+                    for(GuardPart gp: newGE.getGuardParts()){
+                        System.out.println("Guard in GE: " + gp.getGuard().getAttribute());
+                        for(BEPolicy bp: gp.getGuardPartition().getPolicies())
+                            System.out.println("Policy Expression: " + bp.toString());
+                    }
                     result.append(querier).append(",")
                             .append("regenerate").append("\n");
                     writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
@@ -205,6 +215,11 @@ public class CostModelsExp <C,Q> {
 //                    Instant totalEnd = Instant.now();
 //                    totalTime = totalTime.plus(Duration.between(fsStart, totalEnd));
 //                    double secondsE = totalTime.getSeconds() + totalTime.getNano() / 1_000_000.0;
+                    for(GuardPart gp: newGE.getGuardParts()){
+                        System.out.println("Guard in GE: " + gp.getGuard().getAttribute());
+                        for(BEPolicy bp: gp.getGuardPartition().getPolicies())
+                            System.out.println("Policy Expression: " + bp.toString());
+                    }
                     result.append(querier).append(",")
                             .append("updation").append("\n");
                     writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
@@ -230,6 +245,11 @@ public class CostModelsExp <C,Q> {
 //                fsEnd = Instant.now();
 //                totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
 //                double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
+                for(GuardPart gp: newGE.getGuardParts()){
+                    System.out.println("Guard in GE: " + gp.getGuard().getAttribute());
+                    for(BEPolicy bp: gp.getGuardPartition().getPolicies())
+                        System.out.println("Policy Expression: " + bp.toString());
+                }
                 result.append(querier).append(",")
                         .append("miss").append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);

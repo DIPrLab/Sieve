@@ -55,7 +55,22 @@ public class CUserGen {
      */
     public List<User> retrieveUserDataForSU() {
         List<User> users = new ArrayList<>();
-        // TODO
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group " +
+                    "FROM sieve.APP_USER WHERE user_profile IN ('graduate', 'undergraduate', 'staff', 'visitor', 'faculty')");
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String userId = resultSet.getString("user_id");
+                String userProfile = resultSet.getString("user_profile");
+                String userGroup = resultSet.getString("user_group");
+                User user = new User(id, userId, userProfile, userGroup);
+                users.add(user);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return users;
     }
 

@@ -34,6 +34,9 @@ public class Sieve {
 //        cug.runExperiment();
 //        CPolicyGen cpg = new CPolicyGen();
 //        cpg.runExpreriment();
+
+//        CQueryGenAC cqg = new CQueryGenAC();
+//        cqg.runExperiment();
            
 
         int regularInterval = 1; // Example regular interval

@@ -27,7 +27,7 @@ import edu.uci.ics.tippers.model.guard.GuardExp;
 import edu.uci.ics.tippers.persistor.GuardPersistor;
 import edu.uci.ics.tippers.persistor.PolicyPersistor;
 
-public class CostModelsExp <C,Q> {
+public class Baseline1 <C,Q> {
     private Connection connection;
     Random r;
     PolicyPersistor polper;
@@ -38,7 +38,7 @@ public class CostModelsExp <C,Q> {
     StringBuilder result;
     String fileName;
 
-    public CostModelsExp(){
+    public Baseline1(){
         connection = MySQLConnectionManager.getInstance().getConnection();
         r = new Random();
         polper = PolicyPersistor.getInstance();
@@ -47,14 +47,15 @@ public class CostModelsExp <C,Q> {
         e = new QueryPerformance();
         writer = new Writer();
         result = new StringBuilder();
-        fileName = "oit_M_S5P1Q_100.csv";
+        fileName = "oit_B1_S20P1Q.csv";
         result.append("Querier"). append(",")
                 .append("Cache log").append("\n");
         writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
     }
 
-    public void runAlgorithm(ClockHashMap<String, GuardExp> clockHashMap, String querier, QueryStatement query, CircularHashMap<String,Timestamp> timestampDirectory) {
+    public void runAlgorithm(ClockHashMap<String, GuardExp> clockHashMap, String querier, QueryStatement query,
+                             CircularHashMap<String,Timestamp> timestampDirectory, CircularHashMap<String, Integer> countUpdate) {
 
         // Implementation of the Guard Caching Algorithm
         int index;
@@ -81,6 +82,7 @@ public class CostModelsExp <C,Q> {
 //                Instant fsStart = Instant.now();
 //                Duration totalExeTime = Duration.ofMillis(0);
                 String answer = e.runGE(querier, query, guardExp);
+
 //                Instant fsEnd = Instant.now();
 //                totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
 //                double seconds = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
@@ -92,6 +94,8 @@ public class CostModelsExp <C,Q> {
                 newGE = guardExp;
             }else{
                 List<BEPolicy> newPolicies = fetchNewPolicies(querier, timestampGE);
+                Integer updateCount = countUpdate.get(querier);
+
                 int count = 0;
 
 //                Instant fsStart = Instant.now();
@@ -154,7 +158,7 @@ public class CostModelsExp <C,Q> {
 //                totalMergeTime = totalMergeTime.plus(Duration.between(fsStart, fsEnd));
 //                double secondsM = totalMergeTime.getSeconds() + totalMergeTime.getNano() / 1_000_000.0;
 
-                if(count == newPolicies.size()){
+                if(count == newPolicies.size() || (updateCount != null && updateCount >= 2)){
 
 //                    fsStart = Instant.now();
 //                    Duration totalGenTime = Duration.ofMillis(0);
@@ -202,6 +206,7 @@ public class CostModelsExp <C,Q> {
 
 //                    fsStart = Instant.now();
                     String answer = e.runGE(querier, query, guardExp);
+                    countUpdate.put(querier,updateCount+1);
 //                    System.out.println(answer);
 //                    Instant totalEnd = Instant.now();
 //                    totalTime = totalTime.plus(Duration.between(fsStart, totalEnd));
@@ -231,6 +236,7 @@ public class CostModelsExp <C,Q> {
 //                fsEnd = Instant.now();
 //                totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
 //                double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
+                countUpdate.put(querier,0);
                 result.append(querier).append(",")
                         .append("miss").append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
@@ -283,42 +289,5 @@ public class CostModelsExp <C,Q> {
             }
         }
         return newPolicies; // Placeholder, replace with actual implementation
-    }
-
-    public static void main(String[] args) {
-
-        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(3);
-        QueryPerformance e = new QueryPerformance();
-
-        CUserGen cUserGen = new CUserGen(1);
-        List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
-        Iterator<CUserGen.User> iterator = users.iterator();
-        while (iterator.hasNext()) {
-            CUserGen.User user = iterator.next();
-            if (!user.getUserId().equals("958") ) {
-                iterator.remove();
-            }
-        }
-
-        CPolicyGen cpg = new CPolicyGen();
-        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
-
-        System.out.println("Total number of entries: " + users.size());
-        System.out.println("Total number of entries: " + policies.size());
-
-        List<QueryStatement> query = new ArrayList<>();
-        for (QueryStatement q : query){
-            q.setQuery("start_date >= \"2018-02-01\" AND start_date <= \"2018-04-02\" and start_time >= \"00:00\" " +
-                    "AND start_time <= \"20:00\" AND location_id IN (\"3142-clwa-2019\")");
-            q.setId(1);
-            q.setSelectivity(0);
-            q.setTemplate(1);
-        }
-
-        System.out.println("Total number of entries: " + users.size());
-        System.out.println("Total number of policies: " + policies.size());
-        System.out.println("Total number of queries: " + query.size());
-
-
     }
 }

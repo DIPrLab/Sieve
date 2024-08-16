@@ -43,7 +43,7 @@ public class CachingAlgorithm <C,Q> {
         e = new QueryPerformance();
         writer = new Writer();
         result = new StringBuilder();
-        fileName = "gcp_C_S40P1Q.csv";
+        fileName = "oit_M_S5P1Q_100.csv";
         result.append("Querier"). append(",")
                 .append("Cache log").append(",")
                 .append("Generation Time").append(",")
@@ -72,7 +72,7 @@ public class CachingAlgorithm <C,Q> {
             Timestamp timestampGE = guardExp.getLast_updated();
 
             Timestamp lastestTimestamp = timestampDirectory.get(querier);
-            if (lastestTimestamp.before(timestampGE)) {
+            if (lastestTimestamp != null && lastestTimestamp.before(timestampGE)) {
                 clockHashMap.update(querier);
 
                 Instant fsStart = Instant.now();
@@ -89,28 +89,6 @@ public class CachingAlgorithm <C,Q> {
                         .append(seconds).append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
                 newGE = guardExp;
-//                timestampDirectory.put(querier,newGE.getLast_updated());
-//            } else {
-//                // Fetch policies that have timestamp greater than the GE stored
-//                newPolicies = fetchNewPolicies(querier, timestampGlobal);
-//
-//                // costMethod1 and costMethod2 calculation
-//                int cost1 = costMethod1();
-//                // Implement CASE 1 and CASE 2
-//                int cost2 = costMethod2();
-//
-//                if (cost1 > cost2) {
-//                    concatenatePNew(PoliciesInGE_i, P_new); // create a new ge which includes all the policies???
-//                    clockHashMap.findAndUpdate(querier, listGE);
-//                    return;
-//                } else {
-//                    // Implement GE_i union with GE_new
-//                    GuardExp newGE = SieveGG(querier, newPolicies);
-//
-//                    clockHashMap.findAndUpdate(querier, listGE);    // make a list of ge to store more than one ge (GE1+GE2)???
-//                    return;
-//                }
-//            }
             }else{
                 Instant fsStart = Instant.now();
                 Duration totalGenTime = Duration.ofMillis(0);
@@ -172,13 +150,6 @@ public class CachingAlgorithm <C,Q> {
         return;
 
     }
-//    private int costMethod1(){
-//        int a;
-//    }
-//
-//    private int costMethod2(){
-//        int b;
-//    }
 
     public GuardExp SieveGG (String querier, QueryStatement query){
         QueryPerformance e = new QueryPerformance();

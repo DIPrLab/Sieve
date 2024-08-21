@@ -39,16 +39,12 @@ alter table sieve.queries MODIFY selectivity_type varchar(64) NULL;
    3. More information about privileges can be found [here](https://www.sqlshack.com/postgresql-tutorial-to-create-a-user/) (SQLShack).
    4. Select Save.
 4. For psql users, create a new user called 'sieve' and grant all DBA role privileges. 
-5. Right click on PostgreSQL <version #> > Create.. > Database. 
-   1. Name the database ‘sieve’. 
-   2. Navigate to Security > Navigate to Privileges > Add Grantor > Add user ‘sieve’.
-   3. Select Save.
+5. Create a new database and name the database 'sieve'. Add the 'sieve' user as the owner of this database.
 6. For psql users, create a new database called 'sieve', and add the user 'sieve' to this new database.
 7. Create a new schema and name the schema 'sieve'.
 8. On your machine, unzip the file data/mall_dataset.tar.xz twice (once for .xz and once for .tar).
 9. Import the file `data/mall_dataset/mall_defs.sql.` Execute this script.
 10. Repeat Step 9 for the file `data/mall_dataset/mall_data`.
-
 
 
 ### Usage

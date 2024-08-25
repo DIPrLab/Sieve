@@ -13,7 +13,6 @@ SIEVE is a general purpose middleware to support access control in DBMS that ena
 
 1. Download [MySQL](https://dev.mysql.com/downloads/installer/).
 2. Optionally, download the GUI extension for MySQL - [MySQL Workbench](https://dev.mysql.com/downloads/workbench/)
-3. Note your user and localhost connection. (E.g. user = root, server = localhost:3306).
 4. Create a new Schema and name the Schema 'sieve'.
 5. Create a new user called 'sieve' and grant all administrative privileges over that database to the user.
 6. When prompted on option to load a script, skip, and select apply. You will now see sieve in your Schemas.
@@ -33,7 +32,7 @@ alter table sieve.queries MODIFY selectivity_type varchar(64) NULL;
 
 1. Download [PostgreSQL](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads).
 2. Optionally, download the GUI extension for PostgreSQL - [PgAdmin](https://www.pgadmin.org/download/).
-3. In pgAdmin, navigate and right click on the ‘Login/Group Role’ in the Object Explorer on the left. Select Create > Login/Group Role and name the role ‘sieve’.
+3. Create a Login/Group Role and name the role ‘sieve’.
    1. Navigate to 'Definition' and set a password for the sieve user.
    2. Navigate to 'Privileges' and grant user access to be a superuser.
    3. More information about privileges can be found [here](https://www.sqlshack.com/postgresql-tutorial-to-create-a-user/) (SQLShack).

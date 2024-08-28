@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.execution;
 
+import edu.uci.ics.tippers.caching.workload.CUserGen;
 import edu.uci.ics.tippers.caching.workload.WorkloadGenerator;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import org.apache.commons.configuration2.Configuration;
@@ -29,9 +30,9 @@ public class Sieve {
         }
         System.out.println("Test");
      //   GuardGenExp ggexp = new GuardGenExp();
-   //    ggexp.runExperiment();
-//        CUserGen cug =new CUserGen();
-//        cug.runExperiment();
+//       ggexp.runExperiment();
+        CUserGen cug =new CUserGen(2);
+        cug.runExperiment(2);
 //        CPolicyGen cpg = new CPolicyGen();
 //        cpg.runExpreriment();
            
@@ -40,8 +41,8 @@ public class Sieve {
 //        int dynamicInterval = 1; // Example dynamic interval
 //        int duration = 5;
 //
-        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
-        generator.runExperiment();
+//        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
+//        generator.runExperiment();
 
 //        if(QUERY_PERFORMANCE_EXP) {
 //            if(PolicyConstants.DBMS_CHOICE.equalsIgnoreCase(PolicyConstants.PGSQL_DBMS))

@@ -58,7 +58,7 @@ public class CUserGen {
         try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group " +
-                    "FROM sieve.APP_USER WHERE user_profile IN ('graduate', 'undergraduate', 'staff', 'visitor', 'faculty')");
+                    "FROM sieve.APP_USER");
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String userId = resultSet.getString("user_id");
@@ -83,8 +83,8 @@ public class CUserGen {
         System.out.println("Total number of entries: " + users.size());
     }
 
-    public void runExperiment() {
-        CUserGen cug = new CUserGen(1);
+    public void runExperiment(int flag) {
+        CUserGen cug = new CUserGen(flag);
         List<User> users;
         if( cug.flag == 1) {
             users = cug.retrieveUserDataForAC();

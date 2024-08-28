@@ -240,19 +240,19 @@ public class CPolicyGen {
         for (CUserGen.User user: users) {
             int numPolicies = 10;
             for (int i = 0; i < numPolicies; i++) {
-                workingHours.setStartTime(LocalTime.of(0,0,0));
-                workingHours.setEndTime(LocalTime.of(23,59,59));
+                workingHours.setStartTime(LocalTime.of(9,0,0));
+                workingHours.setEndTime(LocalTime.of(17,0,0));
 
                 if (i<numPolicies){
-                    if(user.getUserProfile().equals("graduate")){
-                        List<Integer> possibleQueriers = new ArrayList<>();
-                        for (CUserGen.User u : users) {
-                            if (u.getUserProfile().equals("faculty") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                            if (u.getUserProfile().equals("staff") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
+                    List<Integer> possibleQueriers = new ArrayList<>();
+                    for (CUserGen.User u : users) {
+                        if (u.getUserProfile().equals("faculty") && user.getUserGroup().equals(u.getUserGroup())) {
+                            possibleQueriers.add(u.getId());
+                        }
+                        if (u.getUserProfile().equals("staff") && user.getUserGroup().equals(u.getUserGroup())) {
+                            possibleQueriers.add(u.getId());
+                        }
+                        if(user.getUserProfile().equals("visitor")){
                             Random r = new Random();
                             int index = r.nextInt(possibleQueriers.size());
                             BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
@@ -260,89 +260,29 @@ public class CPolicyGen {
                                     PolicyConstants.ACTION_ALLOW, 2);
                             policies.add(policy);
                         }
-                    }
-                    if(user.getUserProfile().equals("undergraduate")){
-                        List<Integer> possibleQueriers = new ArrayList<>();
-                        for (CUserGen.User u : users) {
-                            if (u.getUserProfile().equals("faculty") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                            if (u.getUserProfile().equals("staff") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                            Random r = new Random();
-                            int index = r.nextInt(possibleQueriers.size());
-                            BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
-                                    user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
-                                    PolicyConstants.ACTION_ALLOW, 2);
-                            policies.add(policy);
-                        }
-                    }
-                    if(user.getUserProfile().equals("staff")){
-                        List<Integer> possibleQueriers = new ArrayList<>();
-                        for (CUserGen.User u : users) {
-                            if (u.getUserProfile().equals("faculty") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                            if (u.getUserProfile().equals("staff") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                            Random r = new Random();
-                            int index = r.nextInt(possibleQueriers.size());
-                            BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
-                                    user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
-                                    PolicyConstants.ACTION_ALLOW, 2);
-                            policies.add(policy);
-                        }
-                    }
-                    if(user.getUserProfile().equals("visitor")){
-                        List<Integer> possibleQueriers = new ArrayList<>();
-                        for (CUserGen.User u : users) {
-                            if (u.getUserProfile().equals("faculty") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                            if (u.getUserProfile().equals("staff") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                            Random r = new Random();
-                            int index = r.nextInt(possibleQueriers.size());
-                            BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
-                                    user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
-                                    PolicyConstants.ACTION_ALLOW, 2);
-                            policies.add(policy);
-                        }
-                    }
-                    if(user.getUserProfile().equals("faculty")){
-                        List<Integer> possibleQueriers = new ArrayList<>();
-                        for (CUserGen.User u : users) {
-                            if (u.getUserProfile().equals("faculty") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                            if (u.getUserProfile().equals("staff") && user.getUserGroup().equals(u.getUserGroup())) {
-                                possibleQueriers.add(u.getId());
-                            }
-                            Random r = new Random();
-                            int index = r.nextInt(possibleQueriers.size());
-                            BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
-                                    user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
-                                    PolicyConstants.ACTION_ALLOW, 2);
-                            policies.add(policy);
-                        }
-                    }
-                    else {
-                        List<Integer> possibleQueriers = new ArrayList<>();
-                        for (CUserGen.User u : users) {
-                            if (u != user) {
-                                possibleQueriers.add(u.getId());
-                            }
-                        }
+                        workingHours.setStartTime(LocalTime.of(0,0,0));
+                        workingHours.setEndTime(LocalTime.of(23,59,59));
                         Random r = new Random();
                         int index = r.nextInt(possibleQueriers.size());
-                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index), user.getId(),
-                                user.getUserGroup(), user.getUserProfile(), workingHours, null,
+                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
+                                user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
                                 PolicyConstants.ACTION_ALLOW, 2);
                         policies.add(policy);
                     }
+//                    else {
+//                        List<Integer> possibleQueriers = new ArrayList<>();
+//                        for (CUserGen.User u : users) {
+//                            if (u != user) {
+//                                possibleQueriers.add(u.getId());
+//                            }
+//                        }
+//                        Random r = new Random();
+//                        int index = r.nextInt(possibleQueriers.size());
+//                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index), user.getId(),
+//                                user.getUserGroup(), user.getUserProfile(), workingHours, null,
+//                                PolicyConstants.ACTION_ALLOW, 2);
+//                        policies.add(policy);
+//                    }
                 }
             }
         }

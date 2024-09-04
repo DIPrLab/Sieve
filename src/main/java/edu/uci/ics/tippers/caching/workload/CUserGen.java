@@ -58,7 +58,7 @@ public class CUserGen {
         try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group " +
-                    "FROM sieve.APP_USER");
+                    "FROM sieve.APP_USER WHERE user_profile NOT IN ('visitor')");
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String userId = resultSet.getString("user_id");

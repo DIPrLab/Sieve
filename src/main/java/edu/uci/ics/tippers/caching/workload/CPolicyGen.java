@@ -99,6 +99,16 @@ public class CPolicyGen {
         return START_RANGE.plusMinutes(randomIncrement * INCREMENT_MINUTES);
     }
 
+    private LocalTime generateRandomStartTimeSU(){
+        final LocalTime START_RANGE = LocalTime.of(9, 0); // Midnight
+        final LocalTime END_RANGE = LocalTime.of(17, 0); // Midnight
+        final int INCREMENT_MINUTES = 30;
+        Random random = new Random();
+        int totalIncrements = (int) ChronoUnit.MINUTES.between(START_RANGE, END_RANGE) / INCREMENT_MINUTES;
+        int randomIncrement = random.nextInt(totalIncrements + 1);
+        return START_RANGE.plusMinutes(randomIncrement * INCREMENT_MINUTES);
+    }
+
     public BEPolicy generateRandomPolicies(int querier, int owner_id, String owner_group, String owner_profile,
                                      TimeStampPredicate tsPred, String location, String action, int flag) {
         String policyID = UUID.randomUUID().toString();
@@ -159,6 +169,7 @@ public class CPolicyGen {
     public List<BEPolicy> generatePoliciesforAC(List<CUserGen.User> users){
 
         List<BEPolicy> policies = new ArrayList<>();
+        List<BEPolicy> locationsList = new ArrayList<>();
         for (CUserGen.User user: users){
 
             int numPolicies = 10;
@@ -177,6 +188,7 @@ public class CPolicyGen {
                         }
                         Random r = new Random();
                         int index = r.nextInt(possibleQueriers.size());
+//                        int locIndex = r.nextInt(all_locations.size());
                         BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
                                 user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
                                 PolicyConstants.ACTION_ALLOW, 1);
@@ -237,37 +249,44 @@ public class CPolicyGen {
     public List<BEPolicy> generatePoliciesforSU(List<CUserGen.User> users){
 
         List<BEPolicy> policies = new ArrayList<>();
+        List<Integer> possibleQueriers = new ArrayList<>();
+        List<String> all_locations_SU = pg.getAllLocations();
+        for (CUserGen.User u : users) {
+            if (u.getUserProfile().equals("faculty")) {
+                possibleQueriers.add(u.getId());
+            }
+            if (u.getUserProfile().equals("staff")) {
+                possibleQueriers.add(u.getId());
+            }
+        }
         for (CUserGen.User user: users) {
-            int numPolicies = 10;
+            int numPolicies = 1;
             for (int i = 0; i < numPolicies; i++) {
-                workingHours.setStartTime(LocalTime.of(9,0,0));
-                workingHours.setEndTime(LocalTime.of(17,0,0));
 
                 if (i<numPolicies){
-                    List<Integer> possibleQueriers = new ArrayList<>();
                     for (CUserGen.User u : users) {
-                        if (u.getUserProfile().equals("faculty") && user.getUserGroup().equals(u.getUserGroup())) {
-                            possibleQueriers.add(u.getId());
-                        }
-                        if (u.getUserProfile().equals("staff") && user.getUserGroup().equals(u.getUserGroup())) {
-                            possibleQueriers.add(u.getId());
-                        }
                         if(user.getUserProfile().equals("visitor")){
+                            workingHours.setStartTime(generateRandomStartTimeSU());
+                            workingHours.setEndTime(workingHours.getStartTime().plus(60, ChronoUnit.MINUTES));
                             Random r = new Random();
                             int index = r.nextInt(possibleQueriers.size());
+                            int locIndex = r.nextInt(all_locations_SU.size());
                             BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
-                                    user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
+                                    user.getUserGroup(),user.getUserProfile(), workingHours, all_locations_SU.get(locIndex),
                                     PolicyConstants.ACTION_ALLOW, 2);
                             policies.add(policy);
                         }
-                        workingHours.setStartTime(LocalTime.of(0,0,0));
-                        workingHours.setEndTime(LocalTime.of(23,59,59));
-                        Random r = new Random();
-                        int index = r.nextInt(possibleQueriers.size());
-                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
-                                user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
-                                PolicyConstants.ACTION_ALLOW, 2);
-                        policies.add(policy);
+                        else {
+                            workingHours.setStartTime(generateRandomStartTime());
+                            workingHours.setEndTime(workingHours.getStartTime().plus(60, ChronoUnit.MINUTES));
+                            Random r = new Random();
+                            int index = r.nextInt(possibleQueriers.size());
+                            int locIndex = r.nextInt(all_locations_SU.size());
+                            BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index), user.getId(),
+                                    user.getUserGroup(), user.getUserProfile(), workingHours, all_locations_SU.get(locIndex),
+                                    PolicyConstants.ACTION_ALLOW, 2);
+                            policies.add(policy);
+                        }
                     }
 //                    else {
 //                        List<Integer> possibleQueriers = new ArrayList<>();
@@ -294,8 +313,11 @@ public class CPolicyGen {
     public void runExpreriment () {
         CPolicyGen cpg = new CPolicyGen();
         CUserGen cUserGen = new CUserGen(1);
-        List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
-        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
+        System.out.println("Print after User Gen");
+        List<CUserGen.User> users = cUserGen.retrieveUserDataForSU();
+        System.out.println("Total number of entries: " + users.size());
+        System.out.println("Retrieving user data for : ");
+        List<BEPolicy> policies = cpg.generatePoliciesforSU(users);
         System.out.println("Total number of entries: " + users.size());
         System.out.println("Total number of entries: " + policies.size());
     }

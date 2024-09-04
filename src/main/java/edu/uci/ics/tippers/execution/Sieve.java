@@ -1,5 +1,6 @@
 package edu.uci.ics.tippers.execution;
 
+import edu.uci.ics.tippers.caching.workload.CPolicyGen;
 import edu.uci.ics.tippers.caching.workload.CUserGen;
 import edu.uci.ics.tippers.caching.workload.WorkloadGenerator;
 import edu.uci.ics.tippers.common.PolicyConstants;
@@ -31,10 +32,10 @@ public class Sieve {
         System.out.println("Test");
      //   GuardGenExp ggexp = new GuardGenExp();
 //       ggexp.runExperiment();
-        CUserGen cug =new CUserGen(2);
-        cug.runExperiment(2);
-//        CPolicyGen cpg = new CPolicyGen();
-//        cpg.runExpreriment();
+//        CUserGen cug =new CUserGen(2);
+//        cug.runExperiment(2);
+        CPolicyGen cpg = new CPolicyGen();
+        cpg.runExpreriment();
            
 
         int regularInterval = 1; // Example regular interval

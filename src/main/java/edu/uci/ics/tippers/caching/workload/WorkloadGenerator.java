@@ -82,7 +82,7 @@ public class WorkloadGenerator {
         int dynamicPolicySize = (int) Math.floor(sizeOfPolicies/3);
         int windowSize = 10;
         int generatedQueries = 0;
-        boolean cachingFlag = true;
+        boolean cachingFlag = false;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 //        System.out.println(dynamicPolicySize);
 

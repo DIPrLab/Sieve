@@ -264,7 +264,7 @@ public class CPolicyGen {
             for (int i = 0; i < numPolicies; i++) {
 
                 if (i<numPolicies){
-                    for (CUserGen.User u : users) {
+//                    for (CUserGen.User u : users) {
                         if(user.getUserProfile().equals("visitor")){
                             workingHours.setStartTime(generateRandomStartTimeSU());
                             workingHours.setEndTime(workingHours.getStartTime().plus(60, ChronoUnit.MINUTES));
@@ -286,7 +286,7 @@ public class CPolicyGen {
                                     user.getUserGroup(), user.getUserProfile(), workingHours, all_locations_SU.get(locIndex),
                                     PolicyConstants.ACTION_ALLOW, 2);
                             policies.add(policy);
-                        }
+//                        }
                     }
 //                    else {
 //                        List<Integer> possibleQueriers = new ArrayList<>();

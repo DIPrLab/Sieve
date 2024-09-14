@@ -2,6 +2,7 @@ package edu.uci.ics.tippers.execution;
 
 import edu.uci.ics.tippers.caching.workload.*;
 import edu.uci.ics.tippers.common.PolicyConstants;
+import edu.uci.ics.tippers.execution.experiments.design.GuardGenExp;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -29,22 +30,23 @@ public class Sieve {
         }
         System.out.println("Test");
      //   GuardGenExp ggexp = new GuardGenExp();
-   //    ggexp.runExperiment();
-//        CUserGen cug =new CUserGen();
-//        cug.runExperiment();
-//        CPolicyGen cpg = new CPolicyGen();
-//        cpg.runExpreriment();
-
-//        CQueryGenAC cqg = new CQueryGenAC();
-//        cqg.runExperiment();
+//       ggexp.runExperiment();
+//        CUserGen cug =new CUserGen(2);
+//        cug.runExperiment(2);
+        CPolicyGen cpg = new CPolicyGen();
+        cpg.runExpreriment();
+        GuardGenExp gge = new GuardGenExp();
+        gge.runExperiment();
+//        CQueryGenSU cqsu = new CQueryGenSU();
+//        cqsu.runExperiment();
            
 
         int regularInterval = 1; // Example regular interval
 //        int dynamicInterval = 1; // Example dynamic interval
 //        int duration = 5;
 //
-        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
-        generator.runExperiment();
+//        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
+//        generator.runExperiment();
 
 //        if(QUERY_PERFORMANCE_EXP) {
 //            if(PolicyConstants.DBMS_CHOICE.equalsIgnoreCase(PolicyConstants.PGSQL_DBMS))

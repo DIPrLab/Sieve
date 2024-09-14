@@ -60,9 +60,9 @@ public class MySQLConnectionManager {
             return connection;
         }
         try {
-//            connection = DriverManager.getConnection(
-//                    String.format("jdbc:mysql://%s:%s/%s?useLegacyDatetimeCode=false&serverTimezone=America/Los_Angeles&rewriteBatchedStatements=true&enabledTLSProtocols=TLSv1.2",
-//                            SERVER, PORT, DATABASE), USER, PASSWORD);
+            connection = DriverManager.getConnection(
+                    String.format("jdbc:mysql://%s:%s/%s?useLegacyDatetimeCode=false&serverTimezone=America/Los_Angeles&rewriteBatchedStatements=true&enabledTLSProtocols=TLSv1.2",
+                            SERVER, PORT, DATABASE), USER, PASSWORD);
             System.out.println("--- Connected to " + DATABASE + " on server " + SERVER + "---");
             countConnection = 1;
             System.out.println("Connection count: " + countConnection);

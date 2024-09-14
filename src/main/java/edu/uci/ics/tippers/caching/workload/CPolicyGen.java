@@ -12,8 +12,10 @@ import edu.uci.ics.tippers.persistor.PolicyPersistor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.time.temporal.ChronoUnit;
@@ -111,12 +113,18 @@ public class CPolicyGen {
 
     private LocalTime generateRandomStartTimeSU(){
         final LocalTime START_RANGE = LocalTime.of(0, 0); // Midnight
-        final LocalTime END_RANGE = LocalTime.of(0, 0); // Midnight
+        final LocalTime END_RANGE = LocalTime.of(23, 59); // Midnight
         final int INCREMENT_MINUTES = 30;
         Random random = new Random();
         int totalIncrements = (int) ChronoUnit.MINUTES.between(START_RANGE, END_RANGE) / INCREMENT_MINUTES;
         int randomIncrement = random.nextInt(totalIncrements + 1);
         return START_RANGE.plusMinutes(randomIncrement * INCREMENT_MINUTES);
+    }
+
+    public static LocalDate getRandomDateBetween(LocalDate startDate, LocalDate endDate) {
+        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        long randomDays = ThreadLocalRandom.current().nextLong(0, daysBetween + 1); // +1 to include endDate
+        return startDate.plusDays(randomDays);
     }
 
     public BEPolicy generateRandomPolicies(int querier, int owner_id, String owner_group, String owner_profile,
@@ -298,7 +306,7 @@ public class CPolicyGen {
                             System.out.println("Policy & Count: " + count + " " + policy.toString());
                         }
                         else {
-                            workingHours.setStartTime(generateRandomStartTimeVisitorSU());
+                            workingHours.setStartTime(generateRandomStartTimeSU());
                             workingHours.setEndTime(workingHours.getStartTime().plus(60, ChronoUnit.MINUTES));
                             Random r = new Random();
                             int index = r.nextInt(possibleQueriers.size());

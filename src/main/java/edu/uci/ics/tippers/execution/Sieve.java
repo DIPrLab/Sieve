@@ -35,8 +35,8 @@ public class Sieve {
 //        cug.runExperiment(2);
         CPolicyGen cpg = new CPolicyGen();
         cpg.runExpreriment();
-        GuardGenExp gge = new GuardGenExp();
-        gge.runExperiment();
+//        GuardGenExp gge = new GuardGenExp();
+//        gge.runExperiment();
 //        CQueryGenSU cqsu = new CQueryGenSU();
 //        cqsu.runExperiment();
            

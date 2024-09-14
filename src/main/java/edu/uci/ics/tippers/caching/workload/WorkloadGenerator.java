@@ -3,6 +3,7 @@ package edu.uci.ics.tippers.caching.workload;
 import edu.uci.ics.tippers.caching.CachingAlgorithm;
 import edu.uci.ics.tippers.caching.CircularHashMap;
 import edu.uci.ics.tippers.caching.ClockHashMap;
+import edu.uci.ics.tippers.caching.costmodel.Baseline1;
 import edu.uci.ics.tippers.caching.costmodel.CMWorkoad;
 import edu.uci.ics.tippers.caching.costmodel.CostModelsExp;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -40,6 +41,7 @@ public class WorkloadGenerator {
     QueryPerformance e;
     CachingAlgorithm ca;
     CostModelsExp cme;
+    Baseline1 baseline1;
     ClockHashMap<String, GuardExp> clockMap;
 
     public WorkloadGenerator(int regularInterval, int dynamicIntervalStart, int duration) {
@@ -50,6 +52,7 @@ public class WorkloadGenerator {
         e = new QueryPerformance();
         ca = new CachingAlgorithm();
         cme = new CostModelsExp();
+        baseline1 = new Baseline1<>();
         clockMap = new ClockHashMap<>();
     }
 
@@ -61,6 +64,7 @@ public class WorkloadGenerator {
         e = new QueryPerformance();
         ca = new CachingAlgorithm();
         cme = new CostModelsExp();
+        baseline1 = new Baseline1<>();
         clockMap = new ClockHashMap<>(3);
     }
 
@@ -93,10 +97,11 @@ public class WorkloadGenerator {
 
         CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(400);
         ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(400);
+        CircularHashMap<String, Integer> countUpdate = new CircularHashMap<>(400);
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "gcp_M_S40P1Q.txt";
+        String fileName = "oit_M_S5P1Q_100.txt";
 
         boolean first = true;
 
@@ -115,7 +120,7 @@ public class WorkloadGenerator {
 //        String fileName = "workload.json";
 
         if(cachingFlag){
-            System.out.println("!!!Caching+Merge!!!");
+            System.out.println("!!!Caching!!!");
             while (!queries.isEmpty() && !policies.isEmpty()) {
                 if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
@@ -203,8 +208,9 @@ public class WorkloadGenerator {
                 result.append(currentTime).append(",")
                         .append(query.toString()).append("\n");
                 String querier = e.runExperiment(query);
-               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-//                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
 
 
         // Add the number of policies and queries

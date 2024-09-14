@@ -25,6 +25,10 @@ public class MySQLConnectionManager {
     private static String PASSWORD;
     private static Connection connection;
 
+    private static final int MAX_CONNECTIONS =1000;
+
+    private static int countConnection;
+
     private MySQLConnectionManager() {
         try {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(String.valueOf
@@ -50,13 +54,18 @@ public class MySQLConnectionManager {
 
 
     public Connection getConnection() throws PolicyEngineException {
-        if (connection != null)
+        if (connection != null && countConnection<MAX_CONNECTIONS){
+            countConnection++;
+            System.out.println("Connection count: " + countConnection);
             return connection;
+        }
         try {
-            connection = DriverManager.getConnection(
-                    String.format("jdbc:mysql://%s:%s/%s?useLegacyDatetimeCode=false&serverTimezone=America/Los_Angeles&rewriteBatchedStatements=true",
-                            SERVER, PORT, DATABASE), USER, PASSWORD);
+//            connection = DriverManager.getConnection(
+//                    String.format("jdbc:mysql://%s:%s/%s?useLegacyDatetimeCode=false&serverTimezone=America/Los_Angeles&rewriteBatchedStatements=true&enabledTLSProtocols=TLSv1.2",
+//                            SERVER, PORT, DATABASE), USER, PASSWORD);
             System.out.println("--- Connected to " + DATABASE + " on server " + SERVER + "---");
+            countConnection = 1;
+            System.out.println("Connection count: " + countConnection);
             return connection;
         } catch (SQLException e) {
             e.printStackTrace();

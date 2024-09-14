@@ -202,7 +202,7 @@ public class CQueryGenAC extends QueryGen {
 //            querier = e.runExperiment(query);
 //            System.out.println(querier);
         }
-        cqg.insertQuery(queries);
+//        cqg.insertQuery(queries);
         System.out.println();
     }
 

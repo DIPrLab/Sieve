@@ -1,9 +1,8 @@
 package edu.uci.ics.tippers.execution;
 
-import edu.uci.ics.tippers.caching.workload.CPolicyGen;
-import edu.uci.ics.tippers.caching.workload.CUserGen;
-import edu.uci.ics.tippers.caching.workload.WorkloadGenerator;
+import edu.uci.ics.tippers.caching.workload.*;
 import edu.uci.ics.tippers.common.PolicyConstants;
+import edu.uci.ics.tippers.execution.experiments.design.GuardGenExp;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -36,6 +35,10 @@ public class Sieve {
 //        cug.runExperiment(2);
         CPolicyGen cpg = new CPolicyGen();
         cpg.runExpreriment();
+        GuardGenExp gge = new GuardGenExp();
+        gge.runExperiment();
+//        CQueryGenSU cqsu = new CQueryGenSU();
+//        cqsu.runExperiment();
            
 
         int regularInterval = 1; // Example regular interval

@@ -12,10 +12,14 @@ import edu.uci.ics.tippers.persistor.PolicyPersistor;
 
 import java.sql.Connection;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.sql.Connection;
 
@@ -79,6 +83,24 @@ public class CQueryGenSU extends QueryGen {
 
     }
 
+    public static LocalDate getRandomDateBetween(LocalDate startDate, LocalDate endDate) {
+        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        long randomDays = ThreadLocalRandom.current().nextLong(0, daysBetween + 1); // +1 to include endDate
+        return startDate.plusDays(randomDays);
+    }
+
+    public static LocalTime getRandomTime() {
+        // Define the range for time in seconds (86400 seconds in a day)
+        int minSeconds = 0; // 00:00:00
+        int maxSeconds = 24 * 60 * 60 - 1; // 23:59:59
+
+        // Generate a random number of seconds between 0 and 86399
+        int randomSeconds = ThreadLocalRandom.current().nextInt(minSeconds, maxSeconds + 1);
+
+        // Return the random LocalTime
+        return LocalTime.ofSecondOfDay(randomSeconds);
+    }
+
     @Override
     public List<QueryStatement> createQuery1(int queryCount) {
         List<QueryStatement> queries = new ArrayList<>();
@@ -87,7 +109,14 @@ public class CQueryGenSU extends QueryGen {
         for (int numQ = 0; numQ < queryCount; numQ++) {
             // Generate query without considering selectivity
             int locs = r.nextInt(locations.size());
-            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 89, "00:00", duration);
+            LocalDate startSU = LocalDate.of(2018, 02, 01);
+            LocalDate endSU = LocalDate.of(2018, 04, 30);
+            LocalDate randomSUStart = getRandomDateBetween(startSU, endSU);
+            LocalDate randomSUEnd = getRandomDateBetween(randomSUStart, endSU);
+            LocalTime randomTime = getRandomTime();
+            Random r = new Random();
+            int randomDuration = r.nextInt(1440);
+            TimeStampPredicate tsPred = new TimeStampPredicate(randomSUStart, randomSUEnd, randomTime.toString(), randomDuration);
             String query = String.format("start_date >= \"%s\" AND start_date <= \"%s\" ",
                     tsPred.getStartDate().toString(), tsPred.getEndDate().toString());
             query += String.format("and start_time >= \"%s\" AND start_time <= \"%s\" ",
@@ -126,7 +155,14 @@ public class CQueryGenSU extends QueryGen {
                 // Ensure there is at least one user
                 userCount = 1;
             }
-            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 89, "00:00", 1439);
+            LocalDate startSU = LocalDate.of(2018, 02, 01);
+            LocalDate endSU = LocalDate.of(2018, 04, 30);
+            LocalDate randomSUStart = getRandomDateBetween(startSU, endSU);
+            LocalDate randomSUEnd = getRandomDateBetween(randomSUStart, endSU);
+            LocalTime randomTime = getRandomTime();
+            Random r = new Random();
+            int randomDuration = r.nextInt(1440);
+            TimeStampPredicate tsPred = new TimeStampPredicate(randomSUStart,randomSUEnd,randomTime.toString(), randomDuration);
             String query = String.format("start_date >= \"%s\" AND start_date <= \"%s\" ",
                     tsPred.getStartDate().toString(), tsPred.getEndDate().toString());
             query += String.format("and start_time >= \"%s\" AND start_time <= \"%s\" ",
@@ -167,8 +203,15 @@ public class CQueryGenSU extends QueryGen {
     public List<QueryStatement> createQuery4() {
         List<QueryStatement> queries = new ArrayList<>();
         for (int j = 0; j < 200; j++) {
+            LocalDate startSU = LocalDate.of(2018, 02, 01);
+            LocalDate endSU = LocalDate.of(2018, 04, 30);
+            LocalDate randomSUStart = getRandomDateBetween(startSU, endSU);
+            LocalDate randomSUEnd = getRandomDateBetween(randomSUStart, endSU);
+            LocalTime randomTime = getRandomTime();
+            Random r = new Random();
+            int randomDuration = r.nextInt(1440);
             // Generate query without considering selectivity
-            TimeStampPredicate tsPred = new TimeStampPredicate(pg.getDate("MIN"), 89, "00:00", 1439);
+            TimeStampPredicate tsPred = new TimeStampPredicate(randomSUStart, randomSUEnd, randomTime.toString(), randomDuration);
             String query = String.format("SELECT location_id, COUNT(*) FROM PRESENCE WHERE start_time >= \"%s\" " +
                             "AND start_time <= \"%s\" GROUP BY location_id",
                     tsPred.getStartTime().toString(), tsPred.getEndTime().toString());
@@ -186,13 +229,13 @@ public class CQueryGenSU extends QueryGen {
         CQueryGenSU cqg = new CQueryGenSU();
         QueryPerformance e = new QueryPerformance();
         boolean[] templates = {true, true, false, false};
-        int numOfQueries = 182180;
+        int numOfQueries = 200;
         String querier;
         List<QueryStatement> queries = cqg.constructWorkload(templates, numOfQueries);
         for (QueryStatement query : queries) {
             System.out.println(query.toString());
-            querier = e.runExperiment(query);
-            System.out.println(querier);
+//            querier = e.runExperiment(query);
+//            System.out.println(querier);
         }
         cqg.insertQuery(queries);
         System.out.println();

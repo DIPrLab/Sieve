@@ -199,8 +199,8 @@ public class CQueryGenAC extends QueryGen {
         List<QueryStatement> queries = cqg.constructWorkload(templates, numOfQueries);
         for (QueryStatement query : queries) {
             System.out.println(query.toString());
-            querier = e.runExperiment(query);
-            System.out.println(querier);
+//            querier = e.runExperiment(query);
+//            System.out.println(querier);
         }
         cqg.insertQuery(queries);
         System.out.println();

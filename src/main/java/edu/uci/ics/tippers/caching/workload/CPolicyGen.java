@@ -99,9 +99,19 @@ public class CPolicyGen {
         return START_RANGE.plusMinutes(randomIncrement * INCREMENT_MINUTES);
     }
 
+    private LocalTime generateRandomStartTimeVisitorSU(){
+        final LocalTime START_RANGE = LocalTime.of(9, 0);
+        final LocalTime END_RANGE = LocalTime.of(17, 0);
+        final int INCREMENT_MINUTES = 30;
+        Random random = new Random();
+        int totalIncrements = (int) ChronoUnit.MINUTES.between(START_RANGE, END_RANGE) / INCREMENT_MINUTES;
+        int randomIncrement = random.nextInt(totalIncrements + 1);
+        return START_RANGE.plusMinutes(randomIncrement * INCREMENT_MINUTES);
+    }
+
     private LocalTime generateRandomStartTimeSU(){
-        final LocalTime START_RANGE = LocalTime.of(9, 0); // Midnight
-        final LocalTime END_RANGE = LocalTime.of(17, 0); // Midnight
+        final LocalTime START_RANGE = LocalTime.of(0, 0); // Midnight
+        final LocalTime END_RANGE = LocalTime.of(0, 0); // Midnight
         final int INCREMENT_MINUTES = 30;
         Random random = new Random();
         int totalIncrements = (int) ChronoUnit.MINUTES.between(START_RANGE, END_RANGE) / INCREMENT_MINUTES;
@@ -251,6 +261,9 @@ public class CPolicyGen {
         List<BEPolicy> policies = new ArrayList<>();
         List<Integer> possibleQueriers = new ArrayList<>();
         List<String> all_locations_SU = pg.getAllLocations();
+        for(int i = 0; i < all_locations_SU.size(); i++) {
+            System.out.println("Location: " + all_locations_SU.get(i));
+        }
         for (CUserGen.User u : users) {
             if (u.getUserProfile().equals("faculty")) {
                 possibleQueriers.add(u.getId());
@@ -259,6 +272,11 @@ public class CPolicyGen {
                 possibleQueriers.add(u.getId());
             }
         }
+        for(int i = 0; i < possibleQueriers.size(); i++) {
+            System.out.println("Querier: " + possibleQueriers.get(i));
+        }
+        System.out.println("Size: " + possibleQueriers.size());
+        int count = 0;
         for (CUserGen.User user: users) {
             int numPolicies = 1;
             for (int i = 0; i < numPolicies; i++) {
@@ -266,18 +284,22 @@ public class CPolicyGen {
                 if (i<numPolicies){
 //                    for (CUserGen.User u : users) {
                         if(user.getUserProfile().equals("visitor")){
-                            workingHours.setStartTime(generateRandomStartTimeSU());
+                            workingHours.setStartTime(generateRandomStartTimeVisitorSU());
                             workingHours.setEndTime(workingHours.getStartTime().plus(60, ChronoUnit.MINUTES));
                             Random r = new Random();
                             int index = r.nextInt(possibleQueriers.size());
                             int locIndex = r.nextInt(all_locations_SU.size());
-                            BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
+                            BEPolicy policy =
+                                    generateRandomPolicies(possibleQueriers.get(index),user.getId(),
                                     user.getUserGroup(),user.getUserProfile(), workingHours, all_locations_SU.get(locIndex),
                                     PolicyConstants.ACTION_ALLOW, 2);
                             policies.add(policy);
+                            count++;
+
+                            System.out.println("Policy & Count: " + count + " " + policy.toString());
                         }
                         else {
-                            workingHours.setStartTime(generateRandomStartTime());
+                            workingHours.setStartTime(generateRandomStartTimeVisitorSU());
                             workingHours.setEndTime(workingHours.getStartTime().plus(60, ChronoUnit.MINUTES));
                             Random r = new Random();
                             int index = r.nextInt(possibleQueriers.size());
@@ -286,6 +308,8 @@ public class CPolicyGen {
                                     user.getUserGroup(), user.getUserProfile(), workingHours, all_locations_SU.get(locIndex),
                                     PolicyConstants.ACTION_ALLOW, 2);
                             policies.add(policy);
+                            count++;
+                            System.out.println("Policy & Count: " + count + " " + policy.toString());
 //                        }
                     }
 //                    else {
@@ -305,6 +329,14 @@ public class CPolicyGen {
                 }
             }
         }
+        /*
+        To print policies generated and store it in the DB
+         */
+        for (BEPolicy policy : policies) {
+            System.out.println(policy.toString());
+        }
+        System.out.println();
+        polper.insertPolicy(policies);
         return policies;
     }
 

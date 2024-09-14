@@ -21,3 +21,5 @@ target/
 #
 #data/
 
+*credentials/
+src/main/resources/credentials/sample/sample.properties

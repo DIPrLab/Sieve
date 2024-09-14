@@ -55,22 +55,7 @@ public class CUserGen {
      */
     public List<User> retrieveUserDataForSU() {
         List<User> users = new ArrayList<>();
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group " +
-                    "FROM sieve.APP_USER WHERE user_profile NOT IN ('visitor')");
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String userId = resultSet.getString("user_id");
-                String userProfile = resultSet.getString("user_profile");
-                String userGroup = resultSet.getString("user_group");
-                User user = new User(id, userId, userProfile, userGroup);
-                users.add(user);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // TODO
         return users;
     }
 
@@ -83,8 +68,8 @@ public class CUserGen {
         System.out.println("Total number of entries: " + users.size());
     }
 
-    public void runExperiment(int flag) {
-        CUserGen cug = new CUserGen(flag);
+    public void runExperiment() {
+        CUserGen cug = new CUserGen(1);
         List<User> users;
         if( cug.flag == 1) {
             users = cug.retrieveUserDataForAC();

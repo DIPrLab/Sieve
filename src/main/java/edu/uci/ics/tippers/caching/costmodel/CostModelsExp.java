@@ -47,7 +47,7 @@ public class CostModelsExp <C,Q> {
         e = new QueryPerformance();
         writer = new Writer();
         result = new StringBuilder();
-        fileName = "oit_M_S5P1Q_100.csv";
+        fileName = "cons_M_S20P1Q_20.csv";
         result.append("Querier"). append(",")
                 .append("Cache log").append("\n");
         writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);

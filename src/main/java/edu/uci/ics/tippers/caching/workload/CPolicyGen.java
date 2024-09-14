@@ -161,9 +161,8 @@ public class CPolicyGen {
         List<BEPolicy> policies = new ArrayList<>();
         for (CUserGen.User user: users){
 
-            int numPolicies = 10;
-
-            for (int i = 0; i < numPolicies; i++) {
+            int numPolicies = 20;
+             for (int i = 0; i < numPolicies; i++) {
                 workingHours.setStartTime(generateRandomStartTime());
                 workingHours.setEndTime(workingHours.getStartTime().plus(120, ChronoUnit.MINUTES));
                 if (i<numPolicies){

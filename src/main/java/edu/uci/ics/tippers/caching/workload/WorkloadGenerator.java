@@ -95,13 +95,13 @@ public class WorkloadGenerator {
         int batchSize = 2;
         List<QueryStatement> batchQueries = new ArrayList<>();
 
-        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(400);
-        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(400);
+        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(80);
+        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(80);
         CircularHashMap<String, Integer> countUpdate = new CircularHashMap<>(400);
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "oit_M_S5P1Q_100.txt";
+        String fileName = "cons_M_S20P1Q_20.txt";
 
         boolean first = true;
 
@@ -192,25 +192,28 @@ public class WorkloadGenerator {
 //                }
 
 //                Steady State
-                if (generatedQueries % 2 == 0){
-                    if(queryWindow.size() < windowSize){
-                        queryWindow.add(queries.remove(0));
+                if(generatedQueries<3153){
+                    if (generatedQueries % 2 == 0){
+                        if(queryWindow.size() < windowSize){
+                            queryWindow.add(queries.remove(0));
+                        }else{
+                            queryWindow.removeFirst();
+                            queryWindow.add(queries.remove(0));
+                        }
+                        query = queryWindow.getLast();
                     }else{
-                        queryWindow.removeFirst();
-                        queryWindow.add(queries.remove(0));
+                        int index = random.nextInt(queryWindow.size());
+                        query = queryWindow.get(index);
                     }
-                    query = queryWindow.getLast();
-                }else{
-                    int index = random.nextInt(queryWindow.size());
-                    query = queryWindow.get(index);
-                }
-                generatedQueries++;
-                result.append(currentTime).append(",")
-                        .append(query.toString()).append("\n");
-                String querier = e.runExperiment(query);
+                    generatedQueries++;
+                    result.append(currentTime).append(",")
+                            .append(query.toString()).append("\n");
+                    String querier = e.runExperiment(query);
 //               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-                cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                    cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
+                }
+
 
 
         // Add the number of policies and queries
@@ -320,24 +323,27 @@ public class WorkloadGenerator {
 //                }
 
 //                Steady State
-                if (generatedQueries % 2 == 0){
-                    if(queryWindow.size() < windowSize){
-                        queryWindow.add(queries.remove(0));
+                if(generatedQueries<=4728){
+                    if (generatedQueries % 2 == 0){
+                        if(queryWindow.size() < windowSize){
+                            queryWindow.add(queries.remove(0));
+                        }else{
+                            queryWindow.removeFirst();
+                            queryWindow.add(queries.remove(0));
+                        }
+                        query = queryWindow.getLast();
                     }else{
-                        queryWindow.removeFirst();
-                        queryWindow.add(queries.remove(0));
+                        int index = random.nextInt(queryWindow.size());
+                        query = queryWindow.get(index);
                     }
-                    query = queryWindow.getLast();
-                }else{
-                    int index = random.nextInt(queryWindow.size());
-                    query = queryWindow.get(index);
+                    generatedQueries++;
+                    result.append(currentTime).append(",")
+                            .append(query.toString()).append("\n");
+                    String querier = e.runExperiment(query);
+                    GuardExp GE = ca.SieveGG(querier, query);
+                    String answer = e.runGE(querier, query, GE);
                 }
-                generatedQueries++;
-                result.append(currentTime).append(",")
-                        .append(query.toString()).append("\n");
-                String querier = e.runExperiment(query);
-                GuardExp GE = ca.SieveGG(querier, query);
-                String answer = e.runGE(querier, query, GE);
+
 //                System.out.println(GE);
         // Add queries to the array
 //        for (QueryStatement query : queries) {
@@ -417,7 +423,7 @@ public class WorkloadGenerator {
 //        }
 //        System.out.println();
 
-        int queryCount = 3940;
+        int queryCount = 1576;
         boolean[] templates = {true, true, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {
@@ -439,7 +445,7 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 5; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 20; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
 

@@ -101,7 +101,7 @@ public class DataGeneration {
             else if (Stream.of("lounge", "meeting_room", "conference_room").anyMatch(infra.getType()::equalsIgnoreCase)) {
                 activity = "meeting";
             }
-            else if (Stream.of("credentials.sample/lab", "faculty_office", "office").anyMatch(infra.getType()::equalsIgnoreCase)){
+            else if (Stream.of("credentials/lab", "faculty_office", "office").anyMatch(infra.getType()::equalsIgnoreCase)){
                 activity = "work";
             }
             else if (Stream.of("male_restroom", "female_restroom", "kitchen").anyMatch(infra.getType()::equalsIgnoreCase)){

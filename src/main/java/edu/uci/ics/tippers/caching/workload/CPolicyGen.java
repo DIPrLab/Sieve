@@ -12,10 +12,8 @@ import edu.uci.ics.tippers.persistor.PolicyPersistor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.time.temporal.ChronoUnit;
@@ -196,7 +194,6 @@ public class CPolicyGen {
     public List<BEPolicy> generatePoliciesforAC(List<CUserGen.User> users){
 
         List<BEPolicy> policies = new ArrayList<>();
-        List<BEPolicy> locationsList = new ArrayList<>();
         for (CUserGen.User user: users){
 
             int numPolicies = 20;
@@ -214,7 +211,6 @@ public class CPolicyGen {
                         }
                         Random r = new Random();
                         int index = r.nextInt(possibleQueriers.size());
-//                        int locIndex = r.nextInt(all_locations.size());
                         BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(),
                                 user.getUserGroup(),user.getUserProfile(), workingHours, user.getUserGroup(),
                                 PolicyConstants.ACTION_ALLOW, 1);
@@ -381,12 +377,10 @@ public class CPolicyGen {
 
     public void runExpreriment () {
         CPolicyGen cpg = new CPolicyGen();
-        CUserGen cUserGen = new CUserGen(2);
-        System.out.println("Print after User Gen");
-        List<CUserGen.User> users = cUserGen.retrieveUserDataForSU();
-        System.out.println("Total number of entries: " + users.size());
-        System.out.println("Retrieving user data for : ");
-        List<BEPolicy> policies = cpg.generatePoliciesforSU(users);
+        CUserGen cUserGen = new CUserGen(1);
+        List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
+        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
+
         System.out.println("Total number of entries: " + users.size());
         System.out.println("Total number of entries: " + policies.size());
     }

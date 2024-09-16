@@ -1,32 +1,5 @@
 package edu.uci.ics.tippers.caching.workload;
 
-import edu.uci.ics.tippers.generation.query.QueryGen;
-import edu.uci.ics.tippers.persistor.PolicyPersistor;
-import edu.uci.ics.tippers.dbms.mysql.MySQLConnectionManager;
-import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
-import edu.uci.ics.tippers.generation.policy.WiFiDataSet.PolicyUtil;
-import edu.uci.ics.tippers.generation.query.QueryGen;
-import edu.uci.ics.tippers.model.policy.TimeStampPredicate;
-import edu.uci.ics.tippers.model.query.QueryStatement;
-import edu.uci.ics.tippers.persistor.PolicyPersistor;
-
-import java.sql.Connection;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.sql.Connection;
-
-/*
-Write queries for space-usage scenario.
-You can start with copy-paste the CQueryGenAC and start making edits on it.
- */
 public class CQueryGenSU extends QueryGen {
     private Connection connection;
 
@@ -240,5 +213,4 @@ public class CQueryGenSU extends QueryGen {
 //        cqg.insertQuery(queries);
         System.out.println();
     }
-    // TODO
 }

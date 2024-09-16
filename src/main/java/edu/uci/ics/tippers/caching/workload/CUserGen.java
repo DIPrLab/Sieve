@@ -83,8 +83,8 @@ public class CUserGen {
         System.out.println("Total number of entries: " + users.size());
     }
 
-    public void runExperiment(int flag) {
-        CUserGen cug = new CUserGen(flag);
+    public void runExperiment() {
+        CUserGen cug = new CUserGen(1);
         List<User> users;
         if( cug.flag == 1) {
             users = cug.retrieveUserDataForAC();

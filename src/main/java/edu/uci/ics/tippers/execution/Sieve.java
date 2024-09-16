@@ -33,12 +33,11 @@ public class Sieve {
 //       ggexp.runExperiment();
 //        CUserGen cug =new CUserGen(2);
 //        cug.runExperiment(2);
-        CPolicyGen cpg = new CPolicyGen();
-        cpg.runExpreriment();
-//        GuardGenExp gge = new GuardGenExp();
-//        gge.runExperiment();
-//        CQueryGenSU cqsu = new CQueryGenSU();
-//        cqsu.runExperiment();
+//        CPolicyGen cpg = new CPolicyGen();
+//        cpg.runExpreriment();
+
+        CQueryGenSU cqsu = new CQueryGenSU();
+        cqsu.runExperiment();
            
 
         int regularInterval = 1; // Example regular interval

@@ -229,15 +229,15 @@ public class CQueryGenSU extends QueryGen {
         CQueryGenSU cqg = new CQueryGenSU();
         QueryPerformance e = new QueryPerformance();
         boolean[] templates = {true, true, false, false};
-        int numOfQueries = 200;
+        int numOfQueries = 4555;
         String querier;
         List<QueryStatement> queries = cqg.constructWorkload(templates, numOfQueries);
         for (QueryStatement query : queries) {
             System.out.println(query.toString());
-//            querier = e.runExperiment(query);
-//            System.out.println(querier);
+            querier = e.runExperiment(query);
+            System.out.println(querier);
         }
-        cqg.insertQuery(queries);
+//        cqg.insertQuery(queries);
         System.out.println();
     }
     // TODO

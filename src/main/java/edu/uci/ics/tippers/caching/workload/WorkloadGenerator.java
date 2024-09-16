@@ -95,13 +95,13 @@ public class WorkloadGenerator {
         int batchSize = 2;
         List<QueryStatement> batchQueries = new ArrayList<>();
 
-        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(80);
-        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(80);
+        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(1134);
+        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(1134);
         CircularHashMap<String, Integer> countUpdate = new CircularHashMap<>(400);
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "cons_M_S20P1Q_20.txt";
+        String fileName = "SU_C_S20P1Q_80.txt";
 
         boolean first = true;
 
@@ -192,7 +192,7 @@ public class WorkloadGenerator {
 //                }
 
 //                Steady State
-                if(generatedQueries<3153){
+                if(generatedQueries<18218){
                     if (generatedQueries % 2 == 0){
                         if(queryWindow.size() < windowSize){
                             queryWindow.add(queries.remove(0));
@@ -209,8 +209,8 @@ public class WorkloadGenerator {
                     result.append(currentTime).append(",")
                             .append(query.toString()).append("\n");
                     String querier = e.runExperiment(query);
-//               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-                    cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//                    cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
                 }
 
@@ -323,7 +323,7 @@ public class WorkloadGenerator {
 //                }
 
 //                Steady State
-                if(generatedQueries<=4728){
+                if(generatedQueries<=18218){
                     if (generatedQueries % 2 == 0){
                         if(queryWindow.size() < windowSize){
                             queryWindow.add(queries.remove(0));
@@ -423,7 +423,7 @@ public class WorkloadGenerator {
 //        }
 //        System.out.println();
 
-        int queryCount = 1576;
+        int queryCount = 9110;
         boolean[] templates = {true, true, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {

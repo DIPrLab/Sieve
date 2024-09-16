@@ -127,6 +127,15 @@ public class CPolicyGen {
         return startDate.plusDays(randomDays);
     }
 
+    public static int getRandomDuration() {
+        Random r = new Random();
+        int duration = r.nextInt(300);
+        if (duration < 30) {
+            getRandomDuration();
+        }
+        return duration;
+    }
+
     public BEPolicy generateRandomPolicies(int querier, int owner_id, String owner_group, String owner_profile,
                                      TimeStampPredicate tsPred, String location, String action, int flag) {
         String policyID = UUID.randomUUID().toString();
@@ -268,9 +277,9 @@ public class CPolicyGen {
         List<BEPolicy> policies = new ArrayList<>();
         List<Integer> possibleQueriers = new ArrayList<>();
         List<String> all_locations_SU = pg.getAllLocations();
-        for(int i = 0; i < all_locations_SU.size(); i++) {
-            System.out.println("Location: " + all_locations_SU.get(i));
-        }
+//        for(int i = 0; i < all_locations_SU.size(); i++) {
+//            System.out.println("Location: " + all_locations_SU.get(i));
+//        }
         for (CUserGen.User u : users) {
             if (u.getUserProfile().equals("faculty")) {
                 possibleQueriers.add(u.getId());
@@ -279,46 +288,67 @@ public class CPolicyGen {
                 possibleQueriers.add(u.getId());
             }
         }
-        for(int i = 0; i < possibleQueriers.size(); i++) {
-            System.out.println("Querier: " + possibleQueriers.get(i));
-        }
-        System.out.println("Size: " + possibleQueriers.size());
-        int count = 0;
+//        for(int i = 0; i < possibleQueriers.size(); i++) {
+//            System.out.println("Querier: " + possibleQueriers.get(i));
+//        }
+//        System.out.println("Size: " + possibleQueriers.size());
+//        int count = 0;
         for (CUserGen.User user: users) {
-            int numPolicies = 1;
+            int numPolicies = 10;
             for (int i = 0; i < numPolicies; i++) {
-
-                if (i<numPolicies){
-//                    for (CUserGen.User u : users) {
-                        if(user.getUserProfile().equals("visitor")){
-                            workingHours.setStartTime(generateRandomStartTimeVisitorSU());
-                            workingHours.setEndTime(workingHours.getStartTime().plus(60, ChronoUnit.MINUTES));
-                            Random r = new Random();
-                            int index = r.nextInt(possibleQueriers.size());
-                            int locIndex = r.nextInt(all_locations_SU.size());
-                            BEPolicy policy =
-                                    generateRandomPolicies(possibleQueriers.get(index),user.getId(),
-                                    user.getUserGroup(),user.getUserProfile(), workingHours, all_locations_SU.get(locIndex),
-                                    PolicyConstants.ACTION_ALLOW, 2);
-                            policies.add(policy);
-                            count++;
-
-                            System.out.println("Policy & Count: " + count + " " + policy.toString());
+                int randomDuration = getRandomDuration();
+                boolean duration = false;
+//                   for (CUserGen.User u : users) {
+                if(user.getUserProfile().equals("visitor")){
+                    workingHours.setStartTime(generateRandomStartTimeVisitorSU());
+                    while (duration == false) {
+                        if (workingHours.getStartTime().toSecondOfDay() + randomDuration < (24 * 60 * 60)) {
+                            workingHours.setEndTime(workingHours.getStartTime().plus(randomDuration, ChronoUnit.MINUTES));
+                            duration = true;
                         }
-                        else {
-                            workingHours.setStartTime(generateRandomStartTimeSU());
-                            workingHours.setEndTime(workingHours.getStartTime().plus(60, ChronoUnit.MINUTES));
-                            Random r = new Random();
-                            int index = r.nextInt(possibleQueriers.size());
-                            int locIndex = r.nextInt(all_locations_SU.size());
-                            BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index), user.getId(),
-                                    user.getUserGroup(), user.getUserProfile(), workingHours, all_locations_SU.get(locIndex),
-                                    PolicyConstants.ACTION_ALLOW, 2);
-                            policies.add(policy);
-                            count++;
-                            System.out.println("Policy & Count: " + count + " " + policy.toString());
-//                        }
+                        randomDuration = getRandomDuration();
                     }
+                    LocalDate startSU = LocalDate.of(2018, 02, 01);
+                    LocalDate endSU = LocalDate.of(2018, 04, 30);
+                    LocalDate randomSUStart = getRandomDateBetween(startSU, endSU);
+                    LocalDate randomSUEnd = getRandomDateBetween(randomSUStart, endSU);
+                    workingHours.setStartDate(randomSUStart);
+                    workingHours.setEndDate(randomSUEnd);
+                    Random r = new Random();
+                    int index = r.nextInt(possibleQueriers.size());
+                    int locIndex = r.nextInt(all_locations_SU.size());
+                    BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index),user.getId(), user.getUserGroup(),user.getUserProfile(), workingHours, all_locations_SU.get(locIndex), PolicyConstants.ACTION_ALLOW, 2);
+                    policies.add(policy);
+//                    count++;
+
+//                    System.out.println("Policy & Count: " + count + " " + policy.toString());
+                }
+                else {
+                    workingHours.setStartTime(generateRandomStartTimeSU());
+                    while (duration == false) {
+                        if (workingHours.getStartTime().toSecondOfDay() + randomDuration < (24 * 60 * 60)) {
+                            workingHours.setEndTime(workingHours.getStartTime().plus(randomDuration, ChronoUnit.MINUTES));
+                            duration = true;
+                        }
+                        randomDuration = getRandomDuration();
+                    }
+                    LocalDate startSU = LocalDate.of(2018, 02, 01);
+                    LocalDate endSU = LocalDate.of(2018, 04, 30);
+                    LocalDate randomSUStart = getRandomDateBetween(startSU, endSU);
+                    LocalDate randomSUEnd = getRandomDateBetween(randomSUStart, endSU);
+                    workingHours.setStartDate(randomSUStart);
+                    workingHours.setEndDate(randomSUEnd);
+                    Random r = new Random();
+                    int index = r.nextInt(possibleQueriers.size());
+                    int locIndex = r.nextInt(all_locations_SU.size());
+                    BEPolicy policy = generateRandomPolicies(possibleQueriers.get(index), user.getId(),
+                            user.getUserGroup(), user.getUserProfile(), workingHours, all_locations_SU.get(locIndex),
+                            PolicyConstants.ACTION_ALLOW, 2);
+                    policies.add(policy);
+     //               count++;
+//                    System.out.println("Policy & Count: " + count + " " + policy.toString());
+//                  }
+                }
 //                    else {
 //                        List<Integer> possibleQueriers = new ArrayList<>();
 //                        for (CUserGen.User u : users) {
@@ -333,7 +363,7 @@ public class CPolicyGen {
 //                                PolicyConstants.ACTION_ALLOW, 2);
 //                        policies.add(policy);
 //                    }
-                }
+
             }
         }
         /*
@@ -351,7 +381,7 @@ public class CPolicyGen {
 
     public void runExpreriment () {
         CPolicyGen cpg = new CPolicyGen();
-        CUserGen cUserGen = new CUserGen(1);
+        CUserGen cUserGen = new CUserGen(2);
         System.out.println("Print after User Gen");
         List<CUserGen.User> users = cUserGen.retrieveUserDataForSU();
         System.out.println("Total number of entries: " + users.size());

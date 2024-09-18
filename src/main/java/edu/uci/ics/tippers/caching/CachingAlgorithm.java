@@ -43,7 +43,7 @@ public class CachingAlgorithm <C,Q> {
         e = new QueryPerformance();
         writer = new Writer();
         result = new StringBuilder();
-        fileName = "oit_M_S5P1Q_100.csv";
+        fileName = "SU_C_S20P1Q_80.csv";
         result.append("Querier"). append(",")
                 .append("Cache log").append(",")
                 .append("Generation Time").append(",")

@@ -87,7 +87,7 @@ public class WorkloadGenerator {
         int windowSize = 10;
         int generatedQueries = 0;
         int yQuery = 2;
-        boolean cachingFlag = false;
+        boolean cachingFlag = true;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 //        System.out.println(dynami
 //
@@ -105,7 +105,7 @@ public class WorkloadGenerator {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "CEE_N_S1P2Q_80.txt";
+        String fileName = "CEE_C_S5P2Q_80.txt";
 
         boolean first = true;
 
@@ -125,7 +125,7 @@ public class WorkloadGenerator {
 
         if(cachingFlag){
             System.out.println("!!!Caching!!!");
-            while (!queries.isEmpty() && !policies.isEmpty()) {
+            while (generatedQueries<15761 && !policies.isEmpty()) {
                 if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
         // Create a JSON object to hold the data
@@ -456,7 +456,7 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 1; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 5; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
 

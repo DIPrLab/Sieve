@@ -125,7 +125,7 @@ public class WorkloadGenerator {
 
         if(cachingFlag){
             System.out.println("!!!Caching!!!");
-            while (generatedQueries<15761 && !policies.isEmpty()) {
+            while (!queries.isEmpty() && !policies.isEmpty()) {
                 if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
         // Create a JSON object to hold the data
@@ -220,7 +220,6 @@ public class WorkloadGenerator {
 //                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
                     }
                 }
-                }
 
 
 
@@ -260,7 +259,7 @@ public class WorkloadGenerator {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
 
                     //Insert policy into database
-                    for(BEPolicy policy: regularPolicies){
+                    for (BEPolicy policy : regularPolicies) {
                         result.append(currentTime).append(",")
                                 .append(policy.toString()).append("\n");
                         Instant pinsert = Instant.now();
@@ -268,12 +267,12 @@ public class WorkloadGenerator {
                         policy.setInserted_at(policyinsertionTime);
                     }
                     nextRegularPolicyInsertionTime += regularInterval;
-        // Create an array to hold policies and queries
+                    // Create an array to hold policies and queries
 //        JsonArray policiesAndQueriesArray = new JsonArray();
 
                     polper.insertPolicy(regularPolicies);
                 }
-        // Add policies to the array
+                // Add policies to the array
 //        for (BEPolicy policy : policies) {
 //            JsonObject policyJson = gson.toJsonTree(policy).getAsJsonObject();
 //            policyJson.addProperty("type", "BEPolicy");
@@ -331,17 +330,17 @@ public class WorkloadGenerator {
 //                }
 
 //                Steady State
-                for (int i=0; i<yQuery; i++){
-                    if(generatedQueries<=18218){
-                        if (generatedQueries % 2 == 0){
-                            if(queryWindow.size() < windowSize){
+                for (int i = 0; i < yQuery; i++) {
+                    if (generatedQueries <= 18218) {
+                        if (generatedQueries % 2 == 0) {
+                            if (queryWindow.size() < windowSize) {
                                 queryWindow.add(queries.remove(0));
-                            }else{
+                            } else {
                                 queryWindow.removeFirst();
                                 queryWindow.add(queries.remove(0));
                             }
                             query = queryWindow.getLast();
-                        }else{
+                        } else {
                             int index = random.nextInt(queryWindow.size());
                             query = queryWindow.get(index);
                         }
@@ -353,7 +352,7 @@ public class WorkloadGenerator {
                         String answer = e.runGE(querier, query, GE);
                     }
                 }
-		}
+
 
 //                System.out.println(GE);
         // Add queries to the array

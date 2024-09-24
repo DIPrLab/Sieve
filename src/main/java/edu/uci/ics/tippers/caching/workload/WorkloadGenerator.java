@@ -86,7 +86,8 @@ public class WorkloadGenerator {
         int dynamicPolicySize = (int) Math.floor(sizeOfPolicies/3);
         int windowSize = 10;
         int generatedQueries = 0;
-        boolean cachingFlag = true;
+        int yQuery = 2;
+        boolean cachingFlag = false;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 //        System.out.println(dynamicPolicySize);
 
@@ -95,13 +96,13 @@ public class WorkloadGenerator {
         int batchSize = 2;
         List<QueryStatement> batchQueries = new ArrayList<>();
 
-        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(1134);
-        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(1134);
+        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(320);
+        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(320);
         CircularHashMap<String, Integer> countUpdate = new CircularHashMap<>(400);
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
-        String fileName = "SU_C_S20P1Q_80.txt";
+        String fileName = "CEE_N_S1P2Q_80.txt";
 
         boolean first = true;
 
@@ -192,7 +193,8 @@ public class WorkloadGenerator {
 //                }
 
 //                Steady State
-                if(generatedQueries<18218){
+                for(int i=1; i<yQuery; i++) {
+                if(generatedQueries<15761){
                     if (generatedQueries % 2 == 0){
                         if(queryWindow.size() < windowSize){
                             queryWindow.add(queries.remove(0));
@@ -212,6 +214,7 @@ public class WorkloadGenerator {
                ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                    cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
+                }
                 }
 
 
@@ -323,7 +326,8 @@ public class WorkloadGenerator {
 //                }
 
 //                Steady State
-                if(generatedQueries<=18218){
+                for(int i=0; i<yQuery ; i++){
+                if(generatedQueries<15761){
                     if (generatedQueries % 2 == 0){
                         if(queryWindow.size() < windowSize){
                             queryWindow.add(queries.remove(0));
@@ -343,6 +347,7 @@ public class WorkloadGenerator {
                     GuardExp GE = ca.SieveGG(querier, query);
                     String answer = e.runGE(querier, query, GE);
                 }
+		}
 
 //                System.out.println(GE);
         // Add queries to the array
@@ -445,7 +450,7 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 20; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 1; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
 

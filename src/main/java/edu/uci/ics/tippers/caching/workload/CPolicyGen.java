@@ -1,3 +1,4 @@
+
 package edu.uci.ics.tippers.caching.workload;
 
 import edu.uci.ics.tippers.common.AttributeType;
@@ -12,8 +13,10 @@ import edu.uci.ics.tippers.persistor.PolicyPersistor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.time.temporal.ChronoUnit;
@@ -196,7 +199,7 @@ public class CPolicyGen {
         List<BEPolicy> policies = new ArrayList<>();
         for (CUserGen.User user: users){
 
-            int numPolicies = 20;
+            int numPolicies = 3;
              for (int i = 0; i < numPolicies; i++) {
                 workingHours.setStartTime(generateRandomStartTime());
                 workingHours.setEndTime(workingHours.getStartTime().plus(120, ChronoUnit.MINUTES));

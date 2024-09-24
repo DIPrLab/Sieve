@@ -89,7 +89,9 @@ public class WorkloadGenerator {
         int yQuery = 2;
         boolean cachingFlag = false;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
-//        System.out.println(dynamicPolicySize);
+//        System.out.println(dynami
+//
+//        cPolicySize);
 
         QueryStatement query = new QueryStatement();
         Random random = new Random();
@@ -102,6 +104,7 @@ public class WorkloadGenerator {
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
+
         String fileName = "CEE_N_S1P2Q_80.txt";
 
         boolean first = true;
@@ -193,27 +196,29 @@ public class WorkloadGenerator {
 //                }
 
 //                Steady State
-                for(int i=1; i<yQuery; i++) {
-                if(generatedQueries<15761){
-                    if (generatedQueries % 2 == 0){
-                        if(queryWindow.size() < windowSize){
-                            queryWindow.add(queries.remove(0));
+
+                for (int i=0; i<yQuery; i++){
+                    if(generatedQueries<3153){
+                        if (generatedQueries % 2 == 0){
+                            if(queryWindow.size() < windowSize){
+                                queryWindow.add(queries.remove(0));
+                            }else{
+                                queryWindow.removeFirst();
+                                queryWindow.add(queries.remove(0));
+                            }
+                            query = queryWindow.getLast();
                         }else{
-                            queryWindow.removeFirst();
-                            queryWindow.add(queries.remove(0));
+                            int index = random.nextInt(queryWindow.size());
+                            query = queryWindow.get(index);
                         }
-                        query = queryWindow.getLast();
-                    }else{
-                        int index = random.nextInt(queryWindow.size());
-                        query = queryWindow.get(index);
-                    }
-                    generatedQueries++;
-                    result.append(currentTime).append(",")
-                            .append(query.toString()).append("\n");
-                    String querier = e.runExperiment(query);
-               ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-//                    cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                        generatedQueries++;
+                        result.append(currentTime).append(",")
+                                .append(query.toString()).append("\n");
+                        String querier = e.runExperiment(query);
+                        ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+//                        cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
+                    }
                 }
                 }
 
@@ -326,26 +331,27 @@ public class WorkloadGenerator {
 //                }
 
 //                Steady State
-                for(int i=0; i<yQuery ; i++){
-                if(generatedQueries<15761){
-                    if (generatedQueries % 2 == 0){
-                        if(queryWindow.size() < windowSize){
-                            queryWindow.add(queries.remove(0));
+                for (int i=0; i<yQuery; i++){
+                    if(generatedQueries<=18218){
+                        if (generatedQueries % 2 == 0){
+                            if(queryWindow.size() < windowSize){
+                                queryWindow.add(queries.remove(0));
+                            }else{
+                                queryWindow.removeFirst();
+                                queryWindow.add(queries.remove(0));
+                            }
+                            query = queryWindow.getLast();
                         }else{
-                            queryWindow.removeFirst();
-                            queryWindow.add(queries.remove(0));
+                            int index = random.nextInt(queryWindow.size());
+                            query = queryWindow.get(index);
                         }
-                        query = queryWindow.getLast();
-                    }else{
-                        int index = random.nextInt(queryWindow.size());
-                        query = queryWindow.get(index);
+                        generatedQueries++;
+                        result.append(currentTime).append(",")
+                                .append(query.toString()).append("\n");
+                        String querier = e.runExperiment(query);
+                        GuardExp GE = ca.SieveGG(querier, query);
+                        String answer = e.runGE(querier, query, GE);
                     }
-                    generatedQueries++;
-                    result.append(currentTime).append(",")
-                            .append(query.toString()).append("\n");
-                    String querier = e.runExperiment(query);
-                    GuardExp GE = ca.SieveGG(querier, query);
-                    String answer = e.runGE(querier, query, GE);
                 }
 		}
 
@@ -428,7 +434,7 @@ public class WorkloadGenerator {
 //        }
 //        System.out.println();
 
-        int queryCount = 9110;
+        int queryCount = 1576;
         boolean[] templates = {true, true, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {

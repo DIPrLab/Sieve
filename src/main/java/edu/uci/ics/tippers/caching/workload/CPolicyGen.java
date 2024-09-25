@@ -262,6 +262,51 @@ public class CPolicyGen {
         return policies;
     }
 
+    public List<BEPolicy> generatePoliciesPerQueriesforAC(List<CUserGen.User> users){
+
+        List<BEPolicy> policies = new ArrayList<>();
+        List<Integer> possibleQueriers = new ArrayList<>();
+        for (CUserGen.User u : users) {
+            if (u.getUserProfile().equals("faculty")) {
+                possibleQueriers.add(u.getId());
+            }
+        }
+        System.out.println("Total no. of Queriers: " + possibleQueriers.size());
+        for (int i=0; i< possibleQueriers.size(); i++){
+
+            int numPolicies = 10;
+            for (int j = 0; j < numPolicies; j++) {
+                workingHours.setStartTime(generateRandomStartTime());
+                workingHours.setEndTime(workingHours.getStartTime().plus(120, ChronoUnit.MINUTES));
+
+                boolean flag = false;
+                while(!flag){
+                    Random r = new Random();
+                    int index = r.nextInt(users.size());
+                    CUserGen.User user = users.get(index);
+                    if(user.getUserProfile().equals("undergrad") || user.getUserProfile().equals("graduate")){
+                        BEPolicy policy = generateRandomPolicies(possibleQueriers.get(i), user.getId(),
+                                user.getUserGroup(), user.getUserProfile(), workingHours, user.getUserGroup(),
+                                PolicyConstants.ACTION_ALLOW, 1);
+                        policies.add(policy);
+                        flag = true;
+                    }
+                }
+            }
+        }
+
+        /*
+        To print policies generated and store it in the DB
+         */
+//        for (BEPolicy policy : policies) {
+//            System.out.println(policy.toString());
+//        }
+//        System.out.println();
+        polper.insertPolicy(policies);
+        return policies;
+    }
+
+
     /*
     This function generates policies for all the users sampled by CUserGen class.
     Variable numPolicies indicates the # of policies defined by each user
@@ -381,10 +426,10 @@ public class CPolicyGen {
         CPolicyGen cpg = new CPolicyGen();
         CUserGen cUserGen = new CUserGen(1);
         List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
-        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
+        List<BEPolicy> policies = cpg.generatePoliciesPerQueriesforAC(users);
 
         System.out.println("Total number of entries: " + users.size());
-        System.out.println("Total number of entries: " + policies.size());
+        System.out.println("Total number of policies: " + policies.size());
     }
 
 }

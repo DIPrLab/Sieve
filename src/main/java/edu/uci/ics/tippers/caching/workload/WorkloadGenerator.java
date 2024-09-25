@@ -125,7 +125,7 @@ public class WorkloadGenerator {
 
         if(cachingFlag){
             System.out.println("!!!Caching!!!");
-            while (!queries.isEmpty() && !policies.isEmpty()) {
+            while (generatedQueries<15761 && !policies.isEmpty() && !queries.isEmpty()) {
                 if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
         // Create a JSON object to hold the data
@@ -198,7 +198,7 @@ public class WorkloadGenerator {
 //                Steady State
 
                 for (int i=0; i<yQuery; i++){
-                    if(generatedQueries<3153){
+                    if(generatedQueries<15670){
                         if (generatedQueries % 2 == 0){
                             if(queryWindow.size() < windowSize){
                                 queryWindow.add(queries.remove(0));
@@ -249,7 +249,7 @@ public class WorkloadGenerator {
             }
         }else{
             System.out.println("!!! Without Caching!!!");
-            while (!policies.isEmpty() && !queries.isEmpty()) {
+            while (!policies.isEmpty() && !queries.isEmpty() && generatedQueries<15761) {
 //                if (generatedQueries <= 2000) n = 10;
 //                else if (generatedQueries <= 4000) n = 5;
 //                else n = 1;
@@ -331,7 +331,7 @@ public class WorkloadGenerator {
 
 //                Steady State
                 for (int i = 0; i < yQuery; i++) {
-                    if (generatedQueries <= 18218) {
+                    if (generatedQueries < 15761) {
                         if (generatedQueries % 2 == 0) {
                             if (queryWindow.size() < windowSize) {
                                 queryWindow.add(queries.remove(0));
@@ -433,7 +433,7 @@ public class WorkloadGenerator {
 //        }
 //        System.out.println();
 
-        int queryCount = 1576;
+        int queryCount = 7880;
         boolean[] templates = {true, true, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {

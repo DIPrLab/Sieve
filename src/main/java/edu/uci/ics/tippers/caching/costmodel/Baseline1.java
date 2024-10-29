@@ -47,7 +47,7 @@ public class Baseline1 <C,Q> {
         e = new QueryPerformance();
         writer = new Writer();
         result = new StringBuilder();
-        fileName = "oit_B1_S20P1Q.csv";
+        fileName = "ME_B1_S10P1Q.csv";
         result.append("Querier"). append(",")
                 .append("Cache log").append("\n");
         writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
@@ -158,7 +158,7 @@ public class Baseline1 <C,Q> {
 //                totalMergeTime = totalMergeTime.plus(Duration.between(fsStart, fsEnd));
 //                double secondsM = totalMergeTime.getSeconds() + totalMergeTime.getNano() / 1_000_000.0;
 
-                if(count == newPolicies.size() || (updateCount != null && updateCount >= 2)){
+                if(count == newPolicies.size() || (updateCount != null && updateCount >= 10)){
 
 //                    fsStart = Instant.now();
 //                    Duration totalGenTime = Duration.ofMillis(0);

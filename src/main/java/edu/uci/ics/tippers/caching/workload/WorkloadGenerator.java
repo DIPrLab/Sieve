@@ -84,9 +84,9 @@ public class WorkloadGenerator {
         int nextRegularPolicyInsertionTime = 0;
         int sizeOfPolicies = policies.size();
         int dynamicPolicySize = (int) Math.floor(sizeOfPolicies/3);
-        int windowSize = 10;
+        int windowSize = 50;
         int generatedQueries = 0;
-        int yQuery = 2;
+        int yQuery = 10;
         boolean cachingFlag = true;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 //        System.out.println(dynami
@@ -105,7 +105,7 @@ public class WorkloadGenerator {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "CEE_C_S5P2Q_80.txt";
+        String fileName = "WS_50_S5P10Q_80.txt";
 
         boolean first = true;
 
@@ -125,7 +125,7 @@ public class WorkloadGenerator {
 
         if(cachingFlag){
             System.out.println("!!!Caching!!!");
-            while (generatedQueries<15761 && !policies.isEmpty() && !queries.isEmpty()) {
+            while (!policies.isEmpty() && !queries.isEmpty() && generatedQueries<6305) {
                 if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
         // Create a JSON object to hold the data
@@ -198,7 +198,7 @@ public class WorkloadGenerator {
 //                Steady State
 
                 for (int i=0; i<yQuery; i++){
-                    if(generatedQueries<15670){
+                    if(generatedQueries<6305){
                         if (generatedQueries % 2 == 0){
                             if(queryWindow.size() < windowSize){
                                 queryWindow.add(queries.remove(0));
@@ -217,7 +217,7 @@ public class WorkloadGenerator {
                         String querier = e.runExperiment(query);
                         ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                        cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-//                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
+//                        baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
                     }
                 }
 
@@ -337,6 +337,7 @@ public class WorkloadGenerator {
                                 queryWindow.add(queries.remove(0));
                             } else {
                                 queryWindow.removeFirst();
+
                                 queryWindow.add(queries.remove(0));
                             }
                             query = queryWindow.getLast();
@@ -424,16 +425,19 @@ public class WorkloadGenerator {
         List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
 
         CPolicyGen cpg = new CPolicyGen();
+        List<BEPolicy> additionalpolicies = cpg.generatePoliciesPerQueriesforAC(users);
+        System.out.println("Total no. of additional policies: " + additionalpolicies.size());
+ 
         List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
 
         System.out.println("Total number of entries: " + users.size());
-        System.out.println("Total number of entries: " + policies.size());
+        System.out.println("Total number of policies: " + policies.size());
 //        for (BEPolicy policy : policies) {
 //            System.out.println(policy.toString());
 //        }
 //        System.out.println();
 
-        int queryCount = 7880;
+        int queryCount = 3152;
         boolean[] templates = {true, true, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {

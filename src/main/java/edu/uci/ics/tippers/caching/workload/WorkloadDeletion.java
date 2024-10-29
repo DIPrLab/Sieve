@@ -8,6 +8,7 @@ import edu.uci.ics.tippers.caching.costmodel.Baseline1;
 import edu.uci.ics.tippers.caching.costmodel.CostModelsExp;
 
 import edu.uci.ics.tippers.common.PolicyConstants;
+import edu.uci.ics.tippers.dbms.mysql.MySQLConnectionManager;
 import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
 import edu.uci.ics.tippers.fileop.Writer;
 
@@ -16,15 +17,12 @@ import edu.uci.ics.tippers.model.policy.BEPolicy;
 import edu.uci.ics.tippers.model.query.QueryStatement;
 import edu.uci.ics.tippers.persistor.PolicyPersistor;
 
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-public class WorkloadGenerator {
+public class WorkloadDeletion {
     private int regularInterval;
     private int dynamicIntervalStart;
     private int duration;
@@ -35,7 +33,9 @@ public class WorkloadGenerator {
     Baseline1 baseline1;
     ClockHashMap<String, GuardExp> clockMap;
 
-    public WorkloadGenerator(int regularInterval, int dynamicIntervalStart, int duration) {
+    private Connection connection;
+
+    public WorkloadDeletion(int regularInterval, int dynamicIntervalStart, int duration) {
         this.regularInterval = regularInterval;
         this.dynamicIntervalStart = dynamicIntervalStart;
         this.duration = duration;
@@ -45,9 +45,10 @@ public class WorkloadGenerator {
         cme = new CostModelsExp();
         baseline1 = new Baseline1<>();
         clockMap = new ClockHashMap<>();
+        connection = MySQLConnectionManager.getInstance().getConnection();
     }
 
-    public WorkloadGenerator(int regularInterval) {
+    public WorkloadDeletion(int regularInterval) {
         this.regularInterval = regularInterval;
         this.dynamicIntervalStart = 0;
         this.duration = 0;
@@ -57,6 +58,7 @@ public class WorkloadGenerator {
         cme = new CostModelsExp();
         baseline1 = new Baseline1<>();
         clockMap = new ClockHashMap<>(3);
+        connection = MySQLConnectionManager.getInstance().getConnection();
     }
 
     public Duration generateWorkload(int n, List<BEPolicy> policies, List<QueryStatement> queries) {
@@ -66,6 +68,7 @@ public class WorkloadGenerator {
         int windowSize = 10;
         int generatedQueries = 0;
         int yQuery = 2;
+        int dQuery = 1;
         boolean cachingFlag = true;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 
@@ -87,6 +90,7 @@ public class WorkloadGenerator {
         CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(320);
         ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(320);
         CircularHashMap<String, Integer> countUpdate = new CircularHashMap<>(400);
+        HashMap<String,Integer> deletionHashMap = new HashMap<>();
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
@@ -105,8 +109,7 @@ public class WorkloadGenerator {
 
         if(cachingFlag){
             System.out.println("!!!Caching!!!");
-            if(!bursty) {
-                System.out.println("!!!Steady!!!");
+
                 while (!queries.isEmpty() && !policies.isEmpty()) {
                     if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                         List<BEPolicy> regularPolicies = extractPolicies(policies, n);
@@ -125,9 +128,10 @@ public class WorkloadGenerator {
                         polper.insertPolicy(regularPolicies);
                     }
 
+
 //                Steady State
                     for (int i = 0; i < yQuery; i++) {
-                        if (generatedQueries < 3153) {
+                        if (generatedQueries < 15760) {
                             if (generatedQueries % 2 == 0) {
                                 if (queryWindow.size() < windowSize) {
                                     queryWindow.add(queries.remove(0));
@@ -145,8 +149,26 @@ public class WorkloadGenerator {
                                     .append(query.toString()).append("\n");
                             String querier = e.runExperiment(query);
                             ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                            deletionHashMap.put(querier,0);
 //                        cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
+                        }
+                    }
+
+                    List<String> keys = new ArrayList<>(deletionHashMap.keySet());
+                    for(int i=0; i<dQuery; i++){
+                        Random rand = new Random();
+                        String randQuerier = keys.get(rand.nextInt(keys.size()));
+                        List<BEPolicy> allowPolicies = polper.retrievePolicies(randQuerier,
+                                PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
+
+                        BEPolicy deletePolicy = getOldestPolicy(allowPolicies);
+                        try{
+                            Statement statement = connection.createStatement();
+                            ResultSet resultSet = statement.executeQuery("DELETE FROM sieve.USER_POLICY WHERE id = " + deletePolicy.getId());
+
+                        }catch (SQLException e) {
+                            e.printStackTrace();
                         }
                     }
 
@@ -160,60 +182,6 @@ public class WorkloadGenerator {
                     currentTime++;
 
                 }
-            }else{
-                System.out.println("***Bursty State***");
-                while (!policies.isEmpty() && !queries.isEmpty() && currentTime < totalCycles){
-                    // Calculate dynamic rates for the current cycle
-                    int currentPolicyRate = initialPolicyRate -
-                            (int)((initialPolicyRate - finalPolicyRate) * (double)currentTime / totalCycles);
-                    int currentQueryRate = initialQueryRate +
-                            (int)((finalQueryRate - initialQueryRate) * (double)currentTime / totalCycles);
-
-                    // Insert policies based on the current policy rate
-                    List<BEPolicy> regularPolicies = extractPolicies(policies, currentPolicyRate);
-
-                    //Insert policy into database
-                    for (BEPolicy policy : regularPolicies) {
-                        result.append(currentTime).append(",")
-                                .append(policy.toString()).append("\n");
-                        Instant pinsert = Instant.now();
-                        Timestamp policyinsertionTime = Timestamp.from(pinsert);
-                        timestampDirectory.put(policy.fetchQuerier(), policyinsertionTime);
-                        policy.setInserted_at(policyinsertionTime);
-                    }
-                    nextRegularPolicyInsertionTime += regularInterval;
-
-                    polper.insertPolicy(regularPolicies);
-                    insertedPolicies += currentPolicyRate;
-
-
-                    // Execute queries based on the current query rate
-                    for (int i = 0; i < currentQueryRate && !queries.isEmpty(); i++) {
-                        if (generatedQueries % 2 == 0) {
-                            if (queryWindow.size() < windowSize) {
-                                queryWindow.add(queries.remove(0));
-                            } else {
-                                queryWindow.removeFirst();
-                                queryWindow.add(queries.remove(0));
-                            }
-                            query = queryWindow.getLast();
-                        } else {
-                            int index = random.nextInt(queryWindow.size());
-                            query = queryWindow.get(index);
-                        }
-                        generatedQueries++;
-                        result.append(currentTime).append(",")
-                                .append(query.toString()).append("\n");
-                        String querier = e.runExperiment(query);
-                        ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-//                        cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-//                        baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
-                    }
-
-                    // Increment the insertion cycle
-                    currentTime++;
-                }
-            }
         }else{
             System.out.println("!!! Without Caching!!!");
             while (!policies.isEmpty() && !queries.isEmpty()) {
@@ -232,6 +200,8 @@ public class WorkloadGenerator {
                     nextRegularPolicyInsertionTime += regularInterval;
                     polper.insertPolicy(regularPolicies);
                 }
+
+
 
 //                Steady State
                 for (int i = 0; i < yQuery; i++) {
@@ -274,7 +244,18 @@ public class WorkloadGenerator {
         return totalRunTime;
     }
 
-     private List<BEPolicy> extractPolicies(List<BEPolicy> policies, int n) {
+    private BEPolicy getOldestPolicy (List<BEPolicy> policies){
+        if (policies == null || policies.isEmpty())
+            return null;
+        BEPolicy oldPolicy = policies.get(0);
+        for(BEPolicy policy:policies){
+            if(policy.getInserted_at().before(oldPolicy.getInserted_at()))
+                oldPolicy = policy;
+        }
+        return oldPolicy;
+    }
+
+    private List<BEPolicy> extractPolicies(List<BEPolicy> policies, int n) {
         List<BEPolicy> extractedPolicies = new ArrayList<>();
         for (int i = 0; i < n && !policies.isEmpty(); i++) {
             extractedPolicies.add(policies.remove(0)); // Remove and add the first policy from the list
@@ -327,3 +308,4 @@ public class WorkloadGenerator {
     }
 
 }
+

@@ -23,8 +23,6 @@ import edu.uci.ics.tippers.persistor.PolicyPersistor;
 
 public class CachingAlgorithm <C,Q> {
 
-    private Connection connection;
-
     Random r;
     PolicyPersistor polper;
     GuardPersistor guardPersistor;
@@ -33,9 +31,9 @@ public class CachingAlgorithm <C,Q> {
     Writer writer;
     StringBuilder result;
     String fileName;
+    double secondsPR;
 
     public CachingAlgorithm(){
-        connection = MySQLConnectionManager.getInstance().getConnection();
         r = new Random();
         polper = PolicyPersistor.getInstance();
         pg = new PolicyUtil();
@@ -43,17 +41,22 @@ public class CachingAlgorithm <C,Q> {
         e = new QueryPerformance();
         writer = new Writer();
         result = new StringBuilder();
+        secondsPR = 0.0;
 
         fileName = "CEE_C_S1P2Q_80.csv";
         result.append("Querier"). append(",")
                 .append("Cache log").append(",")
                 .append("Generation Time").append(",")
-                .append("Execution Time").append("\n");
+                .append("Execution Time").append(",")
+                .append("Policy Retrieval Time").append(",")
+                .append("Hit Total Time").append(",")
+                .append("Miss Total Time").append("\n");
         writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
     }
 
-    public void runAlgorithm(ClockHashMap<String, GuardExp> clockHashMap, String querier, QueryStatement query, CircularHashMap<String,Timestamp> timestampDirectory) {
+    public void runAlgorithm(ClockHashMap<String, GuardExp> clockHashMap, String querier,
+                             QueryStatement query, CircularHashMap<String,Timestamp> timestampDirectory) {
 
         // Implementation of the Guard Caching Algorithm
         int index;
@@ -87,56 +90,67 @@ public class CachingAlgorithm <C,Q> {
                 result.append(querier).append(",")
                         .append("hit").append(",")
                         .append(0).append(",")
-                        .append(seconds).append("\n");
+                        .append(seconds).append(",")
+                        .append(0).append(",")
+                        .append(seconds).append(",")
+                        .append(0).append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
                 newGE = guardExp;
             }else{
-                Instant fsStart = Instant.now();
+                secondsPR = 0.0;
+                Instant guardGenStart = Instant.now();
                 Duration totalGenTime = Duration.ofMillis(0);
                 newGE = SieveGG(querier, query);
-                Instant fsEnd = Instant.now();
-                totalGenTime = totalGenTime.plus(Duration.between(fsStart, fsEnd));
+                Instant guardGenEnd = Instant.now();
+                totalGenTime = totalGenTime.plus(Duration.between(guardGenStart, guardGenEnd));
                 double secondsG = totalGenTime.getSeconds() + totalGenTime.getNano() / 1_000_000.0;
 
                 clockHashMap.put(querier, newGE);
 
-                fsStart = Instant.now();
+                Instant queryExeStart = Instant.now();
                 Duration totalExeTime = Duration.ofMillis(0);
                 String answer = e.runGE(querier, query, newGE);
-                fsEnd = Instant.now();
-                totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
+                Instant queryExeEnd = Instant.now();
+                totalExeTime = totalExeTime.plus(Duration.between(queryExeStart, queryExeEnd));
                 double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
 
                 result.append(querier).append(",")
                         .append("soft-hit").append(",")
                         .append(secondsG).append(",")
-                        .append(secondsE).append("\n");
+                        .append(secondsE).append(",")
+                        .append(secondsPR).append(",")
+                        .append(secondsE+secondsPR+secondsG).append(",")
+                        .append(0).append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
             }
         }else{
         // If querier not found or no matching GE, create a new one
-            Instant fsStart = Instant.now();
+            secondsPR = 0.0;
+            Instant guardGenStart = Instant.now();
             Duration guardGen = Duration.ofMillis(0);
             newGE = SieveGG(querier, query);
-            Instant fsEnd = Instant.now();
-            guardGen = guardGen.plus(Duration.between(fsStart, fsEnd));
+            Instant guardGenEnd = Instant.now();
+            guardGen = guardGen.plus(Duration.between(guardGenStart, guardGenEnd));
             double secondsG = guardGen.getSeconds() + guardGen.getNano() / 1_000_000.0;
             if (newGE == null){
                 return;
             }else {
                 clockHashMap.put(querier, newGE);
-                fsStart = Instant.now();
+                Instant queryExeStart = Instant.now();
                 Duration totalExeTime = Duration.ofMillis(0);
                 String answer = e.runGE(querier, query, newGE);
 //                System.out.println(answer);
-                fsEnd = Instant.now();
-                totalExeTime = totalExeTime.plus(Duration.between(fsStart, fsEnd));
+                Instant queryExeEnd = Instant.now();
+                totalExeTime = totalExeTime.plus(Duration.between(queryExeStart, queryExeEnd));
                 double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
                 result.append(querier).append(",")
                         .append("miss").append(",")
                         .append(secondsG).append(",")
-                        .append(secondsE).append("\n");
+                        .append(secondsE).append(",")
+                        .append(secondsPR).append(",")
+                        .append(0).append(",")
+                        .append(secondsE+secondsPR+secondsG).append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
             }
         }
@@ -153,18 +167,30 @@ public class CachingAlgorithm <C,Q> {
     }
 
     public GuardExp SieveGG (String querier, QueryStatement query){
+        secondsPR = 0;
         QueryPerformance e = new QueryPerformance();
+        Instant fsStart = Instant.now();
+        Duration totalPolicyRetrievalTime = Duration.ofMillis(0);
         List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
                     PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
+        Instant fsEnd = Instant.now();
+        totalPolicyRetrievalTime = totalPolicyRetrievalTime.plus(Duration.between(fsStart, fsEnd));
+        secondsPR = totalPolicyRetrievalTime.getSeconds() + totalPolicyRetrievalTime.getNano() / 1_000_000.0;
+
+//        int counter=1;
+//        for (BEPolicy policy:allowPolicies){
+//            System.out.println("Policy: "+ counter + " : " + policy.toString());
+//            counter++;
+//        }
 
         if(allowPolicies == null) return null;
         System.out.println("Querier #: " + querier + " with " + allowPolicies.size() + " allow policies");
         BEExpression allowBeExpression = new BEExpression(allowPolicies);
         Duration guardGen = Duration.ofMillis(0);
 
-        Instant fsStart = Instant.now();
+        fsStart = Instant.now();
         SelectGuard gh = new SelectGuard(allowBeExpression, true);
-        Instant fsEnd = Instant.now();
+        fsEnd = Instant.now();
 
         System.out.println(gh.createGuardedQuery(true));
         guardGen = guardGen.plus(Duration.between(fsStart, fsEnd));

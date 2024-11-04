@@ -19,10 +19,7 @@ import edu.uci.ics.tippers.persistor.PolicyPersistor;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class WorkloadGenerator {
     private int regularInterval;
@@ -88,6 +85,7 @@ public class WorkloadGenerator {
         CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(320);
         ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(320);
         CircularHashMap<String, Integer> countUpdate = new CircularHashMap<>(400);
+        HashMap<String,Integer> deletionHashMap = new HashMap<>();
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
@@ -145,7 +143,7 @@ public class WorkloadGenerator {
                             result.append(currentTime).append(",")
                                     .append(query.toString()).append("\n");
                             String querier = e.runExperiment(query);
-                            ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                            ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory, deletionHashMap);
 //                        cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
                         }
@@ -206,7 +204,7 @@ public class WorkloadGenerator {
                         result.append(currentTime).append(",")
                                 .append(query.toString()).append("\n");
                         String querier = e.runExperiment(query);
-                        ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                        ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory, deletionHashMap);
 //                        cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                        baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
                     }

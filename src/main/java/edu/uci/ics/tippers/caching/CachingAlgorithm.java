@@ -50,13 +50,15 @@ public class CachingAlgorithm <C,Q> {
                 .append("Execution Time").append(",")
                 .append("Policy Retrieval Time").append(",")
                 .append("Hit Total Time").append(",")
-                .append("Miss Total Time").append("\n");
+                .append("Miss Total Time").append(",")
+                .append("Deletion Flag").append("\n");
         writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
     }
 
     public void runAlgorithm(ClockHashMap<String, GuardExp> clockHashMap, String querier,
-                             QueryStatement query, CircularHashMap<String,Timestamp> timestampDirectory) {
+                             QueryStatement query, CircularHashMap<String,Timestamp> timestampDirectory,
+                             HashMap<String,Integer> deletionHashMap) {
 
         // Implementation of the Guard Caching Algorithm
         int index;
@@ -74,9 +76,15 @@ public class CachingAlgorithm <C,Q> {
         if (index != 0) {
             GuardExp guardExp = clockHashMap.get(querier);
             Timestamp timestampGE = guardExp.getLast_updated();
+            boolean deletionFlag = false;
+
+            //checking if the deletion flag is set
+            if(deletionHashMap.get(querier).equals(1)){
+                deletionFlag = true;
+            }
 
             Timestamp lastestTimestamp = timestampDirectory.get(querier);
-            if (lastestTimestamp != null && lastestTimestamp.before(timestampGE)) {
+            if (lastestTimestamp != null && lastestTimestamp.before(timestampGE) && !deletionFlag) {
                 clockHashMap.update(querier);
 
                 Instant fsStart = Instant.now();
@@ -93,6 +101,7 @@ public class CachingAlgorithm <C,Q> {
                         .append(seconds).append(",")
                         .append(0).append(",")
                         .append(seconds).append(",")
+                        .append(0).append(",")
                         .append(0).append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
                 newGE = guardExp;
@@ -120,7 +129,8 @@ public class CachingAlgorithm <C,Q> {
                         .append(secondsE).append(",")
                         .append(secondsPR).append(",")
                         .append(secondsE+secondsPR+secondsG).append(",")
-                        .append(0).append("\n");
+                        .append(0).append(",")
+                        .append(deletionFlag).append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
             }
@@ -150,7 +160,8 @@ public class CachingAlgorithm <C,Q> {
                         .append(secondsE).append(",")
                         .append(secondsPR).append(",")
                         .append(0).append(",")
-                        .append(secondsE+secondsPR+secondsG).append("\n");
+                        .append(secondsE+secondsPR+secondsG).append(",")
+                        .append(0).append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
             }
         }

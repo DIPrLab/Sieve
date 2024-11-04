@@ -67,8 +67,8 @@ public class WorkloadDeletion {
         int sizeOfPolicies = policies.size();
         int windowSize = 10;
         int generatedQueries = 0;
-        int yQuery = 2;
-        int dQuery = 1;
+        int yQuery = 5;
+        int dPolicy = 2;
         boolean cachingFlag = true;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 
@@ -79,7 +79,7 @@ public class WorkloadDeletion {
         int initialQueryRate = 1;
         int finalQueryRate = 10;
         int totalCycles = 31520;
-        boolean bursty = true;
+        boolean bursty = false;
 
 
         QueryStatement query = new QueryStatement();
@@ -95,7 +95,7 @@ public class WorkloadDeletion {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "CEE_C_S5P2Q_80.txt";
+        String fileName = "deletion10P5Q2D.txt";
 
         boolean first = true;
 
@@ -148,7 +148,7 @@ public class WorkloadDeletion {
                             result.append(currentTime).append(",")
                                     .append(query.toString()).append("\n");
                             String querier = e.runExperiment(query);
-                            ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
+                            ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory, deletionHashMap);
                             deletionHashMap.put(querier,0);
 //                        cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
 //                baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
@@ -156,7 +156,7 @@ public class WorkloadDeletion {
                     }
 
                     List<String> keys = new ArrayList<>(deletionHashMap.keySet());
-                    for(int i=0; i<dQuery; i++){
+                    for(int i=0; i<dPolicy; i++){
                         Random rand = new Random();
                         String randQuerier = keys.get(rand.nextInt(keys.size()));
                         List<BEPolicy> allowPolicies = polper.retrievePolicies(randQuerier,
@@ -164,9 +164,25 @@ public class WorkloadDeletion {
 
                         BEPolicy deletePolicy = getOldestPolicy(allowPolicies);
                         try{
-                            Statement statement = connection.createStatement();
-                            ResultSet resultSet = statement.executeQuery("DELETE FROM sieve.USER_POLICY WHERE id = " + deletePolicy.getId());
-
+                            if(deletePolicy != null){
+                                Statement statement1 = connection.createStatement();
+                                int rowsAffected1 = statement1.executeUpdate("DELETE FROM sieve.USER_POLICY WHERE id = '" + deletePolicy.getId() + "'");
+                                // Check if any rows were deleted
+                                if (rowsAffected1 > 0) {
+                                    System.out.println("Deletion successful in user_policy table. Rows affected: " + rowsAffected1);
+                                } else {
+                                    System.out.println("No rows were deleted in user_policy table. The specified ID might not exist.");
+                                }
+                                Statement statement2 = connection.createStatement();
+                                int rowsAffected2 = statement2.executeUpdate("DELETE FROM sieve.USER_POLICY_OBJECT_CONDITION WHERE policy_id = '" + deletePolicy.getId() + "'");
+                                // Check if any rows were deleted
+                                if (rowsAffected2 > 0) {
+                                    System.out.println("Deletion successful in user_policy_object_condition table. Rows affected: " + rowsAffected2);
+                                } else {
+                                    System.out.println("No rows were deleted in user_policy_object_condition table. The specified ID might not exist.");
+                                }
+                                deletionHashMap.put(randQuerier,1);
+                            }
                         }catch (SQLException e) {
                             e.printStackTrace();
                         }
@@ -279,7 +295,7 @@ public class WorkloadDeletion {
 //        }
 //        System.out.println();
 
-        int queryCount = 1576;
+        int queryCount = 7880;
         boolean[] templates = {true, true, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {
@@ -298,10 +314,10 @@ public class WorkloadDeletion {
 //        int dynamicInterval = 1; // Example dynamic interval
 //        int duration = 3;
 
-        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
+        WorkloadDeletion generator = new WorkloadDeletion(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 5; // Example number of policies/queries to generate each interval
+        int numPoliciesQueries = 10; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
 

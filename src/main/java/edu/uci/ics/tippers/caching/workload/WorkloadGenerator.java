@@ -74,7 +74,7 @@ public class WorkloadGenerator {
         int initialQueryRate = 1;
         int finalQueryRate = 10;
         int totalCycles = 31520;
-        boolean bursty = true;
+        boolean bursty = false;
 
 
         QueryStatement query = new QueryStatement();
@@ -90,7 +90,9 @@ public class WorkloadGenerator {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "WS_50_S5P10Q_80.txt";
+        String fileName = "experiment2.txt";
+
+        List<String> quereier = new ArrayList<>();
 
         boolean first = true;
 
@@ -126,7 +128,7 @@ public class WorkloadGenerator {
 
 //                Steady State
                     for (int i = 0; i < yQuery; i++) {
-                        if (generatedQueries < 3153) {
+                        if (generatedQueries < 6401) {
                             if (generatedQueries % 2 == 0) {
                                 if (queryWindow.size() < windowSize) {
                                     queryWindow.add(queries.remove(0));
@@ -275,11 +277,14 @@ public class WorkloadGenerator {
     }
 
      private List<BEPolicy> extractPolicies(List<BEPolicy> policies, int n) {
-        List<BEPolicy> extractedPolicies = new ArrayList<>();
-        for (int i = 0; i < n && !policies.isEmpty(); i++) {
-            extractedPolicies.add(policies.remove(0)); // Remove and add the first policy from the list
-        }
-        return extractedPolicies;
+         List<BEPolicy> extractedPolicies = new ArrayList<>();
+         Random random = new Random();
+
+         for (int i = 0; i < n && !policies.isEmpty(); i++) {
+             int randomIndex = random.nextInt(policies.size()); // Generate a random index within the list size
+             extractedPolicies.add(policies.remove(randomIndex)); // Remove and add the policy at the random index
+         }
+         return extractedPolicies;
     }
 
     public void runExperiment() {
@@ -289,20 +294,23 @@ public class WorkloadGenerator {
         List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
 
         CPolicyGen cpg = new CPolicyGen();
-        List<BEPolicy> additionalpolicies = cpg.generatePoliciesPerQueriesforAC(users);
+        List<BEPolicy> additionalpolicies = cpg.generatePoliciesPerQueriesforAC(users,10);
         System.out.println("Total no. of additional policies: " + additionalpolicies.size());
  
-        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
+//        List<BEPolicy> policies = cpg.generatePoliciesforAC(users); ---
+
+        List<BEPolicy> policies = cpg.generatePoliciesPerQueriesforAC(users,200);
 
         System.out.println("Total number of entries: " + users.size());
         System.out.println("Total number of policies: " + policies.size());
+
 //        for (BEPolicy policy : policies) {
 //            System.out.println(policy.toString());
 //        }
 //        System.out.println();
 
-        int queryCount = 3152;
-        boolean[] templates = {true, true, false, false};
+        int queryCount = 3200;
+        boolean[] templates = {true, false, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {
             if (templates[i]) queries.addAll(e.getQueries(i+1,queryCount));
@@ -324,6 +332,7 @@ public class WorkloadGenerator {
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
         int numPoliciesQueries = 5; // Example number of policies/queries to generate each interval
+//        Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
         System.out.println("Total Run Time: " + totalRunTime);
 

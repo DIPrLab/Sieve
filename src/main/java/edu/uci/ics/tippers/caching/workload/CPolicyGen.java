@@ -262,7 +262,7 @@ public class CPolicyGen {
         return policies;
     }
 
-    public List<BEPolicy> generatePoliciesPerQueriesforAC(List<CUserGen.User> users){
+    public List<BEPolicy> generatePoliciesPerQueriesforAC(List<CUserGen.User> users, int numPolicies){
 
         List<BEPolicy> policies = new ArrayList<>();
         List<Integer> possibleQueriers = new ArrayList<>();
@@ -274,7 +274,6 @@ public class CPolicyGen {
         System.out.println("Total no. of Queriers: " + possibleQueriers.size());
         for (int i=0; i< possibleQueriers.size(); i++){
 
-            int numPolicies = 10;
             for (int j = 0; j < numPolicies; j++) {
                 workingHours.setStartTime(generateRandomStartTime());
                 workingHours.setEndTime(workingHours.getStartTime().plus(120, ChronoUnit.MINUTES));
@@ -302,7 +301,8 @@ public class CPolicyGen {
 //            System.out.println(policy.toString());
 //        }
 //        System.out.println();
-        polper.insertPolicy(policies);
+        if(numPolicies <15)
+            polper.insertPolicy(policies);
         return policies;
     }
 
@@ -426,7 +426,7 @@ public class CPolicyGen {
         CPolicyGen cpg = new CPolicyGen();
         CUserGen cUserGen = new CUserGen(1);
         List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
-        List<BEPolicy> policies = cpg.generatePoliciesPerQueriesforAC(users);
+        List<BEPolicy> policies = cpg.generatePoliciesPerQueriesforAC(users,10);
 
         System.out.println("Total number of entries: " + users.size());
         System.out.println("Total number of policies: " + policies.size());

@@ -32,6 +32,7 @@ public class CachingAlgorithm <C,Q> {
     StringBuilder result;
     String fileName;
     double secondsPR;
+    List<BEPolicy> allowPolicies;
 
     public CachingAlgorithm(){
         r = new Random();
@@ -42,9 +43,11 @@ public class CachingAlgorithm <C,Q> {
         writer = new Writer();
         result = new StringBuilder();
         secondsPR = 0.0;
+        allowPolicies = null;
 
-        fileName = "deletion10P5Q10D.csv";
+        fileName = "experiment2.csv";
         result.append("Querier"). append(",")
+                .append("No. of Policies").append(",")
                 .append("Cache log").append(",")
                 .append("Generation Time").append(",")
                 .append("Execution Time").append(",")
@@ -79,7 +82,7 @@ public class CachingAlgorithm <C,Q> {
             boolean deletionFlag = false;
 
             //checking if the deletion flag is set
-            if(deletionHashMap.get(querier).equals(1)){
+            if(deletionHashMap.get(querier) != null && deletionHashMap.get(querier).equals(1)){
                 deletionFlag = true;
             }
 
@@ -96,6 +99,7 @@ public class CachingAlgorithm <C,Q> {
 
 //                System.out.println(answer);
                 result.append(querier).append(",")
+                        .append("used GE").append(",")
                         .append("hit").append(",")
                         .append(0).append(",")
                         .append(seconds).append(",")
@@ -124,6 +128,7 @@ public class CachingAlgorithm <C,Q> {
                 double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
 
                 result.append(querier).append(",")
+                        .append(allowPolicies.size()).append(",")
                         .append("soft-hit").append(",")
                         .append(secondsG).append(",")
                         .append(secondsE).append(",")
@@ -155,6 +160,7 @@ public class CachingAlgorithm <C,Q> {
                 totalExeTime = totalExeTime.plus(Duration.between(queryExeStart, queryExeEnd));
                 double secondsE = totalExeTime.getSeconds() + totalExeTime.getNano() / 1_000_000.0;
                 result.append(querier).append(",")
+                        .append(allowPolicies.size()).append(",")
                         .append("miss").append(",")
                         .append(secondsG).append(",")
                         .append(secondsE).append(",")
@@ -178,11 +184,12 @@ public class CachingAlgorithm <C,Q> {
     }
 
     public GuardExp SieveGG (String querier, QueryStatement query){
+        allowPolicies = null;
         secondsPR = 0;
         QueryPerformance e = new QueryPerformance();
         Instant fsStart = Instant.now();
         Duration totalPolicyRetrievalTime = Duration.ofMillis(0);
-        List<BEPolicy> allowPolicies = polper.retrievePolicies(querier,
+        allowPolicies = polper.retrievePolicies(querier,
                     PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
         Instant fsEnd = Instant.now();
         totalPolicyRetrievalTime = totalPolicyRetrievalTime.plus(Duration.between(fsStart, fsEnd));

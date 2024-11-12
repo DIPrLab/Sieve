@@ -100,11 +100,12 @@ public class CQueryGenAC extends QueryGen {
             } else {
                 // Handle the case where locs is empty
                 // For example, you could add a default location:
-                locPreds.add("3142-clwa-2209");
+                locPreds.add("3146-clwa-6217");
             }
-            query += "AND location_id IN (";
-            query += locPreds.stream().map(item -> "\"" + item + "\"").collect(Collectors.joining(", "));
-            query += ")";
+//            query += "AND location_id IN (";
+//            query += locPreds.stream().map(item -> "\"" + item + "\"").collect(Collectors.joining(", "));
+//            query += ")";
+            query += "AND location_id = '3146-clwa-6217'";
             queries.add(new QueryStatement(query, 1, new Timestamp(System.currentTimeMillis())));
             duration += 60;
         }
@@ -193,15 +194,15 @@ public class CQueryGenAC extends QueryGen {
     public void runExperiment() {
         CQueryGenAC cqg = new CQueryGenAC();
         QueryPerformance e = new QueryPerformance();
-        boolean[] templates = {true, true, false, false};
-        int numOfQueries = 3940;
+        boolean[] templates = {true, false, false, false};
+        int numOfQueries = 3200;
         String querier;
         List<QueryStatement> queries = cqg.constructWorkload(templates, numOfQueries);
         for (QueryStatement query : queries) {
 //            System.out.println(query.toString());
             querier = e.runExperiment(query);
             System.out.println("Querier: " + querier);
-      }
+        }
 //        cqg.insertQuery(queries);
         System.out.println();
     }

@@ -243,6 +243,40 @@ public class WorkloadDeletion {
                     }
                 }
 
+                List<String> keys = new ArrayList<>(deletionHashMap.keySet());
+                for(int i=0; i<dPolicy; i++){
+                    Random rand = new Random();
+                    String randQuerier = keys.get(rand.nextInt(keys.size()));
+                    List<BEPolicy> allowPolicies = polper.retrievePolicies(randQuerier,
+                            PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
+
+                    BEPolicy deletePolicy = getOldestPolicy(allowPolicies);
+                    try{
+                        if(deletePolicy != null){
+                            Statement statement1 = connection.createStatement();
+                            int rowsAffected1 = statement1.executeUpdate("DELETE FROM sieve.USER_POLICY WHERE id = '" + deletePolicy.getId() + "'");
+                            // Check if any rows were deleted
+                            if (rowsAffected1 > 0) {
+                                System.out.println("Deletion successful in user_policy table. Rows affected: " + rowsAffected1);
+                            } else {
+                                System.out.println("No rows were deleted in user_policy table. The specified ID might not exist.");
+                            }
+                            Statement statement2 = connection.createStatement();
+                            int rowsAffected2 = statement2.executeUpdate("DELETE FROM sieve.USER_POLICY_OBJECT_CONDITION WHERE policy_id = '" + deletePolicy.getId() + "'");
+                            // Check if any rows were deleted
+                            if (rowsAffected2 > 0) {
+                                System.out.println("Deletion successful in user_policy_object_condition table. Rows affected: " + rowsAffected2);
+                            } else {
+                                System.out.println("No rows were deleted in user_policy_object_condition table. The specified ID might not exist.");
+                            }
+                            deletionHashMap.put(randQuerier,1);
+                        }
+                    }catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
                 // Writing results to file
                 if (!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
                 else first = false;

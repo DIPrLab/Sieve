@@ -69,7 +69,7 @@ public class WorkloadDeletion {
         int generatedQueries = 0;
         int yQuery = 5;
         int dPolicy = 10;
-        boolean cachingFlag = true;
+        boolean cachingFlag = false;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 
 //      Bursty State variables
@@ -95,7 +95,7 @@ public class WorkloadDeletion {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "deletion10P5Q10D.txt";
+        String fileName = "deletion10P5Q10D_NC.txt";
 
         boolean first = true;
 
@@ -221,7 +221,7 @@ public class WorkloadDeletion {
 
 //                Steady State
                 for (int i = 0; i < yQuery; i++) {
-                    if (generatedQueries <= 18218) {
+                    if (generatedQueries <= 15760) {
                         if (generatedQueries % 2 == 0) {
                             if (queryWindow.size() < windowSize) {
                                 queryWindow.add(queries.remove(0));

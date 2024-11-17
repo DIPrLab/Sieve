@@ -301,8 +301,7 @@ public class CPolicyGen {
 //            System.out.println(policy.toString());
 //        }
 //        System.out.println();
-        if(numPolicies <15)
-            polper.insertPolicy(policies);
+        polper.insertPolicy(policies);
         return policies;
     }
 

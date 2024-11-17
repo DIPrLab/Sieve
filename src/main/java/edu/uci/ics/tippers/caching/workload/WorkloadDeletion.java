@@ -68,7 +68,7 @@ public class WorkloadDeletion {
         int windowSize = 10;
         int generatedQueries = 0;
         int yQuery = 5;
-        int dPolicy = 10;
+        int dPolicy = 5;
         boolean cachingFlag = false;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 
@@ -95,7 +95,7 @@ public class WorkloadDeletion {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "deletion10P5Q10D_NC.txt";
+        String fileName = "deletion10P5Q5D_NC.txt";
 
         boolean first = true;
 
@@ -240,6 +240,7 @@ public class WorkloadDeletion {
                         String querier = e.runExperiment(query);
                         GuardExp GE = ca.SieveGG(querier, query);
                         String answer = e.runGE(querier, query, GE);
+                        deletionHashMap.put(querier,0);
                     }
                 }
 
@@ -254,7 +255,7 @@ public class WorkloadDeletion {
                     try{
                         if(deletePolicy != null){
                             Statement statement1 = connection.createStatement();
-                            int rowsAffected1 = statement1.executeUpdate("DELETE FROM sieve.USER_POLICY WHERE id = '" + deletePolicy.getId() + "'");
+                            int rowsAffected1 = statement1.executeUpdate("DELETE FROM ashakya.USER_POLICY WHERE id = '" + deletePolicy.getId() + "'");
                             // Check if any rows were deleted
                             if (rowsAffected1 > 0) {
                                 System.out.println("Deletion successful in user_policy table. Rows affected: " + rowsAffected1);
@@ -262,7 +263,7 @@ public class WorkloadDeletion {
                                 System.out.println("No rows were deleted in user_policy table. The specified ID might not exist.");
                             }
                             Statement statement2 = connection.createStatement();
-                            int rowsAffected2 = statement2.executeUpdate("DELETE FROM sieve.USER_POLICY_OBJECT_CONDITION WHERE policy_id = '" + deletePolicy.getId() + "'");
+                            int rowsAffected2 = statement2.executeUpdate("DELETE FROM ashakya.USER_POLICY_OBJECT_CONDITION WHERE policy_id = '" + deletePolicy.getId() + "'");
                             // Check if any rows were deleted
                             if (rowsAffected2 > 0) {
                                 System.out.println("Deletion successful in user_policy_object_condition table. Rows affected: " + rowsAffected2);

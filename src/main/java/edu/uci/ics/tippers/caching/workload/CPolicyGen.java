@@ -198,7 +198,7 @@ public class CPolicyGen {
         List<BEPolicy> policies = new ArrayList<>();
         for (CUserGen.User user: users){
 
-            int numPolicies = 10;
+            int numPolicies = 5;
              for (int i = 0; i < numPolicies; i++) {
                 workingHours.setStartTime(generateRandomStartTime());
                 workingHours.setEndTime(workingHours.getStartTime().plus(120, ChronoUnit.MINUTES));
@@ -301,8 +301,8 @@ public class CPolicyGen {
 //            System.out.println(policy.toString());
 //        }
 //        System.out.println();
-        if(numPolicies <15)
-            polper.insertPolicy(policies);
+
+        polper.insertPolicy(policies);
         return policies;
     }
 

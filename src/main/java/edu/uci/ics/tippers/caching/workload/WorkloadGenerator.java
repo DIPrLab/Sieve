@@ -12,6 +12,8 @@ import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
 import edu.uci.ics.tippers.fileop.Writer;
 
 import edu.uci.ics.tippers.model.guard.GuardExp;
+import edu.uci.ics.tippers.model.guard.SelectGuard;
+import edu.uci.ics.tippers.model.policy.BEExpression;
 import edu.uci.ics.tippers.model.policy.BEPolicy;
 import edu.uci.ics.tippers.model.query.QueryStatement;
 import edu.uci.ics.tippers.persistor.PolicyPersistor;
@@ -20,6 +22,9 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+
+import java.util.DoubleSummaryStatistics;
+import java.util.stream.DoubleStream;
 
 public class WorkloadGenerator {
     private int regularInterval;
@@ -63,18 +68,12 @@ public class WorkloadGenerator {
 
         int windowSize = 10;
         int generatedQueries = 0;
-        int yQuery = 10;
+        int yQuery = 0;
         boolean cachingFlag = true;
         LinkedList<QueryStatement> queryWindow = new LinkedList<>();
 
 //      Bursty State variables
-        int insertedPolicies = 0;
-        int initialPolicyRate = 30;
-        int finalPolicyRate = 1;
-        int initialQueryRate = 1;
-        int finalQueryRate = 10;
-        int totalCycles = 31520;
-        boolean bursty = false;
+        boolean bursty = true;
 
 
         QueryStatement query = new QueryStatement();
@@ -90,11 +89,9 @@ public class WorkloadGenerator {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "experiment2.txt";
+        String fileName = "experiment3.txt";
 
-        List<String> quereier = new ArrayList<>();
-
-        boolean first = true;
+       boolean first = true;
 
         result.append("No. of policies= "). append(policies.size()).append("\n")
                 .append("No. of queries= ").append(queries.size()).append("\n")
@@ -163,56 +160,64 @@ public class WorkloadGenerator {
                 }
             }else{
                 System.out.println("***Bursty State***");
-                while (!policies.isEmpty() && !queries.isEmpty() && currentTime < totalCycles){
-                    // Calculate dynamic rates for the current cycle
-                    int currentPolicyRate = initialPolicyRate -
-                            (int)((initialPolicyRate - finalPolicyRate) * (double)currentTime / totalCycles);
-                    int currentQueryRate = initialQueryRate +
-                            (int)((finalQueryRate - initialQueryRate) * (double)currentTime / totalCycles);
+                // Initial values for bursty workload rates
+                int policyRate = 500;
+                int queryRate = 1;
 
-                    // Insert policies based on the current policy rate
-                    List<BEPolicy> regularPolicies = extractPolicies(policies, currentPolicyRate);
+                while (!queries.isEmpty() && !policies.isEmpty()) {
+                    // High policy insertion phase
+                    if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
+                        List<BEPolicy> regularPolicies = extractPolicies(policies, policyRate);
 
-                    //Insert policy into database
-                    for (BEPolicy policy : regularPolicies) {
-                        result.append(currentTime).append(",")
-                                .append(policy.toString()).append("\n");
-                        Instant pinsert = Instant.now();
-                        Timestamp policyinsertionTime = Timestamp.from(pinsert);
-                        timestampDirectory.put(policy.fetchQuerier(), policyinsertionTime);
-                        policy.setInserted_at(policyinsertionTime);
-                    }
-                    nextRegularPolicyInsertionTime += regularInterval;
-
-                    polper.insertPolicy(regularPolicies);
-                    insertedPolicies += currentPolicyRate;
-
-
-                    // Execute queries based on the current query rate
-                    for (int i = 0; i < currentQueryRate && !queries.isEmpty(); i++) {
-                        if (generatedQueries % 2 == 0) {
-                            if (queryWindow.size() < windowSize) {
-                                queryWindow.add(queries.remove(0));
-                            } else {
-                                queryWindow.removeFirst();
-                                queryWindow.add(queries.remove(0));
-                            }
-                            query = queryWindow.getLast();
-                        } else {
-                            int index = random.nextInt(queryWindow.size());
-                            query = queryWindow.get(index);
+                        // Insert policies into the database
+                        for (BEPolicy policy : regularPolicies) {
+                            result.append(currentTime).append(",")
+                                    .append(policy.toString()).append("\n");
+                            Instant pinsert = Instant.now();
+                            Timestamp policyinsertionTime = Timestamp.from(pinsert);
+                            timestampDirectory.put(policy.fetchQuerier(), policyinsertionTime);
+                            policy.setInserted_at(policyinsertionTime);
                         }
-                        generatedQueries++;
-                        result.append(currentTime).append(",")
-                                .append(query.toString()).append("\n");
-                        String querier = e.runExperiment(query);
-                        ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory, deletionHashMap);
-//                        cme.runAlgorithm(clockHashMap, querier, query, timestampDirectory);
-//                        baseline1.runAlgorithm(clockHashMap, querier, query, timestampDirectory, countUpdate);
+                        nextRegularPolicyInsertionTime += regularInterval;
+
+                        polper.insertPolicy(regularPolicies);
                     }
 
-                    // Increment the insertion cycle
+                    // Steady-state with dynamic query rate
+                    for (int i = 0; i < queryRate; i++) {
+                        if (generatedQueries < 6376) {
+                            if (generatedQueries % 2 == 0) {
+                                if (queryWindow.size() < windowSize) {
+                                    queryWindow.add(queries.remove(0));
+                                } else {
+                                    queryWindow.removeFirst();
+                                    queryWindow.add(queries.remove(0));
+                                }
+                                query = queryWindow.getLast();
+                            } else {
+                                int index = random.nextInt(queryWindow.size());
+                                query = queryWindow.get(index);
+                            }
+                            generatedQueries++;
+                            result.append(currentTime).append(",")
+                                    .append(query.toString()).append("\n");
+                            String querier = e.runExperiment(query);
+                            ca.runAlgorithm(clockHashMap, querier, query, timestampDirectory, deletionHashMap);
+                        }
+                    }
+
+                    // Writing results to file
+                    if (!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
+                    else first = false;
+
+                    // Clearing StringBuilder for the next iteration
+                    result.setLength(0);
+
                     currentTime++;
+
+                    // Decrease policy rate and increase query rate gradually
+                    policyRate = Math.max(policyRate - 10, 1); // Cap minimum at 1
+                    queryRate = Math.min(queryRate + 5, 250); // Cap maximum at 50
                 }
             }
         }else{
@@ -276,7 +281,105 @@ public class WorkloadGenerator {
         return totalRunTime;
     }
 
-     private List<BEPolicy> extractPolicies(List<BEPolicy> policies, int n) {
+    public Duration runDemo(List<QueryStatement> queries) {
+
+        QueryStatement query = new QueryStatement();
+        Writer writer = new Writer();
+        StringBuilder result = new StringBuilder();
+        List<BEPolicy> allowPolicies = new ArrayList<>();
+
+        String fileName = "experiment_3.csv";
+        result.append("Querier").append(",")
+                .append("No. of Policies").append(",")
+                .append("Median Generation Time (ms)").append(",")
+                .append("Median Execution Time (ms)").append(",")
+                .append("Median Policy Retrieval Time (ms)").append("\n");
+        writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
+
+        List<String> queriers = Arrays.asList("1081", "4141", "5833", "9178", "11858",
+                "15354", "17798", "18852", "19924", "19963",
+                "20011", "23952", "26484", "29699", "31863", "34647");
+
+        boolean first = true;
+
+        Instant fsStart = Instant.now();
+
+        for (String querier : queriers) {
+            List<Double> policyRetrievalTimes = new ArrayList<>();
+            List<Double> guardGenerationTimes = new ArrayList<>();
+            List<Double> executionTimes = new ArrayList<>();
+
+            for (int i = 0; i < 3; i++) {
+                // Measure Policy Retrieval Time
+                Instant start = Instant.now();
+                allowPolicies = polper.retrievePolicies(querier,
+                        PolicyConstants.USER_INDIVIDUAL, PolicyConstants.ACTION_ALLOW);
+                Instant end = Instant.now();
+                double millisecondsPR = Duration.between(start, end).toMillis();
+                policyRetrievalTimes.add(millisecondsPR);
+
+                if (allowPolicies == null) return null;
+                System.out.println("Querier #: " + querier + " with " + allowPolicies.size() + " allow policies");
+
+                // Measure Guard Generation Time
+                start = Instant.now();
+                BEExpression allowBeExpression = new BEExpression(allowPolicies);
+                SelectGuard gh = new SelectGuard(allowBeExpression, true); // Generates guards
+                end = Instant.now();
+                double millisecondGG = Duration.between(start, end).toMillis();
+                guardGenerationTimes.add(millisecondGG);
+
+                System.out.println(gh.createGuardedQuery(true));
+                System.out.println("Guard Generation time: " + millisecondGG + " ms, Number of Guards: " + gh.numberOfGuards());
+
+                // Measure Query Execution Time
+                GuardExp guard = gh.create(String.valueOf(querier), "user");
+                start = Instant.now();
+                 new QueryPerformance().runGE(querier, query, guard);
+                end = Instant.now();
+                double executionTimeSec = Duration.between(start, end).toMillis(); // Convert to seconds
+                executionTimes.add(executionTimeSec);
+            }
+
+            // Calculate medians for each operation
+            double medianPolicyRetrievalTime = calculateMedian(policyRetrievalTimes);
+            double medianGuardGenerationTime = calculateMedian(guardGenerationTimes);
+            double medianExecutionTime = calculateMedian(executionTimes);
+
+            // Log the medians for the querier
+            result.append(querier).append(",")
+                    .append(allowPolicies.size()).append(",")
+                    .append(medianGuardGenerationTime).append(",")
+                    .append(medianExecutionTime).append(",")
+                    .append(medianPolicyRetrievalTime).append("\n");
+
+            // Writing results to file
+            if (!first) writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
+            else first = false;
+
+            // Clearing StringBuilder for the next iteration
+            result.setLength(0);
+        }
+
+        Instant fsEnd = Instant.now();
+        Duration totalRunTime = Duration.between(fsStart, fsEnd);
+        return totalRunTime;
+    }
+
+    // Inline median calculation function
+    private double calculateMedian(List<Double> times) {
+        DoubleStream sortedStream = times.stream().sorted().mapToDouble(Double::doubleValue);
+        int size = times.size();
+        if (size % 2 == 0) {
+            return sortedStream.skip(size / 2 - 1).limit(2).average().orElse(0.0);
+        } else {
+            return sortedStream.skip(size / 2).findFirst().orElse(0.0);
+        }
+    }
+
+
+
+    private List<BEPolicy> extractPolicies(List<BEPolicy> policies, int n) {
          List<BEPolicy> extractedPolicies = new ArrayList<>();
          Random random = new Random();
 
@@ -297,9 +400,7 @@ public class WorkloadGenerator {
         List<BEPolicy> additionalpolicies = cpg.generatePoliciesPerQueriesforAC(users,10);
         System.out.println("Total no. of additional policies: " + additionalpolicies.size());
  
-//        List<BEPolicy> policies = cpg.generatePoliciesforAC(users); ---
-
-        List<BEPolicy> policies = cpg.generatePoliciesPerQueriesforAC(users,200);
+        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
 
         System.out.println("Total number of entries: " + users.size());
         System.out.println("Total number of policies: " + policies.size());
@@ -309,8 +410,8 @@ public class WorkloadGenerator {
 //        }
 //        System.out.println();
 
-        int queryCount = 3200;
-        boolean[] templates = {true, false, false, false};
+        int queryCount = 6376;
+        boolean[] templates = {true, true, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {
             if (templates[i]) queries.addAll(e.getQueries(i+1,queryCount));
@@ -331,11 +432,9 @@ public class WorkloadGenerator {
         WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
-        int numPoliciesQueries = 5; // Example number of policies/queries to generate each interval
-//        Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
+        int numPoliciesQueries = 0; // Example number of policies/queries to generate each interval
         Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
+//        Duration totalRunTime = generator.runDemo(queries);
         System.out.println("Total Run Time: " + totalRunTime);
-
     }
-
 }

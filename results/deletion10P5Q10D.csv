@@ -15761,3 +15761,5 @@ Querier,Cache log,Generation Time,Execution Time,Policy Retrieval Time,Hit Total
 4494,soft-hit,220.396706,30.863961,160.916425,412.177092,0,true
 23203,soft-hit,456.341285,21.777745,306.306515,784.425545,0,true
 36241,hit,0,13.818348,0,13.818348,0,0
+Querier,Cache log,Generation Time,Execution Time,Policy Retrieval Time,Hit Total Time,Miss Total Time,Deletion Flag
+Querier,Cache log,Generation Time,Execution Time,Policy Retrieval Time,Hit Total Time,Miss Total Time,Deletion Flag

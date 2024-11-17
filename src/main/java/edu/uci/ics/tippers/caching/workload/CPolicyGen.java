@@ -301,7 +301,6 @@ public class CPolicyGen {
 //            System.out.println(policy.toString());
 //        }
 //        System.out.println();
-
         polper.insertPolicy(policies);
         return policies;
     }

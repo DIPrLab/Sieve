@@ -46,6 +46,7 @@ public class PolicyPersistor {
 
             PreparedStatement groupPolicyStmt = connection.prepareStatement(groupPolicyInsert);
             PreparedStatement groupOcStmt = connection.prepareStatement(groupObjectConditionInsert);
+            int policyCount = 0;
 
             for (BEPolicy bePolicy : bePolicies) {
                 if (bePolicy.typeOfPolicy()) { //User Policy
@@ -66,6 +67,8 @@ public class PolicyPersistor {
                             userOcStmt.addBatch();
                         }
                     }
+                    policyCount++;
+
                 } else { //Group Policy
                     USER_POLICY = false;
 
@@ -89,8 +92,11 @@ public class PolicyPersistor {
                     }
                 }
                 if (USER_POLICY) {
-                    userPolicyStmt.executeBatch();
-                    userOcStmt.executeBatch();
+                    if (policyCount % 100 == 0) {
+                        userPolicyStmt.executeBatch();
+                        userOcStmt.executeBatch();
+                        System.out.println("# " + policyCount + " inserted");
+                    }
                 } else {
                     groupPolicyStmt.executeBatch();
                     groupOcStmt.executeBatch();

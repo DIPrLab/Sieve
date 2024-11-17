@@ -194,8 +194,8 @@ public class CQueryGenAC extends QueryGen {
     public void runExperiment() {
         CQueryGenAC cqg = new CQueryGenAC();
         QueryPerformance e = new QueryPerformance();
-        boolean[] templates = {true, false, false, false};
-        int numOfQueries = 3200;
+        boolean[] templates = {true, true, false, false};
+        int numOfQueries = 3188;
         String querier;
         List<QueryStatement> queries = cqg.constructWorkload(templates, numOfQueries);
         for (QueryStatement query : queries) {

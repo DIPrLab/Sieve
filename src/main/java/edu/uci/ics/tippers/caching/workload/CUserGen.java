@@ -31,7 +31,6 @@ public class CUserGen {
 //            ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group " +
 //                    "FROM sieve.APP_USER WHERE user_profile IN ('graduate', 'undergrad', 'faculty') and " +
 //                    "user_group IN ('3146-clwa-6217')");
-//            int count = 0;
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String userId = resultSet.getString("user_id");

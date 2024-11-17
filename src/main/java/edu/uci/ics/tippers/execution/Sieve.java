@@ -44,7 +44,10 @@ public class Sieve {
 //        int dynamicInterval = 1; // Example dynamic interval
 //        int duration = 5;
 //
-        WorkloadDeletion generator = new WorkloadDeletion(regularInterval);
+//        WorkloadDeletion generator = new WorkloadDeletion(regularInterval);
+//        generator.runExperiment();
+
+        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
         generator.runExperiment();
 
 //        if(QUERY_PERFORMANCE_EXP) {

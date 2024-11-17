@@ -45,7 +45,7 @@ public class CachingAlgorithm <C,Q> {
         secondsPR = 0.0;
         allowPolicies = null;
 
-        fileName = "experiment2.csv";
+        fileName = "bursty.csv";
         result.append("Querier"). append(",")
                 .append("No. of Policies").append(",")
                 .append("Cache log").append(",")

@@ -89,7 +89,7 @@ public class WorkloadGenerator {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "experiment3.txt";
+        String fileName = "bursty.txt";
 
        boolean first = true;
 

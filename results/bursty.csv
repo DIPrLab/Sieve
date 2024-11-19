@@ -6377,3 +6377,5 @@ Querier,No. of Policies,Cache log,Generation Time,Execution Time,Policy Retrieva
 16505,used GE,hit,0,59.674255,0,59.674255,0,0
 8071,used GE,hit,0,39.850349,0,39.850349,0,0
 13512,used GE,hit,0,89.473032,0,89.473032,0,0
+Querier,No. of Policies,Cache log,Generation Time,Execution Time,Policy Retrieval Time,Hit Total Time,Miss Total Time,Deletion Flag
+Querier,No. of Policies,Cache log,Generation Time,Execution Time,Policy Retrieval Time,Hit Total Time,Miss Total Time,Deletion Flag

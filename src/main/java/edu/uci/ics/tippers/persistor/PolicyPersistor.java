@@ -92,11 +92,11 @@ public class PolicyPersistor {
                     }
                 }
                 if (USER_POLICY) {
-                    if (policyCount % 100 == 0) {
+//                    if (policyCount % 100 == 0) {
                         userPolicyStmt.executeBatch();
                         userOcStmt.executeBatch();
-                        System.out.println("# " + policyCount + " inserted");
-                    }
+//                        System.out.println("# " + policyCount + " inserted");
+//                    }
                 } else {
                     groupPolicyStmt.executeBatch();
                     groupOcStmt.executeBatch();

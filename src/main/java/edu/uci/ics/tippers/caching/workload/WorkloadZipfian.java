@@ -97,7 +97,7 @@ public class WorkloadZipfian {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "Zipfian_C_0.2.txt";
+        String fileName = "Zipfian_C_0_2_80.txt";
 
         boolean first = true;
 
@@ -117,7 +117,7 @@ public class WorkloadZipfian {
         System.out.println("!!!Zipfian Distribution!!!");
         if(cachingFlag){
             System.out.println("!!!Caching!!!");
-            while (!queries.isEmpty() && !policies.isEmpty()) {
+            while (!policies.isEmpty()) {
                 if (currentTime == 0 || currentTime == nextRegularPolicyInsertionTime) {
                     List<BEPolicy> regularPolicies = extractPolicies(policies, n);
 
@@ -140,6 +140,7 @@ public class WorkloadZipfian {
                     // Select the next query based on Zipfian distribution
                     QueryAssignment queryAssignment = selectZipfianQuery(queryAssignments);
                     if (queryAssignment == null) {
+                        System.out.println("no more queriers are left to process");
                         break; // Exit if no more queriers are left to process
                     }
                     CUserGen.Querier querier = queryAssignment.querier;

@@ -416,7 +416,7 @@ public class QueryPerformance {
         List<CUserGen.User> users = new ArrayList<>();
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group FROM ashakya.APP_USER " +
+            ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group FROM sieve.APP_USER " +
                     "WHERE user_profile IN ('faculty') and " +
                     "user_group NOT IN ('3143-clwa-3019', '3146-clwa-6122', '3143-clwa-3065', '3146-clwa-6219')");
             int count = 0;
@@ -462,5 +462,23 @@ public class QueryPerformance {
             }
         }
         return "1081";
+    }
+    public QueryStatement findNonEmptyQuery(String querier, List<QueryStatement> queries) {
+        QueryPerformance e = new QueryPerformance();
+        Random random = new Random();
+
+        // Iterate through the list of queries to find one with a non-empty result for the specified querier
+        for (QueryStatement query : queries) {
+            List<BEPolicy> allowPolicies = polper.retrievePolicies(querier, PolicyConstants.USER_INDIVIDUAL,
+                    PolicyConstants.ACTION_ALLOW);
+
+            if (allowPolicies != null && !allowPolicies.isEmpty()) {
+                System.out.println("Querier: " + querier + " - Found a non-empty result for query: " + query);
+                return query; // Return the first query that gives a non-empty result
+            }
+        }
+
+        System.out.println("Querier: " + querier + " - No query found with a non-empty result");
+        return null; // Return null if no queries produce a non-empty result for the querier
     }
 }

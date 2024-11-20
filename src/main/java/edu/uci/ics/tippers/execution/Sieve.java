@@ -47,8 +47,11 @@ public class Sieve {
 //        WorkloadDeletion generator = new WorkloadDeletion(regularInterval);
 //        generator.runExperiment();
 
-        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
-        generator.runExperiment();
+//        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
+//        generator.runExperiment();
+
+            WorkloadZipfian generator = new WorkloadZipfian();
+            generator.runExperiment();
 
 //        if(QUERY_PERFORMANCE_EXP) {
 //            if(PolicyConstants.DBMS_CHOICE.equalsIgnoreCase(PolicyConstants.PGSQL_DBMS))

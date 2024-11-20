@@ -90,14 +90,14 @@ public class WorkloadZipfian {
         QueryStatement query = new QueryStatement();
         Random random = new Random();
 
-        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(320);
-        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(320);
+        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(80);
+        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(80);
         HashMap<String,Integer> deletionHashMap = new HashMap<>();
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "Zipfian_C_0_2_80.txt";
+        String fileName = "Zipfian_C_0_2_20.txt";
 
         boolean first = true;
 
@@ -267,7 +267,7 @@ public class WorkloadZipfian {
 //        }
 //        System.out.println();
 
-        int queryCount = 6376;
+        int queryCount = 7880;
         boolean[] templates = {true, true, false, false};
         List<QueryStatement> queries = new ArrayList<>();
         for (int i = 0; i < templates.length; i++) {

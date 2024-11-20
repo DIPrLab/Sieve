@@ -195,13 +195,13 @@ public class CQueryGenAC extends QueryGen {
         CQueryGenAC cqg = new CQueryGenAC();
         QueryPerformance e = new QueryPerformance();
         boolean[] templates = {true, true, false, false};
-        int numOfQueries = 3188;
+        int numOfQueries = 3940;
         String querier;
         List<QueryStatement> queries = cqg.constructWorkload(templates, numOfQueries);
         for (QueryStatement query : queries) {
-//            System.out.println(query.toString());
-            querier = e.runExperiment(query);
-            System.out.println("Querier: " + querier);
+//           System.out.println(query.toString());
+           querier = e.runExperiment(query);
+           System.out.println("Querier: " + querier);
         }
 //        cqg.insertQuery(queries);
         System.out.println();

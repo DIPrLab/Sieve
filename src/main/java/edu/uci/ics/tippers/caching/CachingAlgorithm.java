@@ -45,7 +45,7 @@ public class CachingAlgorithm <C,Q> {
         secondsPR = 0.0;
         allowPolicies = null;
 
-        fileName = "bursty.csv";
+        fileName = "Zipfian_C_0_2_80.csv";
         result.append("Querier"). append(",")
                 .append("No. of Policies").append(",")
                 .append("Cache log").append(",")

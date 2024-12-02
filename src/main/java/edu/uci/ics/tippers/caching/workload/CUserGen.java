@@ -26,7 +26,7 @@ public class CUserGen {
         try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group " +
-                    "FROM ashakya.APP_USER WHERE user_profile IN ('graduate', 'undergrad', 'faculty') and " +
+                    "FROM sieve.APP_USER WHERE user_profile IN ('graduate', 'undergrad', 'faculty') and " +
                     "user_group NOT IN ('3143-clwa-3019', '3146-clwa-6122', '3143-clwa-3065', '3146-clwa-6219')");
 //            ResultSet resultSet = statement.executeQuery("SELECT id, user_id, user_profile, user_group " +
 //                    "FROM sieve.APP_USER WHERE user_profile IN ('graduate', 'undergrad', 'faculty') and " +
@@ -83,8 +83,8 @@ public class CUserGen {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(
                     "SELECT f.id AS faculty_id, COUNT(s.id) AS student_count " +
-                            "FROM ashakya.APP_USER f " +
-                            "JOIN ashakya.APP_USER s ON f.user_group = s.user_group " +
+                            "FROM sieve.APP_USER f " +
+                            "JOIN sieve.APP_USER s ON f.user_group = s.user_group " +
                             "WHERE f.user_profile = 'faculty' " +
                             "AND s.user_profile IN ('graduate', 'undergrad') " +
                             "AND f.user_group NOT IN ('3143-clwa-3019', '3146-clwa-6122', '3143-clwa-3065', '3146-clwa-6219') " +

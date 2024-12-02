@@ -45,7 +45,7 @@ public class CachingAlgorithm <C,Q> {
         secondsPR = 0.0;
         allowPolicies = null;
 
-        fileName = "Zipfian_C_0_2_20.csv";
+        fileName = "Zipfian_C_0_6_20.csv";
         result.append("Querier"). append(",")
                 .append("No. of Policies").append(",")
                 .append("Cache log").append(",")
@@ -79,15 +79,16 @@ public class CachingAlgorithm <C,Q> {
         if (index != 0) {
             GuardExp guardExp = clockHashMap.get(querier);
             Timestamp timestampGE = guardExp.getLast_updated();
-            boolean deletionFlag = false;
+//            boolean deletionFlag = false;
 
             //checking if the deletion flag is set
-            if(deletionHashMap.get(querier) != null && deletionHashMap.get(querier).equals(1)){
-                deletionFlag = true;
-            }
+//            if(deletionHashMap.get(querier) != null && deletionHashMap.get(querier).equals(1)){
+//                deletionFlag = true;
+//            }
 
             Timestamp lastestTimestamp = timestampDirectory.get(querier);
-            if (lastestTimestamp != null && lastestTimestamp.before(timestampGE) && !deletionFlag) {
+//            if (lastestTimestamp != null && lastestTimestamp.before(timestampGE) && !deletionFlag) {
+            if (lastestTimestamp != null && lastestTimestamp.before(timestampGE)) {
                 clockHashMap.update(querier);
 
                 Instant fsStart = Instant.now();
@@ -135,7 +136,7 @@ public class CachingAlgorithm <C,Q> {
                         .append(secondsPR).append(",")
                         .append(secondsE+secondsPR+secondsG).append(",")
                         .append(0).append(",")
-                        .append(deletionFlag).append("\n");
+                        .append(0).append("\n");
                 writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
             }

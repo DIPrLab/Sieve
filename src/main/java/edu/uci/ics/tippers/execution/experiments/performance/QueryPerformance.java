@@ -104,13 +104,13 @@ public class QueryPerformance {
         resultString.append(querySel).append(",");
 
         try {
-            if (QUERY_EXEC){
+            if (QUERY_EXEC) {
                 QueryResult queryResult;
-                if(queryStatement.getTemplate() == 3)
+                if (queryStatement.getTemplate() == 3)
                     queryResult = queryManager.runTimedSubQuery(queryStatement.getQuery(), RESULT_CHECK);
                 else
                     queryResult = queryManager.runTimedQueryWithOutSorting(queryStatement.getQuery(), true);
-                if(queryResult.getResultCount() != 0){
+                if (queryResult.getResultCount() != 0) {
                     Duration runTime = Duration.ofMillis(0);
                     runTime = runTime.plus(queryResult.getTimeTaken());
                     System.out.println("Time taken by query alone " + runTime.toMillis());
@@ -118,14 +118,13 @@ public class QueryPerformance {
                     resultString.append(QUERY_EXECUTION_TIME).append(",");
 //                mySQLQueryManager.increaseTimeout(runTime.toMillis()); //Updating timeout to query exec time + constant
                 }
-            }
-            else resultString.append("NA").append(",");
+            } else resultString.append("NA").append(",");
 
             if (BASE_LINE_POLICIES) {
                 QueryResult tradResult;
                 String polEvalQuery = "With polEval as ( Select * from PRESENCE where "
-                        + beExpression.createQueryFromPolices() + "  )" ;
-                if(queryStatement.getTemplate() == 3)
+                        + beExpression.createQueryFromPolices() + "  )";
+                if (queryStatement.getTemplate() == 3)
                     tradResult = queryManager.runTimedQueryExp(polEvalQuery + queryStatement.getQuery(), NUM_OF_REPS);
                 else
                     tradResult = queryManager.runTimedQueryExp(polEvalQuery + "SELECT * from polEval where "
@@ -134,49 +133,46 @@ public class QueryPerformance {
                 runTime = runTime.plus(tradResult.getTimeTaken());
                 resultString.append(runTime.toMillis()).append(",");
                 System.out.println("Baseline inlining policies: No of Policies: " + beExpression.getPolicies().size() + " , Time: " + runTime.toMillis());
-            }
-            else resultString.append("NA").append(",");
+            } else resultString.append("NA").append(",");
 
 
-            if(BASELINE_UDF){
+            if (BASELINE_UDF) {
                 QueryResult execResult;
                 String udf_query = " and pcheck( " + querier + ", PRESENCE.user_id, PRESENCE.location_id, " +
                         "PRESENCE.start_date, PRESENCE.start_time, PRESENCE.user_profile, PRESENCE.user_group) = 1";
-                if(queryStatement.getTemplate() == 3)
+                if (queryStatement.getTemplate() == 3)
                     execResult = queryManager.runTimedQueryExp(queryStatement.getQuery() + udf_query, NUM_OF_REPS);
                 else
                     execResult = queryManager.runTimedQueryExp("SELECT * from PRESENCE where "
                             + queryStatement.getQuery() + udf_query, NUM_OF_REPS);
                 resultString.append(execResult.getTimeTaken().toMillis()).append(",");
                 System.out.println("Baseline UDF: Time: " + execResult.getTimeTaken().toMillis());
-            }
-            else resultString.append("NA").append(",");
+            } else resultString.append("NA").append(",");
 
 
-            if(BASELINE_INDEX){
+            if (BASELINE_INDEX) {
                 QueryResult indResult;
-                String polIndexQuery = "With polEval as ( " + beExpression.createIndexQuery()  + " ) " ;
-                if(queryStatement.getTemplate() == 3)
+                String polIndexQuery = "With polEval as ( " + beExpression.createIndexQuery() + " ) ";
+                if (queryStatement.getTemplate() == 3)
                     indResult = queryManager.runTimedQueryExp(polIndexQuery + queryStatement.getQuery(), NUM_OF_REPS);
                 else
                     indResult = queryManager.runTimedQueryExp(polIndexQuery + "SELECT * from polEval where "
                             + queryStatement.getQuery(), NUM_OF_REPS);
                 resultString.append(indResult.getTimeTaken().toMillis()).append(",");
                 System.out.println("Baseline Index: Time: " + indResult.getTimeTaken().toMillis());
-            }
-            else resultString.append("NA").append(",");
+            } else resultString.append("NA").append(",");
 
 //            CachingAlgorithm ca =new CachingAlgorithm<>();
 //            GuardExp GE = ca.SieveGG(querier);
             GuardPersistor guardPersistor = new GuardPersistor();
             GuardExp guardExp = guardPersistor.retrieveGuardExpression(querier, "user", bePolicies);
-            if(guardExp.getGuardParts().isEmpty()) return "empty";
+            if (guardExp.getGuardParts().isEmpty()) return "empty";
             resultString.append(guardExp.getGuardParts().size()).append(",");
             double guardTotalCard = guardExp.getGuardParts().stream().mapToDouble(GuardPart::getCardinality).sum();
             resultString.append(guardTotalCard).append(",");
 
 
-            if(GUARD_POLICY_INLINE) {
+            if (GUARD_POLICY_INLINE) {
                 //TODO: Does not work for template 3
                 Duration execTime = Duration.ofMillis(0);
                 String guard_query_with_union = guardExp.inlineRewrite(true);
@@ -186,13 +182,13 @@ public class QueryPerformance {
                 QueryResult execResult = queryManager.runTimedQueryExp(guard_query_with_union, NUM_OF_REPS);
                 execTime = execTime.plus(execResult.getTimeTaken());
                 resultString.append(execTime.toMillis()).append(",");
-                System.out.println("Guard inline execution with union: "  + " Time: " + execTime.toMillis());
+                System.out.println("Guard inline execution with union: " + " Time: " + execTime.toMillis());
                 execResult = queryManager.runTimedQueryExp(guard_query_with_or, NUM_OF_REPS);
                 execTime = execTime.plus(execResult.getTimeTaken());
                 resultString.append(execTime.toMillis()).append(",");
-                System.out.println("Guard inline execution with OR: "  + " Time: " + execTime.toMillis());
+                System.out.println("Guard inline execution with OR: " + " Time: " + execTime.toMillis());
             }
-            if(GUARD_UDF){
+            if (GUARD_UDF) {
                 //TODO: Does not work for template 3
                 Duration execTime = Duration.ofMillis(0);
                 String guard_query_with_union = guardExp.udfRewrite(true);
@@ -202,47 +198,44 @@ public class QueryPerformance {
                 QueryResult execResult = queryManager.runTimedQueryExp(guard_query_with_union, NUM_OF_REPS);
                 execTime = execTime.plus(execResult.getTimeTaken());
                 resultString.append(execTime.toMillis()).append(",");
-                System.out.println("Guard udf execution with union: "  + " Time: " + execTime.toMillis());
+                System.out.println("Guard udf execution with union: " + " Time: " + execTime.toMillis());
                 execResult = queryManager.runTimedQueryExp(guard_query_with_or, NUM_OF_REPS);
                 execTime = execTime.plus(execResult.getTimeTaken());
                 resultString.append(execTime.toMillis());
-                System.out.println("Guard udf execution with OR: "  + " Time: " + execTime.toMillis());
+                System.out.println("Guard udf execution with OR: " + " Time: " + execTime.toMillis());
             }
-            if(GUARD_INDEX) {
+            if (GUARD_INDEX) {
                 Duration execTime = Duration.ofMillis(0);
                 String guard_hybrid_query = guardExp.inlineOrNot(true);
-                if(queryStatement.getTemplate() == 3){
-                    guard_hybrid_query +=  queryStatement.getQuery().replace("PRESENCE", "polEval");
-                }
-                else
+                if (queryStatement.getTemplate() == 3) {
+                    guard_hybrid_query += queryStatement.getQuery().replace("PRESENCE", "polEval");
+                } else
                     guard_hybrid_query += "Select * from polEval where " + queryStatement.getQuery();
                 QueryResult execResult = queryManager.runTimedQueryExp(guard_hybrid_query, 1);
                 execTime = execTime.plus(execResult.getTimeTaken());
                 resultString.append(execTime.toMillis()).append(",");
-                System.out.println("Guard Index execution : "  + " Time: " + execTime.toMillis());
+                System.out.println("Guard Index execution : " + " Time: " + execTime.toMillis());
             }
-            if(QUERY_INDEX) {
+            if (QUERY_INDEX) {
                 Duration execTime = Duration.ofMillis(0);
                 String query_hint = qe.keyUsed(queryStatement);
                 String queryPredicates = queryStatement.getQuery();
                 String query_index_query;
-                if(query_hint != null) {
-                    if(queryStatement.getTemplate() == 3) {
+                if (query_hint != null) {
+                    if (queryStatement.getTemplate() == 3) {
                         queryPredicates = queryPredicates.replace("from PRESENCE", "from PRESENCE force index("
-                                + query_hint +")" );
+                                + query_hint + ")");
                         query_index_query = "SELECT * from ( " + queryPredicates + " ) as P where " + guardExp.createQueryWithOR();
-                    }
-                    else
+                    } else
                         query_index_query = "SELECT * from ( SELECT * from PRESENCE force index(" + query_hint
                                 + ") where " + queryPredicates + " ) as P where " + guardExp.createQueryWithOR();
                     QueryResult execResult = queryManager.runTimedQueryExp(query_index_query, 1);
                     execTime = execTime.plus(execResult.getTimeTaken());
                     resultString.append(execTime.toMillis()).append(",");
-                    System.out.println("Query Index execution : "  + " Time: " + execTime.toMillis());
-                }
-                else resultString.append("NA").append(","); //No index scan used with query predicate
+                    System.out.println("Query Index execution : " + " Time: " + execTime.toMillis());
+                } else resultString.append("NA").append(","); //No index scan used with query predicate
             }
-            if(SIEVE_EXEC){
+            if (SIEVE_EXEC) {
                 Duration execTime = Duration.ofMillis(0);
                 String guardQuery = guardExp.inlineOrNot(true);
                 String query_hint = qe.keyUsed(queryStatement);
@@ -252,24 +245,21 @@ public class QueryPerformance {
                  *  because of the join, this ratio is a much smaller number.
                  */
                 boolean indexGuards = querySel > 0.5 * guardTotalCard;
-                if(queryStatement.getTemplate() == 3) {
-                    indexGuards = querySel > 0.01 *guardTotalCard;
+                if (queryStatement.getTemplate() == 3) {
+                    indexGuards = querySel > 0.01 * guardTotalCard;
                 }
                 if (indexGuards || query_hint == null) { //Use Guards
-                    if(queryStatement.getTemplate() == 3){
+                    if (queryStatement.getTemplate() == 3) {
                         sieve_query = guardQuery + queryStatement.getQuery().replace("PRESENCE", "polEval");
-                    }
-                    else
+                    } else
                         sieve_query = guardQuery + "Select * from polEval where " + queryStatement.getQuery();
                     resultString.append("Guard Index").append(",");
-                }
-                else { //Use queries
-                    if(queryStatement.getTemplate() == 3) {
+                } else { //Use queries
+                    if (queryStatement.getTemplate() == 3) {
                         String query_index = queryStatement.getQuery().replace("from PRESENCE", "from PRESENCE force index("
-                                + query_hint +")" );
+                                + query_hint + ")");
                         sieve_query = "SELECT * from ( " + query_index + " ) as P where " + guardExp.createQueryWithOR();
-                    }
-                    else
+                    } else
                         sieve_query = "SELECT * from ( SELECT * from PRESENCE force index(" + query_hint
                                 + ") where " + queryStatement.getQuery() + " ) as P where " + guardExp.createQueryWithOR();
                     resultString.append("Query Index").append(",");
@@ -277,7 +267,7 @@ public class QueryPerformance {
                 QueryResult execResult = queryManager.runTimedQueryExp(sieve_query, NUM_OF_REPS);
                 execTime = execTime.plus(execResult.getTimeTaken());
                 resultString.append(execTime.toMillis());
-                System.out.println("Sieve Query: "  + " Time: " + execTime.toMillis());
+                System.out.println("Sieve Query: " + " Time: " + execTime.toMillis());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -300,7 +290,7 @@ public class QueryPerformance {
 
         try {
             GuardPersistor guardPersistor = new GuardPersistor();
-            if(guardExp.getGuardParts().isEmpty()) return "empty";
+            if (guardExp.getGuardParts().isEmpty()) return "empty";
 
             double guardTotalCard = guardExp.getGuardParts().stream().mapToDouble(GuardPart::getCardinality).sum();
 
@@ -313,24 +303,21 @@ public class QueryPerformance {
              *  because of the join, this ratio is a much smaller number.
              */
             boolean indexGuards = querySel > 0.5 * guardTotalCard;
-            if(queryStatement.getTemplate() == 3) {
-                indexGuards = querySel > 0.01 *guardTotalCard;
+            if (queryStatement.getTemplate() == 3) {
+                indexGuards = querySel > 0.01 * guardTotalCard;
             }
             if (indexGuards || query_hint == null) { //Use Guards
-                if(queryStatement.getTemplate() == 3){
+                if (queryStatement.getTemplate() == 3) {
                     sieve_query = guardQuery + queryStatement.getQuery().replace("PRESENCE", "polEval");
-                }
-                else
+                } else
                     sieve_query = guardQuery + "Select * from polEval where " + queryStatement.getQuery();
                 resultString.append("Guard Index").append(",");
-            }
-            else { //Use queries
-                if(queryStatement.getTemplate() == 3) {
+            } else { //Use queries
+                if (queryStatement.getTemplate() == 3) {
                     String query_index = queryStatement.getQuery().replace("from PRESENCE", "from PRESENCE force index("
-                            + query_hint +")" );
+                            + query_hint + ")");
                     sieve_query = "SELECT * from ( " + query_index + " ) as P where " + guardExp.createQueryWithOR();
-                }
-                else
+                } else
                     sieve_query = "SELECT * from ( SELECT * from PRESENCE force index(" + query_hint
                             + ") where " + queryStatement.getQuery() + " ) as P where " + guardExp.createQueryWithOR();
                 resultString.append("Query Index").append(",");
@@ -339,7 +326,7 @@ public class QueryPerformance {
             QueryResult execResult = queryManager.runTimedQueryExp(sieve_query, NUM_OF_REPS);
             execTime = execTime.plus(execResult.getTimeTaken());
             resultString.append(execTime.toMillis());
-            System.out.println("Sieve Query: "  + " Time: " + execTime.toMillis());
+            System.out.println("Sieve Query: " + " Time: " + execTime.toMillis());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -348,22 +335,22 @@ public class QueryPerformance {
         return resultString.append("\n").toString();
     }
 
-    public List<QueryStatement> getQueries(int template, int query_count){
+    public List<QueryStatement> getQueries(int template, int query_count) {
         WiFiDataSetQueryGeneration qg = new WiFiDataSetQueryGeneration();
         List<QueryStatement> queries = new ArrayList<>();
-        queries.addAll(qg.retrieveQueries(template,"all", query_count));
+        queries.addAll(qg.retrieveQueries(template, "all", query_count));
         return queries;
     }
 
-    private String userProfile(int querier){
-        List <Integer> faculty = new ArrayList<>(Arrays.asList(1023, 5352, 11043, 13353, 18575));
-        List <Integer> undergrad = new ArrayList<>(Arrays.asList(4686, 7632, 12555, 15936, 15007));
+    private String userProfile(int querier) {
+        List<Integer> faculty = new ArrayList<>(Arrays.asList(1023, 5352, 11043, 13353, 18575));
+        List<Integer> undergrad = new ArrayList<>(Arrays.asList(4686, 7632, 12555, 15936, 15007));
         List<Integer> grad = new ArrayList<>(Arrays.asList(100, 532, 5990, 11815, 32467));
         List<Integer> staff = new ArrayList<>(Arrays.asList(888, 2550, 5293, 9733, 20021));
-        if(faculty.contains(querier)) return "faculty";
-        else if(undergrad.contains(querier)) return "undergrad";
-        else if(grad.contains(querier)) return "graduate";
-        else return "staff" ;
+        if (faculty.contains(querier)) return "faculty";
+        else if (undergrad.contains(querier)) return "undergrad";
+        else if (grad.contains(querier)) return "graduate";
+        else return "staff";
     }
 
 //    public void runExperiment() {
@@ -444,7 +431,7 @@ public class QueryPerformance {
 
         List<Integer> users = new ArrayList<>();
 
-        for(CUserGen.User faculty : faculties){
+        for (CUserGen.User faculty : faculties) {
             users.add(faculty.getId());
         }
 
@@ -462,23 +449,5 @@ public class QueryPerformance {
             }
         }
         return "1081";
-    }
-    public QueryStatement findNonEmptyQuery(String querier, List<QueryStatement> queries) {
-        QueryPerformance e = new QueryPerformance();
-        Random random = new Random();
-
-        // Iterate through the list of queries to find one with a non-empty result for the specified querier
-        for (QueryStatement query : queries) {
-            List<BEPolicy> allowPolicies = polper.retrievePolicies(querier, PolicyConstants.USER_INDIVIDUAL,
-                    PolicyConstants.ACTION_ALLOW);
-
-            if (allowPolicies != null && !allowPolicies.isEmpty()) {
-                System.out.println("Querier: " + querier + " - Found a non-empty result for query: " + query);
-                return query; // Return the first query that gives a non-empty result
-            }
-        }
-
-        System.out.println("Querier: " + querier + " - No query found with a non-empty result");
-        return null; // Return null if no queries produce a non-empty result for the querier
     }
 }

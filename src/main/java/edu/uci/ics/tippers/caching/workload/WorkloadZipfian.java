@@ -97,7 +97,7 @@ public class WorkloadZipfian {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "Zipfian_C_0_2_20.txt";
+        String fileName = "Zipfian_C_0_6_20.txt";
 
         boolean first = true;
 
@@ -195,7 +195,6 @@ public class WorkloadZipfian {
                             break; // Exit if no more queries are left to process
                         }
                         CUserGen.Querier querier = queryAssignment.querier;
-                        query = e.findNonEmptyQuery(querier.facultyId,queries);
                         generatedQueries++;
 
                         // Record the query for results output
@@ -288,7 +287,7 @@ public class WorkloadZipfian {
 
         List<CUserGen.Querier> queriers = cUserGen.generateQueriersByPopularity();
         int totalQueries = 15760;
-        double alpha = 0.2;
+        double alpha = 0.6;
 
         System.out.println("Total number of entries: " + queriers.size());
 

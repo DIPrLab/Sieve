@@ -89,9 +89,9 @@ public class WorkloadGenerator {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "bursty_NC.txt";
+        String fileName = "sample_experiment.txt";
 
-       boolean first = true;
+        boolean first = true;
 
         result.append("No. of policies= "). append(policies.size()).append("\n")
                 .append("No. of queries= ").append(queries.size()).append("\n")
@@ -342,14 +342,15 @@ public class WorkloadGenerator {
         return totalRunTime;
     }
 
-    public Duration runDemo(List<QueryStatement> queries) {
+    public Duration runDemo() {
 
-        QueryStatement query = new QueryStatement();
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
         List<BEPolicy> allowPolicies = new ArrayList<>();
 
-        String fileName = "experiment_3.csv";
+        System.out.println("Experiment");
+
+        String fileName = "sample_experiment.csv";
         result.append("Querier").append(",")
                 .append("No. of Policies").append(",")
                 .append("Median Generation Time (ms)").append(",")
@@ -395,8 +396,10 @@ public class WorkloadGenerator {
 
                 // Measure Query Execution Time
                 GuardExp guard = gh.create(String.valueOf(querier), "user");
+                String full_query = String.format("");
+                QueryStatement query = new QueryStatement(full_query,1,new Timestamp(System.currentTimeMillis()));
                 start = Instant.now();
-                 new QueryPerformance().runGE(querier, query, guard);
+                String answer = e.runGE(querier, query, guard);
                 end = Instant.now();
                 double executionTimeSec = Duration.between(start, end).toMillis(); // Convert to seconds
                 executionTimes.add(executionTimeSec);
@@ -458,35 +461,33 @@ public class WorkloadGenerator {
         List<CUserGen.User> users = cUserGen.retrieveUserDataForAC();
 
         CPolicyGen cpg = new CPolicyGen();
-        List<BEPolicy> additionalpolicies = cpg.generatePoliciesPerQueriesforAC(users,10);
+//        List<BEPolicy> additionalpolicies = cpg.generatePoliciesPerQueriesforAC(users,10);
+        List<BEPolicy> additionalpolicies = cpg.generatePoliciesPerQueriesforAC(users,200);
         System.out.println("Total no. of additional policies: " + additionalpolicies.size());
  
-        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
+//        List<BEPolicy> policies = cpg.generatePoliciesforAC(users);
 
-        System.out.println("Total number of entries: " + users.size());
-        System.out.println("Total number of policies: " + policies.size());
+         System.out.println("Total number of entries: " + users.size());
+//        System.out.println("Total number of policies: " + policies.size());
+        System.out.println("Total number of policies: " + additionalpolicies);
 
 //        for (BEPolicy policy : policies) {
 //            System.out.println(policy.toString());
 //        }
 //        System.out.println();
 
-        int queryCount = 6376;
-        boolean[] templates = {true, true, false, false};
-        List<QueryStatement> queries = new ArrayList<>();
-        for (int i = 0; i < templates.length; i++) {
-            if (templates[i]) queries.addAll(e.getQueries(i+1,queryCount));
-//            for (QueryStatement query : queries) {
-//                System.out.println(query.toString());
-//            }
-//            System.out.println();
-        }
+//        int queryCount = 6376;
+//        boolean[] templates = {true, true, false, false};
+//        List<QueryStatement> queries = new ArrayList<>();
+//        for (int i = 0; i < templates.length; i++) {
+//            if (templates[i]) queries.addAll(e.getQueries(i+1,queryCount));
+//        }
 
-        System.out.println("Total number of entries: " + users.size());
-        System.out.println("Total number of policies: " + policies.size());
-        System.out.println("Total number of queries: " + queries.size());
+//        System.out.println("Total number of entries: " + users.size());
+//        System.out.println("Total number of policies: " + policies.size());
+//        System.out.println("Total number of queries: " + queries.size());
 
-        int regularInterval = 1; // Example regular interval
+//        int regularInterval = 1; // Example regular interval
 //        int dynamicInterval = 1; // Example dynamic interval
 //        int duration = 3;
 
@@ -494,8 +495,8 @@ public class WorkloadGenerator {
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval, dynamicInterval, duration);
 
         int numPoliciesQueries = 0; // Example number of policies/queries to generate each interval
-        Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
-//        Duration totalRunTime = generator.runDemo(queries);
+//        Duration totalRunTime = generator.generateWorkload(numPoliciesQueries, policies, queries);
+        Duration totalRunTime = generator.runDemo();
         System.out.println("Total Run Time: " + totalRunTime);
     }
 }

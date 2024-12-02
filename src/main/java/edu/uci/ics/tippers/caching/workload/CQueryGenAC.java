@@ -102,10 +102,9 @@ public class CQueryGenAC extends QueryGen {
                 // For example, you could add a default location:
                 locPreds.add("3146-clwa-6217");
             }
-//            query += "AND location_id IN (";
-//            query += locPreds.stream().map(item -> "\"" + item + "\"").collect(Collectors.joining(", "));
-//            query += ")";
-            query += "AND location_id = '3146-clwa-6217'";
+            query += "AND location_id IN (";
+            query += locPreds.stream().map(item -> "\"" + item + "\"").collect(Collectors.joining(", "));
+            query += ")";
             queries.add(new QueryStatement(query, 1, new Timestamp(System.currentTimeMillis())));
             duration += 60;
         }

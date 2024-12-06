@@ -97,7 +97,7 @@ public class WorkloadZipfian {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "Zipfian_C_0_6_20.txt";
+        String fileName = "Zipfian_C_0_8_20.txt";
 
         boolean first = true;
 
@@ -287,7 +287,7 @@ public class WorkloadZipfian {
 
         List<CUserGen.Querier> queriers = cUserGen.generateQueriersByPopularity();
         int totalQueries = 15760;
-        double alpha = 0.6;
+        double alpha = 0.8;
 
         System.out.println("Total number of entries: " + queriers.size());
 

@@ -90,14 +90,14 @@ public class WorkloadZipfian {
         QueryStatement query = new QueryStatement();
         Random random = new Random();
 
-        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(80);
-        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(80);
+        CircularHashMap<String,Timestamp> timestampDirectory = new CircularHashMap<>(194);
+        ClockHashMap<String, GuardExp> clockHashMap = new ClockHashMap<>(194);
         HashMap<String,Integer> deletionHashMap = new HashMap<>();
 
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "Zipfian_C_0_8_20.txt";
+        String fileName = "Zipfian_C_0_2_50.txt";
 
         boolean first = true;
 
@@ -114,7 +114,7 @@ public class WorkloadZipfian {
             System.out.println(assignment);
         }
 
-        System.out.println("!!!Zipfian Distribution!!!");
+        System.out.println("!!!Zipfian Distribution 0.2 50%!!!");
         if(cachingFlag){
             System.out.println("!!!Caching!!!");
             while (!policies.isEmpty()) {
@@ -287,7 +287,7 @@ public class WorkloadZipfian {
 
         List<CUserGen.Querier> queriers = cUserGen.generateQueriersByPopularity();
         int totalQueries = 15760;
-        double alpha = 0.8;
+        double alpha = 0.2;
 
         System.out.println("Total number of entries: " + queriers.size());
 

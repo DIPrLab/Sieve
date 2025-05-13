@@ -1,6 +1,7 @@
 package edu.uci.ics.tippers.execution;
 
 import edu.uci.ics.tippers.caching.workload.*;
+import edu.uci.ics.tippers.execution.experiments.design.GuardGenExp;
 import edu.uci.ics.tippers.common.PolicyConstants;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -28,9 +29,9 @@ public class Sieve {
             e.printStackTrace();
         }
         System.out.println("Test");
-     //   GuardGenExp ggexp = new GuardGenExp();
+        GuardGenExp ggexp = new GuardGenExp();
+        ggexp.runExperiment();
 
-   //    ggexp.runExperiment();
 //        CUserGen cug =new CUserGen();
 //        cug.runExperiment();
 //        CPolicyGen cpg = new CPolicyGen();
@@ -50,8 +51,8 @@ public class Sieve {
 //        WorkloadGenerator generator = new WorkloadGenerator(regularInterval);
 //        generator.runExperiment();
 
-            WorkloadZipfian generator = new WorkloadZipfian();
-            generator.runExperiment();
+//            WorkloadZipfian generator = new WorkloadZipfian();
+//            generator.runExperiment();
 
 //        if(QUERY_PERFORMANCE_EXP) {
 //            if(PolicyConstants.DBMS_CHOICE.equalsIgnoreCase(PolicyConstants.PGSQL_DBMS))

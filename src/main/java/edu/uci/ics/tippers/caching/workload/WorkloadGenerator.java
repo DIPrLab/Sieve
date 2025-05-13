@@ -347,10 +347,11 @@ public class WorkloadGenerator {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
         List<BEPolicy> allowPolicies = new ArrayList<>();
+        boolean fgacCaching = true;
 
         System.out.println("Experiment");
 
-        String fileName = "sample_experiment.csv";
+        String fileName = "sample_experiment_baseline.csv";
         result.append("Querier").append(",")
                 .append("No. of Policies").append(",")
                 .append("Median Generation Time (ms)").append(",")
@@ -383,31 +384,43 @@ public class WorkloadGenerator {
                 if (allowPolicies == null) return null;
                 System.out.println("Querier #: " + querier + " with " + allowPolicies.size() + " allow policies");
 
-                // Measure Guard Generation Time
-                start = Instant.now();
-                BEExpression allowBeExpression = new BEExpression(allowPolicies);
-                SelectGuard gh = new SelectGuard(allowBeExpression, true); // Generates guards
-                end = Instant.now();
-                double millisecondGG = Duration.between(start, end).toMillis();
-                guardGenerationTimes.add(millisecondGG);
+                if(fgacCaching == true){
+                    // Measure Guard Generation Time
+                    start = Instant.now();
+                    BEExpression allowBeExpression = new BEExpression(allowPolicies);
+                    SelectGuard gh = new SelectGuard(allowBeExpression, true); // Generates guards
+                    end = Instant.now();
+                    double millisecondGG = Duration.between(start, end).toMillis();
+                    guardGenerationTimes.add(millisecondGG);
 
-                System.out.println(gh.createGuardedQuery(true));
-                System.out.println("Guard Generation time: " + millisecondGG + " ms, Number of Guards: " + gh.numberOfGuards());
+                    System.out.println(gh.createGuardedQuery(true));
+                    System.out.println("Guard Generation time: " + millisecondGG + " ms, Number of Guards: " + gh.numberOfGuards());
 
-                // Measure Query Execution Time
-                GuardExp guard = gh.create(String.valueOf(querier), "user");
-                String full_query = String.format("");
-                QueryStatement query = new QueryStatement(full_query,1,new Timestamp(System.currentTimeMillis()));
-                start = Instant.now();
-                String answer = e.runGE(querier, query, guard);
-                end = Instant.now();
-                double executionTimeSec = Duration.between(start, end).toMillis(); // Convert to seconds
-                executionTimes.add(executionTimeSec);
+                    // Measure Query Execution Time
+                    GuardExp guard = gh.create(String.valueOf(querier), "user");
+                    String full_query = String.format("");
+                    QueryStatement query = new QueryStatement(full_query,1,new Timestamp(System.currentTimeMillis()));
+                    start = Instant.now();
+                    String answer = e.runGE(querier, query, guard);
+                    end = Instant.now();
+                    double executionTimeSec = Duration.between(start, end).toMillis(); // Convert to seconds
+                    executionTimes.add(executionTimeSec);
+                }
+                else{
+                    String full_query = String.format("");
+                    QueryStatement query = new QueryStatement(full_query,1,new Timestamp(System.currentTimeMillis()));
+                    start = Instant.now();
+                    String answer = e.runBEPolicies(querier,query,allowPolicies);
+                    end = Instant.now();
+                    double executionTimeSec = Duration.between(start, end).toMillis(); // Convert to seconds
+                    executionTimes.add(executionTimeSec);
+                }
             }
 
             // Calculate medians for each operation
             double medianPolicyRetrievalTime = calculateMedian(policyRetrievalTimes);
-            double medianGuardGenerationTime = calculateMedian(guardGenerationTimes);
+//            double medianGuardGenerationTime = calculateMedian(guardGenerationTimes);
+            double medianGuardGenerationTime = 0;
             double medianExecutionTime = calculateMedian(executionTimes);
 
             // Log the medians for the querier

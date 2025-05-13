@@ -2,13 +2,18 @@ package edu.uci.ics.tippers.execution.experiments.design;
 
 import edu.uci.ics.tippers.common.PolicyConstants;
 import edu.uci.ics.tippers.dbms.mysql.MySQLConnectionManager;
+import edu.uci.ics.tippers.execution.experiments.performance.QueryPerformance;
 import edu.uci.ics.tippers.fileop.Writer;
 import edu.uci.ics.tippers.generation.policy.WiFiDataSet.PolicyUtil;
+import edu.uci.ics.tippers.model.guard.GuardExp;
+import edu.uci.ics.tippers.model.query.QueryStatement;
 import edu.uci.ics.tippers.persistor.GuardPersistor;
 import edu.uci.ics.tippers.persistor.PolicyPersistor;
 import edu.uci.ics.tippers.model.guard.SelectGuard;
 import edu.uci.ics.tippers.model.policy.BEExpression;
 import edu.uci.ics.tippers.model.policy.BEPolicy;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -106,6 +111,14 @@ public class GuardGenExp {
             guardGen = guardGen.plus(Duration.between(fsStart, fsEnd));
 
             System.out.println("Guard Generation time: " + guardGen + " Number of Guards: " + gh.numberOfGuards());
+
+//            Added lines to get the time for FGAC comparison
+//            QueryPerformance e =new QueryPerformance();
+//            GuardExp guard = gh.create(String.valueOf(querier), "user");
+//            String full_query = String.format("");
+//            QueryStatement query = new QueryStatement(full_query,1,new Timestamp(System.currentTimeMillis()));
+//            String answer = e.runGE(String.valueOf(querier), query, guard);
+
 
             guardPersistor.insertGuard(gh.create(String.valueOf(querier), "user"));
 

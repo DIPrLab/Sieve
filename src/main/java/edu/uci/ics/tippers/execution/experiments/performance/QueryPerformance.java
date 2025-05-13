@@ -101,6 +101,7 @@ public class QueryPerformance {
 
         QueryExplainer qe = new QueryExplainer();
         double querySel = qe.estimateSelectivity(queryStatement);
+//        double querySel = 0;
         resultString.append(querySel).append(",");
 
         try {
@@ -121,6 +122,7 @@ public class QueryPerformance {
             } else resultString.append("NA").append(",");
 
             if (BASE_LINE_POLICIES) {
+                System.out.println("Inside Baseline P");
                 QueryResult tradResult;
                 String polEvalQuery = "With polEval as ( Select * from PRESENCE where "
                         + beExpression.createQueryFromPolices() + "  )";

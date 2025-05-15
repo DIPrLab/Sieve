@@ -21,13 +21,16 @@ SIEVE is a general purpose middleware to support access control in DBMS that ena
 1. Install any java code editor (maven extension required) or [IntelliJ](https://www.jetbrains.com/idea/download/?section=windows) (comes with inbuilt maven requirements)
 2. Open the sieve project.
 3. Set the dbms and table_name options in resources/config/general.properties
-4. Set true for the experiments that you wish to run (Options: Query Performance, Policy Scale up)
-5. Compile the code
+4. Set true for the experiments that you wish to run (Options: Query Performance, Policy Scale up. Caching)
+5. Configure caching and workload properties in:
+   1. Set cache size and window size options in resources/config/execution/caching.properties 
+   2. Set interleaving pattern of policy and query operations, select the workload scenario, and choose the experiment to run in resources/config/execution/workload.properties 
+6. Compile the code
 ```
 mvn clean install
 
 ```
-6. Execute it with
+7. Execute it with
 ```
 mvn exec:java 
 ```

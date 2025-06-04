@@ -4,6 +4,18 @@
 
 SIEVE is a general purpose middleware to support access control in DBMS that enables them to scale query processing with very large number of access control policies. Full version of the paper can be seen at [arXiv](https://arxiv.org/abs/2004.07498). 
 
+## Table of Contents
+- [Sieve Architecture Overview](#sieve-architecture-overview)
+- [Setup](#setup)
+- [Usage](#usage)
+
+## Sieve Architecture Overview
+
+![Sieve Architecture](images/fgac-caching.png)
+
+Sieve introduces a lightweight planning phase to enforce fine-grained access control more efficiently. As shown in the figure, the process begins when a querier submits a query (1), which includes metadata such as the purpose and querier identity. Sieve extracts this metadata (2) and uses it to retrieve only the relevant policies from the full set of FGAC policies (3). These selected policies are then used to rewrite the query (4), ensuring that access control is enforced without evaluating irrelevant policies. The rewritten query is executed on the underlying database, and the final, policy-enforced result is returned to the querier (5).
+
+To improve performance, Sieve also integrates a cache that stores previously computed guarded expressions. If a matching entry exists in the cache, planning time is significantly reduced. In the example shown, the planning phase completes in just 156ms. This architecture reduces redundant policy checks and accelerates both query rewriting and execution, making Sieve efficient and responsive across varied workloads.
 
 ## Setup
 
@@ -34,6 +46,14 @@ mvn clean install
 ```
 mvn exec:java 
 ```
+## Directory Arrangement
+
+:smile: 
+:file_folder:
+:page_facing_up:
+
+
+
 
 ## License
 [Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)

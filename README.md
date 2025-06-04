@@ -51,32 +51,28 @@ mvn exec:java
 ```
 ## Directory Tree
 ```
-:file_folder: Sieve-root/
-├── :file_folder: data
-│   └── :page_facing_up: mall_dataset # Mall Dataset
-│   └── :page_facing_up: wifi_dataset # Presence Dataset
-├── :file_folder: histogram # Underlying Statistics
-├── :file_folder: images # Images used in ReadMe
-├── :file_folder: result # Stores result in .csv and .txt
-├── :file_folder: script # Contains reusable lookup scripts written in Python and SQL
-├── :file_folder: src\main # Source Code
-│   └── :file_folder: java/edu/uci/ics/tippers # Contails java code
-│       └── :file_folder: caching
-│       └── :file_folder: common
-│       └── :file_folder: dbms
-│       └── :file_folder: execution
-│           └── :page_facing_up: Sieve # Main class to launch the code
-│       └── :file_folder: fileop
-│       └── :file_folder: generation
-│       └── :file_folder: model
-│       └── :file_folder: persistor
-│   └── :file_folder: resources # Contains .properties files
+📁 Sieve-root/
+├── 📁 data
+│   └── 📄 mall_dataset # Mall Dataset
+│   └── 📄 wifi_dataset # Presence Dataset
+├── 📁 histogram # Underlying Statistics
+├── 📁 images # Images used in ReadMe
+├── 📁 result # Stores result in .csv and .txt
+├── 📁 script # Contains reusable lookup scripts written in Python and SQL
+├── 📁 src\main # Source Code
+│   └── 📁 java/edu/uci/ics/tippers # Contails java code
+│       └── 📁 caching
+│       └── 📁 common
+│       └── 📁 dbms
+│       └── 📁 execution
+│           └── 📄 Sieve # Main class to launch the code
+│       └── 📁 fileop
+│       └── 📁 generation
+│       └── 📁 model
+│       └── 📁 persistor
+│   └── 📁 resources # Contains .properties files
 
 ```
-
-:file_folder:
-:page_facing_up:
-
 
 ## License
 [Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)

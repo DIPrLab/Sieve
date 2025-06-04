@@ -8,10 +8,13 @@ SIEVE is a general purpose middleware to support access control in DBMS that ena
 - [Sieve Architecture Overview](#sieve-architecture-overview)
 - [Setup](#setup)
 - [Usage](#usage)
+- [Directory Tree](#directory-tree)
 
 ## Sieve Architecture Overview
 
-![Sieve Architecture](images/fgac-caching.png)
+<p align="center">
+   <img src="images/fgac-caching.png" width="500"/>
+</p>
 
 Sieve introduces a lightweight planning phase to enforce fine-grained access control more efficiently. As shown in the figure, the process begins when a querier submits a query (1), which includes metadata such as the purpose and querier identity. Sieve extracts this metadata (2) and uses it to retrieve only the relevant policies from the full set of FGAC policies (3). These selected policies are then used to rewrite the query (4), ensuring that access control is enforced without evaluating irrelevant policies. The rewritten query is executed on the underlying database, and the final, policy-enforced result is returned to the querier (5).
 
@@ -46,13 +49,33 @@ mvn clean install
 ```
 mvn exec:java 
 ```
-## Directory Arrangement
+## Directory Tree
+```
+:file_folder: Sieve-root/
+├── :file_folder: data
+│   └── :page_facing_up: mall_dataset # Mall Dataset
+│   └── :page_facing_up: wifi_dataset # Presence Dataset
+├── :file_folder: histogram # Underlying Statistics
+├── :file_folder: images # Images used in ReadMe
+├── :file_folder: result # Stores result in .csv and .txt
+├── :file_folder: script # Contains reusable lookup scripts written in Python and SQL
+├── :file_folder: src\main # Source Code
+│   └── :file_folder: java/edu/uci/ics/tippers # Contails java code
+│       └── :file_folder: caching
+│       └── :file_folder: common
+│       └── :file_folder: dbms
+│       └── :file_folder: execution
+│           └── :page_facing_up: Sieve # Main class to launch the code
+│       └── :file_folder: fileop
+│       └── :file_folder: generation
+│       └── :file_folder: model
+│       └── :file_folder: persistor
+│   └── :file_folder: resources # Contains .properties files
 
-:smile: 
+```
+
 :file_folder:
 :page_facing_up:
-
-
 
 
 ## License

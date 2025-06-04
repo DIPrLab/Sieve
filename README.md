@@ -1,8 +1,8 @@
 # Sieve 
 
-![Sieve Logo](images/logo.png)
+<img src="images/logo.png" width="100" align="left"/>
 
-SIEVE is a general purpose middleware to support access control in DBMS that enables them to scale query processing with very large number of access control policies. Full version of the paper can be seen at [arXiv](https://arxiv.org/abs/2004.07498). 
+SIEVE is a general-purpose middleware designed to enforce fine-grained access control in relational database systems. It enables scalable query processing by efficiently handling a large number of access control policies. By decoupling policy evaluation from query execution, SIEVE improves performance while maintaining strict security guarantees. Full version of the paper can be seen at [arXiv](https://arxiv.org/abs/2004.07498). 
 
 ## Table of Contents
 - [Sieve Architecture Overview](#sieve-architecture-overview)

@@ -59,19 +59,26 @@ mvn exec:java
 ├── 📁 images # Images used in ReadMe
 ├── 📁 result # Stores result in .csv and .txt
 ├── 📁 script # Contains reusable lookup scripts written in Python and SQL
-├── 📁 src\main # Source Code
-│   └── 📁 java/edu/uci/ics/tippers # Contails java code
-│       └── 📁 caching
+├── 📁 src/main
+│   └── 📁 java/edu/uci/ics/tippers
+│       └── 📁 caching/
+│           └── 📁 workload # Contain java code for different workload
+│           └── 📄 CashingAlgorithm.java # Contains java code for caching
 │       └── 📁 common
 │       └── 📁 dbms
-│       └── 📁 execution
+│       └── 📁 execution/
 │           └── 📄 Sieve # Main class to launch the code
 │       └── 📁 fileop
 │       └── 📁 generation
 │       └── 📁 model
 │       └── 📁 persistor
-│   └── 📁 resources # Contains .properties files
-
+│   └── 📁 resources/ # Contains .properties files
+│       └── 📁 config/
+│           └── 📁 execution # Used to set options for different experiments
+│           └── 📄 general.properties # Used to set the dbms and table_name
+│       └── 📁 credential/sample/
+            └── 📄 sample.properties # Used to set the dbms properties
+            
 ```
 
 ## License

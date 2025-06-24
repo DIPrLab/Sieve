@@ -21,7 +21,7 @@ import edu.uci.ics.tippers.persistor.GuardPersistor;
 import edu.uci.ics.tippers.persistor.PolicyPersistor;
 
 
-public class CachingAlgorithm <C,Q> {
+public class CachingAlgorithm {
 
     Random r;
     PolicyPersistor polper;

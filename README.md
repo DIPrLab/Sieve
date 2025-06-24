@@ -43,13 +43,14 @@ To improve performance, Sieve also integrates a cache that stores previously com
 6. Compile the code
 ```
 mvn clean install
-
 ```
 7. Execute it with
 ```
 mvn exec:java 
 ```
+
 ## Directory Tree
+
 ```
 📁 Sieve-root/
 ├── 📁 data
@@ -63,7 +64,7 @@ mvn exec:java
 │   └── 📁 java/edu/uci/ics/tippers
 │       └── 📁 caching/
 │           └── 📁 workload # Contain java code for different workload
-│           └── 📄 CashingAlgorithm.java # Contains java code for caching
+│           └── 📄 CachingAlgorithm.java # Contains java code for caching
 │       └── 📁 common
 │       └── 📁 dbms
 │       └── 📁 execution/

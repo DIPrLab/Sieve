@@ -100,9 +100,7 @@ public class WorkloadDeletion {
         boolean first = true;
 
         result.append("No. of policies= "). append(policies.size()).append("\n")
-                .append("No. of queries= ").append(queries.size()).append("\n")
-                .append("Interleaving Techniques= ").append("[Constant Interval= ").append(regularInterval).append("]")
-                .append("[Variable Interval= ").append(dynamicIntervalStart).append(",").append(dynamicIntervalStart+duration).append("]").append("\n");
+                .append("No. of queries= ").append(queries.size()).append("\n");
         writer.writeString(result.toString(), PolicyConstants.EXP_RESULTS_DIR, fileName);
 
         Instant fsStart = Instant.now();

@@ -80,7 +80,7 @@ public class GenerateCandidate {
      *      3. for each predicate (i)
      *          3.a. for each predicate (j)
      *          3.a.1. we check if i and j overlaps; continue if it doesn't
-     *          3.a.2 we check if they if they are identical and add them to eqObjs and continue the inner loop
+     *          3.a.2 we check if they are identical and add them to eqObjs and continue the inner loop
      *          3.a.2 then, we check the merge condition and merge them if it satisfies
      *          3.a.3 the merged predicate is added to all the identical policies (stored in eqObjs)
      *          3.a.4  if not merged, update nextCount (based on the merge theorem)

@@ -89,7 +89,7 @@ public class WorkloadGenerator {
         Writer writer = new Writer();
         StringBuilder result = new StringBuilder();
 
-        String fileName = "sample_experiment.txt";
+        String fileName = "fixingQP.txt";
 
         boolean first = true;
 
@@ -351,7 +351,7 @@ public class WorkloadGenerator {
 
         System.out.println("Experiment");
 
-        String fileName = "sample_experiment_baseline.csv";
+        String fileName = "checkingQP.csv";
         result.append("Querier").append(",")
                 .append("No. of Policies").append(",")
                 .append("Median Generation Time (ms)").append(",")

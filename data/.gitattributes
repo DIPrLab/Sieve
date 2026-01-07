@@ -1,0 +1,2 @@
+wifi_dataset_pg/*.sql filter=lfs diff=lfs merge=lfs -text
+wifi_dataset_pg/*.sql.gz filter=lfs diff=lfs merge=lfs -text
